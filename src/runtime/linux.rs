@@ -1,5 +1,4 @@
 use anyhow::{bail, Result};
-use nix::sys::stat::SFlag;
 use serde::{Deserialize, Serialize};
 use std::{collections::HashMap, convert::TryFrom, path::PathBuf};
 
@@ -170,15 +169,6 @@ impl Default for LinuxDeviceType {
 }
 
 impl LinuxDeviceType {
-    pub fn to_sflag(&self) -> Result<SFlag> {
-        Ok(match self {
-            Self::B => SFlag::S_IFBLK,
-            Self::C | LinuxDeviceType::U => SFlag::S_IFCHR,
-            Self::P => SFlag::S_IFIFO,
-            Self::A => bail!("type a is not allowed for linux device"),
-        })
-    }
-
     pub fn as_str(&self) -> &str {
         match self {
             Self::B => "b",

@@ -5,6 +5,11 @@ use std::{collections::HashMap, convert::TryFrom, path::PathBuf};
 
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(
+    feature = "builder",
+    derive(derive_builder::Builder),
+    builder(default, pattern = "owned", setter(into, strip_option))
+)]
 /// Linux contains platform-specific configuration for Linux based containers.
 pub struct Linux {
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -116,8 +121,13 @@ impl Default for Linux {
     }
 }
 
-#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(
+    feature = "builder",
+    derive(derive_builder::Builder),
+    builder(default, pattern = "owned", setter(into, strip_option))
+)]
 /// LinuxIDMapping specifies UID/GID mappings.
 pub struct LinuxIdMapping {
     #[serde(default, rename = "hostID")]
@@ -181,6 +191,11 @@ impl LinuxDeviceType {
 }
 
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
+#[cfg_attr(
+    feature = "builder",
+    derive(derive_builder::Builder),
+    builder(default, pattern = "owned", setter(into, strip_option))
+)]
 /// Represents a device rule for the devices specified to the device controller
 pub struct LinuxDeviceCgroup {
     #[serde(default)]
@@ -223,8 +238,13 @@ impl ToString for LinuxDeviceCgroup {
     }
 }
 
-#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(
+    feature = "builder",
+    derive(derive_builder::Builder),
+    builder(default, pattern = "owned", setter(into, strip_option))
+)]
 /// LinuxMemory for Linux cgroup 'memory' resource management.
 pub struct LinuxMemory {
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -260,8 +280,13 @@ pub struct LinuxMemory {
     pub use_hierarchy: Option<bool>,
 }
 
-#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(
+    feature = "builder",
+    derive(derive_builder::Builder),
+    builder(default, pattern = "owned", setter(into, strip_option))
+)]
 /// LinuxCPU for Linux cgroup 'cpu' resource management.
 pub struct LinuxCpu {
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -293,7 +318,12 @@ pub struct LinuxCpu {
     pub mems: Option<String>,
 }
 
-#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
+#[cfg_attr(
+    feature = "builder",
+    derive(derive_builder::Builder),
+    builder(default, pattern = "owned", setter(into, strip_option))
+)]
 /// LinuxPids for Linux cgroup 'pids' resource management (Linux 4.3).
 pub struct LinuxPids {
     #[serde(default)]
@@ -301,8 +331,13 @@ pub struct LinuxPids {
     pub limit: i64,
 }
 
-#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(
+    feature = "builder",
+    derive(derive_builder::Builder),
+    builder(default, pattern = "owned", setter(into, strip_option))
+)]
 /// LinuxWeightDevice struct holds a `major:minor weight` pair for weightDevice.
 pub struct LinuxWeightDevice {
     #[serde(default)]
@@ -323,7 +358,12 @@ pub struct LinuxWeightDevice {
     pub leaf_weight: Option<u16>,
 }
 
-#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
+#[cfg_attr(
+    feature = "builder",
+    derive(derive_builder::Builder),
+    builder(default, pattern = "owned", setter(into, strip_option))
+)]
 /// LinuxThrottleDevice struct holds a `major:minor rate_per_second` pair.
 pub struct LinuxThrottleDevice {
     #[serde(default)]
@@ -339,8 +379,13 @@ pub struct LinuxThrottleDevice {
     pub rate: u64,
 }
 
-#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(
+    feature = "builder",
+    derive(derive_builder::Builder),
+    builder(default, pattern = "owned", setter(into, strip_option))
+)]
 /// LinuxBlockIO for Linux cgroup 'blkio' resource management.
 pub struct LinuxBlockIo {
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -373,8 +418,13 @@ pub struct LinuxBlockIo {
     pub throttle_write_iops_device: Option<Vec<LinuxThrottleDevice>>,
 }
 
-#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(
+    feature = "builder",
+    derive(derive_builder::Builder),
+    builder(default, pattern = "owned", setter(into, strip_option))
+)]
 /// LinuxHugepageLimit structure corresponds to limiting kernel hugepages.
 pub struct LinuxHugepageLimit {
     #[serde(default)]
@@ -387,7 +437,12 @@ pub struct LinuxHugepageLimit {
     pub limit: i64,
 }
 
-#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
+#[cfg_attr(
+    feature = "builder",
+    derive(derive_builder::Builder),
+    builder(default, pattern = "owned", setter(into, strip_option))
+)]
 /// LinuxInterfacePriority for network interfaces.
 pub struct LinuxInterfacePriority {
     #[serde(default)]
@@ -405,7 +460,12 @@ impl ToString for LinuxInterfacePriority {
     }
 }
 
-#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
+#[cfg_attr(
+    feature = "builder",
+    derive(derive_builder::Builder),
+    builder(default, pattern = "owned", setter(into, strip_option))
+)]
 /// LinuxNetwork identification and priority configuration.
 pub struct LinuxNetwork {
     #[serde(skip_serializing_if = "Option::is_none", rename = "classID")]
@@ -419,6 +479,11 @@ pub struct LinuxNetwork {
 
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(
+    feature = "builder",
+    derive(derive_builder::Builder),
+    builder(default, pattern = "owned", setter(into, strip_option))
+)]
 /// Resource constraints for container
 pub struct LinuxResources {
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -473,6 +538,11 @@ pub struct LinuxResources {
 
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(
+    feature = "builder",
+    derive(derive_builder::Builder),
+    builder(default, pattern = "owned", setter(into, strip_option))
+)]
 /// LinuxRdma for Linux cgroup 'rdma' resource management (Linux 4.11).
 pub struct LinuxRdma {
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -526,7 +596,18 @@ impl TryFrom<&str> for LinuxNamespaceType {
     }
 }
 
-#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+impl Default for LinuxNamespaceType {
+    fn default() -> Self {
+        Self::Pid
+    }
+}
+
+#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
+#[cfg_attr(
+    feature = "builder",
+    derive(derive_builder::Builder),
+    builder(default, pattern = "owned", setter(into, strip_option))
+)]
 /// LinuxNamespace is the configuration for a Linux namespace.
 pub struct LinuxNamespace {
     #[serde(rename = "type")]
@@ -565,8 +646,13 @@ pub fn get_default_namespaces() -> Vec<LinuxNamespace> {
     ]
 }
 
-#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(
+    feature = "builder",
+    derive(derive_builder::Builder),
+    builder(default, pattern = "owned", setter(into, strip_option))
+)]
 /// LinuxDevice represents the mknod information for a Linux special device file.
 pub struct LinuxDevice {
     #[serde(default)]
@@ -610,8 +696,13 @@ impl From<&LinuxDevice> for LinuxDeviceCgroup {
     }
 }
 
-#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(
+    feature = "builder",
+    derive(derive_builder::Builder),
+    builder(default, pattern = "owned", setter(into, strip_option))
+)]
 /// LinuxSeccomp represents syscall restrictions.
 pub struct LinuxSeccomp {
     pub default_action: LinuxSeccompAction,
@@ -635,6 +726,12 @@ pub enum LinuxSeccompAction {
     ScmpActErrno = 0x00050001,
     ScmpActTrace = 0x7ff00001,
     ScmpActAllow = 0x7fff0000,
+}
+
+impl Default for LinuxSeccompAction {
+    fn default() -> Self {
+        Self::ScmpActAllow
+    }
 }
 
 #[allow(clippy::enum_clike_unportable_variant)]
@@ -673,7 +770,18 @@ pub enum LinuxSeccompOperator {
     ScmpCmpMaskedEq = 7,
 }
 
-#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+impl Default for LinuxSeccompOperator {
+    fn default() -> Self {
+        Self::ScmpCmpEq
+    }
+}
+
+#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
+#[cfg_attr(
+    feature = "builder",
+    derive(derive_builder::Builder),
+    builder(default, pattern = "owned", setter(into, strip_option))
+)]
 /// LinuxSyscall is used to match a syscall in seccomp.
 pub struct LinuxSyscall {
     pub names: Vec<String>,
@@ -687,8 +795,13 @@ pub struct LinuxSyscall {
     pub args: Option<Vec<LinuxSeccompArg>>,
 }
 
-#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(
+    feature = "builder",
+    derive(derive_builder::Builder),
+    builder(default, pattern = "owned", setter(into, strip_option))
+)]
 /// LinuxSeccompArg used for matching specific syscall arguments in seccomp.
 pub struct LinuxSeccompArg {
     pub index: usize,
@@ -738,8 +851,13 @@ pub enum FreezerState {
     Thawed,
 }
 
-#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(
+    feature = "builder",
+    derive(derive_builder::Builder),
+    builder(default, pattern = "owned", setter(into, strip_option))
+)]
 /// LinuxIntelRdt has container runtime resource constraints for Intel RDT CAT and MBA features
 /// which introduced in Linux 4.10 and 4.12 kernel.
 pub struct LinuxIntelRdt {
@@ -760,7 +878,12 @@ pub struct LinuxIntelRdt {
     pub mem_bw_schema: Option<String>,
 }
 
-#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
+#[cfg_attr(
+    feature = "builder",
+    derive(derive_builder::Builder),
+    builder(default, pattern = "owned", setter(into, strip_option))
+)]
 /// LinuxPersonality represents the Linux personality syscall input.
 pub struct LinuxPersonality {
     /// Domain for the personality.
@@ -781,6 +904,12 @@ pub enum LinuxPersonalityDomain {
     #[serde(rename = "LINUX32")]
     /// PerLinux32 sets personality to 32 bit.
     PerLinux32,
+}
+
+impl Default for LinuxPersonalityDomain {
+    fn default() -> Self {
+        Self::PerLinux
+    }
 }
 
 #[cfg(feature = "proptests")]

@@ -2,6 +2,11 @@ use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[cfg_attr(
+    feature = "builder",
+    derive(derive_builder::Builder),
+    builder(default, pattern = "owned", setter(into, strip_option))
+)]
 /// Root contains information about the container's root filesystem on the host.
 pub struct Root {
     /// Path is the absolute path to the container's root filesystem.
@@ -24,7 +29,12 @@ impl Default for Root {
     }
 }
 
-#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
+#[cfg_attr(
+    feature = "builder",
+    derive(derive_builder::Builder),
+    builder(default, pattern = "owned", setter(into, strip_option))
+)]
 /// Mount specifies a mount for a container.
 pub struct Mount {
     /// Destination is the absolute path where the mount will be placed in the container.

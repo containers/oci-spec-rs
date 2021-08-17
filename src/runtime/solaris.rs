@@ -2,6 +2,11 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(
+    feature = "builder",
+    derive(derive_builder::Builder),
+    builder(default, pattern = "owned", setter(into, strip_option))
+)]
 /// Solaris contains platform-specific configuration for Solaris application containers.
 pub struct Solaris {
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -31,6 +36,11 @@ pub struct Solaris {
 
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(
+    feature = "builder",
+    derive(derive_builder::Builder),
+    builder(default, pattern = "owned", setter(into, strip_option))
+)]
 /// SolarisAnet provides the specification for automatic creation of network resources for this
 /// container.
 pub struct SolarisAnet {
@@ -64,6 +74,11 @@ pub struct SolarisAnet {
 }
 
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
+#[cfg_attr(
+    feature = "builder",
+    derive(derive_builder::Builder),
+    builder(default, pattern = "owned", setter(into, strip_option))
+)]
 /// SolarisCappedCPU allows users to set limit on the amount of CPU time that can be used by
 /// container.
 pub struct SolarisCappedCPU {
@@ -72,6 +87,11 @@ pub struct SolarisCappedCPU {
 }
 
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
+#[cfg_attr(
+    feature = "builder",
+    derive(derive_builder::Builder),
+    builder(default, pattern = "owned", setter(into, strip_option))
+)]
 /// SolarisCappedMemory allows users to set the physical and swap caps on the memory that can be
 /// used by this container.
 pub struct SolarisCappedMemory {

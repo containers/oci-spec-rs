@@ -2,6 +2,11 @@ use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
+#[cfg_attr(
+    feature = "builder",
+    derive(derive_builder::Builder),
+    builder(default, pattern = "owned", setter(into, strip_option))
+)]
 /// VM contains information for virtual-machine-based containers.
 pub struct VM {
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -17,6 +22,11 @@ pub struct VM {
 }
 
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
+#[cfg_attr(
+    feature = "builder",
+    derive(derive_builder::Builder),
+    builder(default, pattern = "owned", setter(into, strip_option))
+)]
 /// VMHypervisor contains information about the hypervisor to use for a virtual machine.
 pub struct VMHypervisor {
     /// Path is the host path to the hypervisor used to manage the virtual machine.
@@ -28,6 +38,11 @@ pub struct VMHypervisor {
 }
 
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
+#[cfg_attr(
+    feature = "builder",
+    derive(derive_builder::Builder),
+    builder(default, pattern = "owned", setter(into, strip_option))
+)]
 /// VMKernel contains information about the kernel to use for a virtual machine.
 pub struct VMKernel {
     /// Path is the host path to the kernel used to boot the virtual machine.
@@ -43,6 +58,11 @@ pub struct VMKernel {
 }
 
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
+#[cfg_attr(
+    feature = "builder",
+    derive(derive_builder::Builder),
+    builder(default, pattern = "owned", setter(into, strip_option))
+)]
 /// VMImage contains information about the virtual machine root image.
 pub struct VMImage {
     /// Path is the host path to the root image that the VM kernel would boot into.

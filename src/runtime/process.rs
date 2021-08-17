@@ -114,7 +114,7 @@ pub struct Box {
 
 #[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
-/// Available rlimti types (see https://man7.org/linux/man-pages/man2/getrlimit.2.html)
+/// Available rlimit types (see <https://man7.org/linux/man-pages/man2/getrlimit.2.html>)
 pub enum LinuxRlimitType {
     /// Limit in seconds of the amount of CPU time that the process can consume.
     RlimitCpu,
@@ -205,7 +205,7 @@ pub struct User {
 
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 /// LinuxCapabilities specifies the list of allowed capabilities that are kept for a process.
-/// http://man7.org/linux/man-pages/man7/capabilities.7.html
+/// <http://man7.org/linux/man-pages/man7/capabilities.7.html>
 pub struct LinuxCapabilities {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     /// Bounding is the set of capabilities checked by the kernel.

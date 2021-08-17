@@ -10,7 +10,6 @@ builder = ["derive_builder"]
 
 [dependencies]
 serde = { version = "1.0.127", features = ["derive"] }
-nix = "0.22.0"
 anyhow = "1.0.42"
 serde_json = "1.0.66"
 # Waiting for new caps release, replace git with version on release

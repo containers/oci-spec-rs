@@ -3,6 +3,11 @@ use std::path::PathBuf;
 
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(
+    feature = "builder",
+    derive(derive_builder::Builder),
+    builder(default, pattern = "owned", setter(into, strip_option))
+)]
 /// Hooks specifies a command that is run in the container at a particular event in the lifecycle
 /// (setup and teardown) of a container.
 pub struct Hooks {
@@ -50,6 +55,11 @@ pub struct Hooks {
 }
 
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
+#[cfg_attr(
+    feature = "builder",
+    derive(derive_builder::Builder),
+    builder(default, pattern = "owned", setter(into, strip_option))
+)]
 /// Hook specifies a command that is run at a particular event in the lifecycle of a container.
 pub struct Hook {
     /// Path to the binary to be executed. Following similar semantics to [IEEE Std 1003.1-2008

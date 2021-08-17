@@ -4,6 +4,11 @@ use serde::{Deserialize, Serialize};
 /// Process contains information to start a specific application inside the container.
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(
+    feature = "builder",
+    derive(derive_builder::Builder),
+    builder(default, pattern = "owned", setter(into, strip_option))
+)]
 pub struct Process {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     /// Terminal creates an interactive terminal for the container.
@@ -101,6 +106,11 @@ impl Default for Process {
 }
 
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
+#[cfg_attr(
+    feature = "builder",
+    derive(derive_builder::Builder),
+    builder(default, pattern = "owned", setter(into, strip_option))
+)]
 /// Box specifies dimensions of a rectangle. Used for specifying the size of a console.
 pub struct Box {
     #[serde(default)]
@@ -166,7 +176,18 @@ pub enum LinuxRlimitType {
     RlimitRttime,
 }
 
-#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+impl Default for LinuxRlimitType {
+    fn default() -> Self {
+        Self::RlimitCpu
+    }
+}
+
+#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
+#[cfg_attr(
+    feature = "builder",
+    derive(derive_builder::Builder),
+    builder(default, pattern = "owned", setter(into, strip_option))
+)]
 /// RLimit types and restrictions.
 pub struct LinuxRlimit {
     #[serde(rename = "type")]
@@ -184,6 +205,11 @@ pub struct LinuxRlimit {
 
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(
+    feature = "builder",
+    derive(derive_builder::Builder),
+    builder(default, pattern = "owned", setter(into, strip_option))
+)]
 /// User id (uid) and group id (gid) tracks file permssions.
 pub struct User {
     #[serde(default)]
@@ -204,6 +230,11 @@ pub struct User {
 }
 
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[cfg_attr(
+    feature = "builder",
+    derive(derive_builder::Builder),
+    builder(default, pattern = "owned", setter(into, strip_option))
+)]
 /// LinuxCapabilities specifies the list of allowed capabilities that are kept for a process.
 /// <http://man7.org/linux/man-pages/man7/capabilities.7.html>
 pub struct LinuxCapabilities {

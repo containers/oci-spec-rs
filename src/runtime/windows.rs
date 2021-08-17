@@ -3,6 +3,11 @@ use std::collections::HashMap;
 
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(
+    feature = "builder",
+    derive(derive_builder::Builder),
+    builder(default, pattern = "owned", setter(into, strip_option))
+)]
 /// Windows defines the runtime configuration for Windows based containers, including Hyper-V
 /// containers.
 pub struct Windows {
@@ -43,6 +48,11 @@ pub struct Windows {
 
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(
+    feature = "builder",
+    derive(derive_builder::Builder),
+    builder(default, pattern = "owned", setter(into, strip_option))
+)]
 /// WindowsDevice represents information about a host device to be mapped into the container.
 pub struct WindowsDevice {
     /// Device identifier: interface class GUID, etc..
@@ -53,6 +63,11 @@ pub struct WindowsDevice {
 }
 
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
+#[cfg_attr(
+    feature = "builder",
+    derive(derive_builder::Builder),
+    builder(default, pattern = "owned", setter(into, strip_option))
+)]
 pub struct WindowsResources {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     /// Memory restriction configuration.
@@ -68,6 +83,11 @@ pub struct WindowsResources {
 }
 
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
+#[cfg_attr(
+    feature = "builder",
+    derive(derive_builder::Builder),
+    builder(default, pattern = "owned", setter(into, strip_option))
+)]
 /// WindowsMemoryResources contains memory resource management settings.
 pub struct WindowsMemoryResources {
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -76,6 +96,11 @@ pub struct WindowsMemoryResources {
 }
 
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
+#[cfg_attr(
+    feature = "builder",
+    derive(derive_builder::Builder),
+    builder(default, pattern = "owned", setter(into, strip_option))
+)]
 /// WindowsCPUResources contains CPU resource management settings.
 pub struct WindowsCPUResources {
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -94,6 +119,11 @@ pub struct WindowsCPUResources {
 
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(
+    feature = "builder",
+    derive(derive_builder::Builder),
+    builder(default, pattern = "owned", setter(into, strip_option))
+)]
 /// WindowsStorageResources contains storage resource management settings.
 pub struct WindowsStorageResources {
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -111,6 +141,11 @@ pub struct WindowsStorageResources {
 
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(
+    feature = "builder",
+    derive(derive_builder::Builder),
+    builder(default, pattern = "owned", setter(into, strip_option))
+)]
 /// WindowsHyperV contains information for configuring a container to run with Hyper-V isolation.
 pub struct WindowsHyperV {
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -120,6 +155,11 @@ pub struct WindowsHyperV {
 
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(
+    feature = "builder",
+    derive(derive_builder::Builder),
+    builder(default, pattern = "owned", setter(into, strip_option))
+)]
 /// WindowsNetwork contains network settings for Windows containers.
 pub struct WindowsNetwork {
     #[serde(default, skip_serializing_if = "Option::is_none")]

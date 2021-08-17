@@ -1,67 +1,82 @@
 use caps::Capability;
 use serde::{Deserialize, Serialize};
 
-/// Process contains information to start a specific application inside the container.
-#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
-#[serde(rename_all = "camelCase")]
-#[cfg_attr(
-    feature = "builder",
-    derive(derive_builder::Builder),
-    builder(default, pattern = "owned", setter(into, strip_option))
-)]
-pub struct Process {
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    /// Terminal creates an interactive terminal for the container.
-    pub terminal: Option<bool>,
+make_pub!(
+    /// Process contains information to start a specific application inside the container.
+    #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+    #[serde(rename_all = "camelCase")]
+    #[cfg_attr(
+        feature = "builder",
+        derive(derive_builder::Builder, getset::CopyGetters, getset::Getters),
+        builder(default, pattern = "owned", setter(into, strip_option))
+    )]
+    struct Process {
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        #[cfg_attr(feature = "builder", getset(get_copy = "pub"))]
+        /// Terminal creates an interactive terminal for the container.
+        terminal: Option<bool>,
 
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    /// ConsoleSize specifies the size of the console.
-    pub console_size: Option<Box>,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        #[cfg_attr(feature = "builder", getset(get_copy = "pub"))]
+        /// ConsoleSize specifies the size of the console.
+        console_size: Option<Box>,
 
-    /// User specifies user information for the process.
-    pub user: User,
+        #[cfg_attr(feature = "builder", getset(get = "pub"))]
+        /// User specifies user information for the process.
+        user: User,
 
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    /// Args specifies the binary and arguments for the application to execute.
-    pub args: Option<Vec<String>>,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        #[cfg_attr(feature = "builder", getset(get = "pub"))]
+        /// Args specifies the binary and arguments for the application to execute.
+        args: Option<Vec<String>>,
 
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    /// CommandLine specifies the full command line for the application to execute on Windows.
-    pub command_line: Option<String>,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        #[cfg_attr(feature = "builder", getset(get = "pub"))]
+        /// CommandLine specifies the full command line for the application to execute on Windows.
+        command_line: Option<String>,
 
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    /// Env populates the process environment for the process.
-    pub env: Option<Vec<String>>,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        #[cfg_attr(feature = "builder", getset(get = "pub"))]
+        /// Env populates the process environment for the process.
+        env: Option<Vec<String>>,
 
-    /// Cwd is the current working directory for the process and must be relative to the
-    /// container's root.
-    pub cwd: String,
+        #[cfg_attr(feature = "builder", getset(get = "pub"))]
+        /// Cwd is the current working directory for the process and must be relative to the
+        /// container's root.
+        cwd: String,
 
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    /// Capabilities are Linux capabilities that are kept for the process.
-    pub capabilities: Option<LinuxCapabilities>,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        #[cfg_attr(feature = "builder", getset(get = "pub"))]
+        /// Capabilities are Linux capabilities that are kept for the process.
+        capabilities: Option<LinuxCapabilities>,
 
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    /// Rlimits specifies rlimit options to apply to the process.
-    pub rlimits: Option<Vec<LinuxRlimit>>,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        #[cfg_attr(feature = "builder", getset(get = "pub"))]
+        /// Rlimits specifies rlimit options to apply to the process.
+        rlimits: Option<Vec<LinuxRlimit>>,
 
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    /// NoNewPrivileges controls whether additional privileges could be gained by processes in the
-    /// container.
-    pub no_new_privileges: Option<bool>,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        #[cfg_attr(feature = "builder", getset(get_copy = "pub"))]
+        /// NoNewPrivileges controls whether additional privileges could be gained by processes in the
+        /// container.
+        no_new_privileges: Option<bool>,
 
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    /// ApparmorProfile specifies the apparmor profile for the container.
-    pub apparmor_profile: Option<String>,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        #[cfg_attr(feature = "builder", getset(get = "pub"))]
+        /// ApparmorProfile specifies the apparmor profile for the container.
+        apparmor_profile: Option<String>,
 
-    #[serde(skip_serializing_if = "Option::is_none")]
-    /// Specify an oom_score_adj for the container.
-    pub oom_score_adj: Option<i32>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[cfg_attr(feature = "builder", getset(get_copy = "pub"))]
+        /// Specify an oom_score_adj for the container.
+        oom_score_adj: Option<i32>,
 
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    /// SelinuxLabel specifies the selinux context that the container process is run as.
-    pub selinux_label: Option<String>,
-}
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        #[cfg_attr(feature = "builder", getset(get = "pub"))]
+        /// SelinuxLabel specifies the selinux context that the container process is run as.
+        selinux_label: Option<String>,
+    }
+);
 
 // Default impl for processes in the container
 impl Default for Process {
@@ -105,22 +120,25 @@ impl Default for Process {
     }
 }
 
-#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
-#[cfg_attr(
-    feature = "builder",
-    derive(derive_builder::Builder),
-    builder(default, pattern = "owned", setter(into, strip_option))
-)]
-/// Box specifies dimensions of a rectangle. Used for specifying the size of a console.
-pub struct Box {
-    #[serde(default)]
-    /// Height is the vertical dimension of a box.
-    pub height: u64,
+make_pub!(
+    #[derive(Clone, Copy, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
+    #[cfg_attr(
+        feature = "builder",
+        derive(derive_builder::Builder, getset::CopyGetters),
+        builder(default, pattern = "owned", setter(into, strip_option)),
+        getset(get_copy = "pub")
+    )]
+    /// Box specifies dimensions of a rectangle. Used for specifying the size of a console.
+    struct Box {
+        #[serde(default)]
+        /// Height is the vertical dimension of a box.
+        height: u64,
 
-    #[serde(default)]
-    /// Width is the horizontal dimension of a box.
-    pub width: u64,
-}
+        #[serde(default)]
+        /// Width is the horizontal dimension of a box.
+        width: u64,
+    }
+);
 
 #[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
@@ -182,82 +200,94 @@ impl Default for LinuxRlimitType {
     }
 }
 
-#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
-#[cfg_attr(
-    feature = "builder",
-    derive(derive_builder::Builder),
-    builder(default, pattern = "owned", setter(into, strip_option))
-)]
-/// RLimit types and restrictions.
-pub struct LinuxRlimit {
-    #[serde(rename = "type")]
-    /// Type of Rlimit to set
-    pub typ: LinuxRlimitType,
+make_pub!(
+    #[derive(Clone, Copy, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
+    #[cfg_attr(
+        feature = "builder",
+        derive(derive_builder::Builder, getset::CopyGetters),
+        builder(default, pattern = "owned", setter(into, strip_option)),
+        getset(get_copy = "pub")
+    )]
+    /// RLimit types and restrictions.
+    struct LinuxRlimit {
+        #[serde(rename = "type")]
+        /// Type of Rlimit to set
+        typ: LinuxRlimitType,
 
-    #[serde(default)]
-    /// Hard limit for specified type
-    pub hard: u64,
+        #[serde(default)]
+        /// Hard limit for specified type
+        hard: u64,
 
-    #[serde(default)]
-    /// Soft limit for specified type
-    pub soft: u64,
-}
+        #[serde(default)]
+        /// Soft limit for specified type
+        soft: u64,
+    }
+);
 
-#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
-#[serde(rename_all = "camelCase")]
-#[cfg_attr(
-    feature = "builder",
-    derive(derive_builder::Builder),
-    builder(default, pattern = "owned", setter(into, strip_option))
-)]
-/// User id (uid) and group id (gid) tracks file permssions.
-pub struct User {
-    #[serde(default)]
-    /// UID is the user id.
-    pub uid: u32,
+make_pub!(
+    #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
+    #[serde(rename_all = "camelCase")]
+    #[cfg_attr(
+        feature = "builder",
+        derive(derive_builder::Builder, getset::CopyGetters, getset::Getters),
+        builder(default, pattern = "owned", setter(into, strip_option))
+    )]
+    /// User id (uid) and group id (gid) tracks file permssions.
+    struct User {
+        #[serde(default)]
+        #[cfg_attr(feature = "builder", getset(get_copy = "pub"))]
+        /// UID is the user id.
+        uid: u32,
 
-    #[serde(default)]
-    /// GID is the group id.
-    pub gid: u32,
+        #[serde(default)]
+        #[cfg_attr(feature = "builder", getset(get_copy = "pub"))]
+        /// GID is the group id.
+        gid: u32,
 
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    /// AdditionalGids are additional group ids set for the container's process.
-    pub additional_gids: Option<Vec<u32>>,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        #[cfg_attr(feature = "builder", getset(get = "pub"))]
+        /// AdditionalGids are additional group ids set for the container's process.
+        additional_gids: Option<Vec<u32>>,
 
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    /// Username is the user name.
-    pub username: Option<String>,
-}
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        #[cfg_attr(feature = "builder", getset(get = "pub"))]
+        /// Username is the user name.
+        username: Option<String>,
+    }
+);
 
-#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
-#[cfg_attr(
-    feature = "builder",
-    derive(derive_builder::Builder),
-    builder(default, pattern = "owned", setter(into, strip_option))
-)]
-/// LinuxCapabilities specifies the list of allowed capabilities that are kept for a process.
-/// <http://man7.org/linux/man-pages/man7/capabilities.7.html>
-pub struct LinuxCapabilities {
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    /// Bounding is the set of capabilities checked by the kernel.
-    pub bounding: Option<Vec<Capability>>,
+make_pub!(
+    #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+    #[cfg_attr(
+        feature = "builder",
+        derive(derive_builder::Builder, getset::Getters),
+        builder(default, pattern = "owned", setter(into, strip_option)),
+        getset(get = "pub")
+    )]
+    /// LinuxCapabilities specifies the list of allowed capabilities that are kept for a process.
+    /// <http://man7.org/linux/man-pages/man7/capabilities.7.html>
+    struct LinuxCapabilities {
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        /// Bounding is the set of capabilities checked by the kernel.
+        bounding: Option<Vec<Capability>>,
 
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    /// Effective is the set of capabilities checked by the kernel.
-    pub effective: Option<Vec<Capability>>,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        /// Effective is the set of capabilities checked by the kernel.
+        effective: Option<Vec<Capability>>,
 
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    /// Inheritable is the capabilities preserved across execve.
-    pub inheritable: Option<Vec<Capability>>,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        /// Inheritable is the capabilities preserved across execve.
+        inheritable: Option<Vec<Capability>>,
 
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    /// Permitted is the limiting superset for effective capabilities.
-    pub permitted: Option<Vec<Capability>>,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        /// Permitted is the limiting superset for effective capabilities.
+        permitted: Option<Vec<Capability>>,
 
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    //// Ambient is the ambient set of capabilities that are kept.
-    pub ambient: Option<Vec<Capability>>,
-}
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        //// Ambient is the ambient set of capabilities that are kept.
+        ambient: Option<Vec<Capability>>,
+    }
+);
 
 // Default container's linux capabilities:
 // CAP_AUDIT_WRITE gives container ability to write to linux audit logs,

@@ -1,23 +1,27 @@
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 
-#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
-#[cfg_attr(
-    feature = "builder",
-    derive(derive_builder::Builder),
-    builder(default, pattern = "owned", setter(into, strip_option))
-)]
-/// Root contains information about the container's root filesystem on the host.
-pub struct Root {
-    /// Path is the absolute path to the container's root filesystem.
-    #[serde(default)]
-    pub path: PathBuf,
+make_pub!(
+    #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+    #[cfg_attr(
+        feature = "builder",
+        derive(derive_builder::Builder, getset::CopyGetters, getset::Getters),
+        builder(default, pattern = "owned", setter(into, strip_option))
+    )]
+    /// Root contains information about the container's root filesystem on the host.
+    struct Root {
+        /// Path is the absolute path to the container's root filesystem.
+        #[serde(default)]
+        #[cfg_attr(feature = "builder", getset(get = "pub"))]
+        path: PathBuf,
 
-    /// Readonly makes the root filesystem for the container readonly before the process is
-    /// executed.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub readonly: Option<bool>,
-}
+        /// Readonly makes the root filesystem for the container readonly before the process is
+        /// executed.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        #[cfg_attr(feature = "builder", getset(get_copy = "pub"))]
+        readonly: Option<bool>,
+    }
+);
 
 /// Default path for container root is "./rootfs" from config.json, with readonly true
 impl Default for Root {
@@ -29,29 +33,32 @@ impl Default for Root {
     }
 }
 
-#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
-#[cfg_attr(
-    feature = "builder",
-    derive(derive_builder::Builder),
-    builder(default, pattern = "owned", setter(into, strip_option))
-)]
-/// Mount specifies a mount for a container.
-pub struct Mount {
-    /// Destination is the absolute path where the mount will be placed in the container.
-    pub destination: PathBuf,
+make_pub!(
+    #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
+    #[cfg_attr(
+        feature = "builder",
+        derive(derive_builder::Builder, getset::Getters),
+        builder(default, pattern = "owned", setter(into, strip_option)),
+        getset(get = "pub")
+    )]
+    /// Mount specifies a mount for a container.
+    struct Mount {
+        /// Destination is the absolute path where the mount will be placed in the container.
+        destination: PathBuf,
 
-    #[serde(default, skip_serializing_if = "Option::is_none", rename = "type")]
-    /// Type specifies the mount kind.
-    pub typ: Option<String>,
+        #[serde(default, skip_serializing_if = "Option::is_none", rename = "type")]
+        /// Type specifies the mount kind.
+        typ: Option<String>,
 
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    /// Source specifies the source path of the mount.
-    pub source: Option<PathBuf>,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        /// Source specifies the source path of the mount.
+        source: Option<PathBuf>,
 
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    /// Options are fstab style mount options.
-    pub options: Option<Vec<String>>,
-}
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        /// Options are fstab style mount options.
+        options: Option<Vec<String>>,
+    }
+);
 
 // utility function to generate default config for mounts
 pub fn get_default_mounts() -> Vec<Mount> {

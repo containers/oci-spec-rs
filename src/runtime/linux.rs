@@ -157,14 +157,11 @@ pub enum LinuxDeviceType {
 
     /// FIFO
     P,
-
-    /// ??
-    A,
 }
 
 impl Default for LinuxDeviceType {
     fn default() -> LinuxDeviceType {
-        LinuxDeviceType::A
+        LinuxDeviceType::B
     }
 }
 
@@ -175,7 +172,6 @@ impl LinuxDeviceType {
             Self::C => "c",
             Self::U => "u",
             Self::P => "p",
-            Self::A => "a",
         }
     }
 }
@@ -917,7 +913,7 @@ fn some_none_generator_util<T: Arbitrary>(g: &mut Gen) -> Option<T> {
 #[cfg(feature = "proptests")]
 impl Arbitrary for LinuxDeviceCgroup {
     fn arbitrary(g: &mut Gen) -> LinuxDeviceCgroup {
-        let typ_choices = ["b", "c", "u", "p", "a"];
+        let typ_choices = ["b", "c", "u", "p"];
 
         let typ_chosen = g.choose(&typ_choices).unwrap();
 
@@ -926,8 +922,7 @@ impl Arbitrary for LinuxDeviceCgroup {
             "c" => LinuxDeviceType::C,
             "u" => LinuxDeviceType::U,
             "p" => LinuxDeviceType::P,
-            "a" => LinuxDeviceType::A,
-            _ => LinuxDeviceType::A,
+            _ => LinuxDeviceType::B,
         };
 
         let access_choices = ["rwm", "m"];

@@ -93,15 +93,12 @@ impl Default for Linux {
                     minor: Default::default(),
                 }]
                 .into(),
-                disable_oom_killer: Default::default(),
-                oom_score_adj: Default::default(),
                 memory: Default::default(),
                 cpu: Default::default(),
                 pids: Default::default(),
                 block_io: Default::default(),
                 hugepage_limits: Default::default(),
                 network: Default::default(),
-                freezer: Default::default(),
                 rdma: Default::default(),
                 unified: Default::default(),
             }),
@@ -573,21 +570,6 @@ make_pub!(
         #[cfg_attr(feature = "builder", getset(get = "pub"))]
         /// Unified resources.
         unified: Option<HashMap<String, String>>,
-
-        // TODO: I am not part of the official spec
-        #[serde(default)]
-        #[cfg_attr(feature = "builder", getset(get_copy = "pub"))]
-        // Disables the OOM killer for out of memory conditions
-        disable_oom_killer: bool,
-
-        #[cfg_attr(feature = "builder", getset(get_copy = "pub"))]
-        // TODO: I am not part of the official spec
-        // Specify an oom_score_adj for container
-        oom_score_adj: Option<i32>,
-
-        #[cfg_attr(feature = "builder", getset(get_copy = "pub"))]
-        // TODO: I am not part of the official spec
-        freezer: Option<FreezerState>,
     }
 );
 
@@ -928,13 +910,6 @@ pub fn get_default_readonly_paths() -> Vec<String> {
         "/proc/sys".to_string(),
         "/proc/sysrq-trigger".to_string(),
     ]
-}
-
-#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
-pub enum FreezerState {
-    Undefined,
-    Frozen,
-    Thawed,
 }
 
 make_pub!(

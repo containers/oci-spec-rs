@@ -52,7 +52,7 @@ make_pub!(
     #[cfg_attr(
         feature = "builder",
         derive(derive_builder::Builder, getset::Getters),
-        builder(pattern = "owned", setter(into, strip_option)),
+        builder(default, pattern = "owned", setter(into, strip_option)),
         getset(get = "pub")
     )]
     /// Describes the minimum runtime requirements of the image.

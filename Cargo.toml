@@ -5,7 +5,7 @@ edition = "2018"
 authors = [
     "Furisto",
     "Sascha Grunert <sgrunert@redhat.com>",
-    "Toru Komatsu <k0ma@utam0k.jp",
+    "Toru Komatsu <k0ma@utam0k.jp>",
 ]
 description = "Open Container Initiative Specifictions in Rust"
 documentation = "https://docs.rs/oci-spec"

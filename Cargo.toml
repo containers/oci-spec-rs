@@ -17,9 +17,11 @@ keywords = ["oci", "spec", "container", "runtime", "image"]
 categories = ["api-bindings"]
 
 [features]
-default = []
+default = ["image", "runtime"]
 proptests = ["quickcheck"]
 builder = ["derive_builder", "getset"]
+image = []
+runtime = []
 
 [dependencies]
 serde = { version = "1.0.127", features = ["derive"] }

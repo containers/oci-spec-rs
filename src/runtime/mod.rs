@@ -1,3 +1,5 @@
+//! [OCI runtime spec](https://github.com/opencontainers/runtime-spec) types and definitions.
+
 use anyhow::{Context, Result};
 use serde::{Deserialize, Serialize};
 use std::{
@@ -139,24 +141,24 @@ impl Default for Spec {
 }
 
 impl Spec {
+    /// Load a new `Spec` from the provided JSON file `path`.
     pub fn load<P: AsRef<Path>>(path: P) -> Result<Self> {
         let path = path.as_ref();
         let file = fs::File::open(path)
-            .with_context(|| format!("load spec: failed to open {:?}", path))?;
-        let spec: Spec = serde_json::from_reader(&file)?;
-        Ok(spec)
+            .with_context(|| format!("load spec: failed to open {}", path.display()))?;
+        serde_json::from_reader(&file).context("deserialize spec")
     }
 
+    /// Save a `Spec` to the provided JSON file `path`.
     pub fn save<P: AsRef<Path>>(&self, path: P) -> Result<()> {
         let path = path.as_ref();
         let file = fs::File::create(path)
-            .with_context(|| format!("save spec: failed to create/open {:?}", path))?;
+            .with_context(|| format!("save spec: failed to create/open {}", path.display()))?;
         serde_json::to_writer(&file, self)
-            .with_context(|| format!("failed to save spec to {:?}", path))?;
-
-        Ok(())
+            .with_context(|| format!("failed to save spec to {}", path.display()))
     }
 
+    /// Canonicalize the `root.path` of the `Spec` for the provided `bundle`.
     pub fn canonicalize_rootfs<P: AsRef<Path>>(&mut self, bundle: P) -> Result<()> {
         cfg_if::cfg_if!(
             if #[cfg(feature = "builder")] {
@@ -200,14 +202,13 @@ mod tests {
     #[test]
     fn test_canonicalize_rootfs() -> Result<()> {
         let rootfs_name = "rootfs";
-        let bundle = tempfile::tempdir().with_context(|| "Failed to create tmp test bundle dir")?;
+        let bundle = tempfile::tempdir().context("failed to create tmp test bundle dir")?;
         let rootfs_absolute_path = bundle.path().join(rootfs_name);
         assert!(
             rootfs_absolute_path.is_absolute(),
             "rootfs path is not absolute path"
         );
-        fs::create_dir_all(&rootfs_absolute_path)
-            .with_context(|| "Failed to create the testing rootfs")?;
+        fs::create_dir_all(&rootfs_absolute_path).context("failed to create the testing rootfs")?;
         {
             // Test the case with absolute path
             cfg_if::cfg_if!(
@@ -294,15 +295,13 @@ mod tests {
         let spec = Spec {
             ..Default::default()
         };
-        let test_dir = tempfile::tempdir().with_context(|| "Failed to create tmp test dir")?;
+        let test_dir = tempfile::tempdir().context("failed to create tmp test dir")?;
         let spec_path = test_dir.into_path().join("config.json");
 
         // Test first save the default config, and then load the saved config.
         // The before and after should be the same.
-        spec.save(&spec_path)
-            .with_context(|| "Failed to save spec")?;
-        let loaded_spec =
-            Spec::load(&spec_path).with_context(|| "Failed to load the saved spec.")?;
+        spec.save(&spec_path).context("failed to save spec")?;
+        let loaded_spec = Spec::load(&spec_path).context("failed to load the saved spec.")?;
         assert_eq!(
             spec, loaded_spec,
             "The saved spec is not the same as the loaded spec"

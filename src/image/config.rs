@@ -156,9 +156,9 @@ make_pub!(
         /// replaced by a working directory specified when creating
         /// a container.
         working_dir: Option<String>,
-        #[serde(skip_serializing_if = "Option::is_none")]
         /// The field contains arbitrary metadata for the container.
         /// This property MUST use the annotation rules.
+        #[serde(skip_serializing_if = "Option::is_none")]
         labels: Option<HashMap<String, String>>,
         /// The field contains the system call signal that will be
         /// sent to the container to exit. The signal can be a signal
@@ -246,7 +246,7 @@ make_pub!(
         builder(default, pattern = "owned", setter(into, strip_option)),
         getset(get = "pub")
     )]
-    /// Describes the history of a layer
+    /// Describes the history of a layer.
     struct History {
         /// A combined date and time at which the layer was created,
         /// formatted as defined by RFC 3339, section 5.6.

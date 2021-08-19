@@ -10,6 +10,9 @@ make_pub!(
         builder(pattern = "owned", setter(into, strip_option)),
         getset(get = "pub")
     )]
+    /// A Content Descriptor (or simply Descriptor) describes the disposition of the targeted content.
+    /// It includes the type of the content, a content identifier (digest), and the byte-size of the raw content.
+    /// Descriptors SHOULD be embedded in other formats to securely reference external content.
     struct Descriptor {
         /// This REQUIRED property contains the media type of the referenced
         /// content. Values MUST comply with RFC 6838, including the naming
@@ -30,7 +33,7 @@ make_pub!(
         /// This OPTIONAL property specifies a list of URIs from which this object MAY be
         /// downloaded. Each entry MUST conform to [RFC 3986](https://tools.ietf.org/html/rfc3986).
         /// Entries SHOULD use the http and https schemes, as defined
-        /// in [RFC 7230] https://tools.ietf.org/html/rfc7230#section-2.7
+        /// in [RFC 7230](https://tools.ietf.org/html/rfc7230#section-2.7).
         #[serde(skip_serializing_if = "Option::is_none")]
         urls: Option<Vec<String>>,       
         /// This OPTIONAL property contains arbitrary metadata for this descriptor.
@@ -52,7 +55,7 @@ make_pub!(
         builder(pattern = "owned", setter(into, strip_option)),
         getset(get = "pub")
     )]
-    /// Describes the minimum runtime requirements of the image
+    /// Describes the minimum runtime requirements of the image.
     struct Platform {
         /// This REQUIRED property specifies the CPU architecture.
         /// Image indexes SHOULD use, and implementations SHOULD understand,

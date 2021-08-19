@@ -1,4 +1,4 @@
-use std::{collections::HashMap, fs, iter::FromIterator, path::Path};
+use std::{collections::HashMap, fs, path::Path};
 
 use anyhow::Result;
 use serde::ser::SerializeMap;
@@ -199,7 +199,7 @@ where
 {
     match target {
         Some(values) => {
-            let map = HashMap::<_, _>::from_iter(values.iter().map(|v| (v, GoMapSerde {})));
+            let map: HashMap<_, _> = values.iter().map(|v| (v, GoMapSerde {})).collect();
             let mut map_ser = serializer.serialize_map(Some(map.len()))?;
             for (key, value) in map {
                 map_ser.serialize_entry(key, &value)?;

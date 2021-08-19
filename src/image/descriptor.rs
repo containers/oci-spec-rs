@@ -23,23 +23,23 @@ make_pub!(
         /// conforming to the requirements outlined in Digests. Retrieved
         /// content SHOULD be verified against this digest when consumed via
         /// untrusted sources.
-        digest: String,  
+        digest: String,
         /// This REQUIRED property specifies the size, in bytes, of the raw content.
         /// This property exists so that a client will have an expected size for the
         /// content before processing. If the length of the retrieved content does
         /// not match the specified length, the content SHOULD NOT be trusted.
         #[cfg_attr(feature = "builder", getset(get_copy = "pub"))]
-        size: i64,   
+        size: i64,
         /// This OPTIONAL property specifies a list of URIs from which this object MAY be
         /// downloaded. Each entry MUST conform to [RFC 3986](https://tools.ietf.org/html/rfc3986).
         /// Entries SHOULD use the http and https schemes, as defined
         /// in [RFC 7230](https://tools.ietf.org/html/rfc7230#section-2.7).
         #[serde(skip_serializing_if = "Option::is_none")]
-        urls: Option<Vec<String>>,       
+        urls: Option<Vec<String>>,
         /// This OPTIONAL property contains arbitrary metadata for this descriptor.
         /// This OPTIONAL property MUST use the annotation rules.
         #[serde(skip_serializing_if = "Option::is_none")]
-        annotations: Option<HashMap<String, String>>,     
+        annotations: Option<HashMap<String, String>>,
         /// This OPTIONAL property describes the minimum runtime requirements of the image.
         /// This property SHOULD be present if its target is platform-specific.
         #[serde(skip_serializing_if = "Option::is_none")]

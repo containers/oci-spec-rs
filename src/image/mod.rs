@@ -1,3 +1,5 @@
+//! [OCI image spec](https://github.com/opencontainers/image-spec) types and definitions.
+
 mod annotations;
 mod config;
 mod descriptor;

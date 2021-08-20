@@ -4,7 +4,8 @@ use caps::Capability;
 use serde::{Deserialize, Serialize};
 
 make_pub!(
-    /// Process contains information to start a specific application inside the container.
+    /// Process contains information to start a specific application inside the
+    /// container.
     #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
     #[serde(rename_all = "camelCase")]
     #[cfg_attr(
@@ -29,12 +30,14 @@ make_pub!(
 
         #[serde(default, skip_serializing_if = "Option::is_none")]
         #[cfg_attr(feature = "builder", getset(get = "pub"))]
-        /// Args specifies the binary and arguments for the application to execute.
+        /// Args specifies the binary and arguments for the application to
+        /// execute.
         args: Option<Vec<String>>,
 
         #[serde(default, skip_serializing_if = "Option::is_none")]
         #[cfg_attr(feature = "builder", getset(get = "pub"))]
-        /// CommandLine specifies the full command line for the application to execute on Windows.
+        /// CommandLine specifies the full command line for the application to
+        /// execute on Windows.
         command_line: Option<String>,
 
         #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -43,8 +46,8 @@ make_pub!(
         env: Option<Vec<String>>,
 
         #[cfg_attr(feature = "builder", getset(get = "pub"))]
-        /// Cwd is the current working directory for the process and must be relative to the
-        /// container's root.
+        /// Cwd is the current working directory for the process and must be
+        /// relative to the container's root.
         cwd: PathBuf,
 
         #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -59,8 +62,8 @@ make_pub!(
 
         #[serde(default, skip_serializing_if = "Option::is_none")]
         #[cfg_attr(feature = "builder", getset(get_copy = "pub"))]
-        /// NoNewPrivileges controls whether additional privileges could be gained by processes in the
-        /// container.
+        /// NoNewPrivileges controls whether additional privileges could be
+        /// gained by processes in the container.
         no_new_privileges: Option<bool>,
 
         #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -75,7 +78,8 @@ make_pub!(
 
         #[serde(default, skip_serializing_if = "Option::is_none")]
         #[cfg_attr(feature = "builder", getset(get = "pub"))]
-        /// SelinuxLabel specifies the selinux context that the container process is run as.
+        /// SelinuxLabel specifies the selinux context that the container
+        /// process is run as.
         selinux_label: Option<String>,
     }
 );
@@ -130,7 +134,8 @@ make_pub!(
         builder(default, pattern = "owned", setter(into, strip_option)),
         getset(get_copy = "pub")
     )]
-    /// Box specifies dimensions of a rectangle. Used for specifying the size of a console.
+    /// Box specifies dimensions of a rectangle. Used for specifying the size of
+    /// a console.
     struct Box {
         #[serde(default)]
         /// Height is the vertical dimension of a box.
@@ -152,7 +157,8 @@ pub enum LinuxRlimitType {
     /// Maximum size in bytes of the files that the process creates.
     RlimitFsize,
 
-    /// Maximum size of the process's data segment (init data, uninit data and heap) in bytes.
+    /// Maximum size of the process's data segment (init data, uninit data and
+    /// heap) in bytes.
     RlimitData,
 
     /// Maximum size of the proces stack in bytes.
@@ -161,13 +167,15 @@ pub enum LinuxRlimitType {
     /// Maximum size of a core dump file in bytes.
     RlimitCore,
 
-    /// Limit on the process's resident set (the number of virtual pages resident in RAM).
+    /// Limit on the process's resident set (the number of virtual pages
+    /// resident in RAM).
     RlimitRss,
 
     /// Limit on number of threads for the real uid calling processes.
     RlimitNproc,
 
-    /// One greator than the maximum number of file descritors that one process may open.
+    /// One greator than the maximum number of file descritors that one process
+    /// may open.
     RlimitNofile,
 
     /// Maximum number of bytes of memory that may be locked into RAM.
@@ -182,7 +190,8 @@ pub enum LinuxRlimitType {
     /// Limit on number of signals that may be queued for the process.
     RlimitSigpending,
 
-    /// Limit on the number of bytes that can be allocated for POSIX message queue.
+    /// Limit on the number of bytes that can be allocated for POSIX message
+    /// queue.
     RlimitMsgqueue,
 
     /// Specifies a ceiling to which the process's nice value can be raised.
@@ -191,8 +200,9 @@ pub enum LinuxRlimitType {
     /// Specifies a ceiling on the real-time priority.
     RlimitRtprio,
 
-    /// This is a limit (in microseconds) on the amount of CPU time that a process scheduled under
-    /// a real-time scheduling policy may consume without making a blocking system call.
+    /// This is a limit (in microseconds) on the amount of CPU time that a
+    /// process scheduled under a real-time scheduling policy may consume
+    /// without making a blocking system call.
     RlimitRttime,
 }
 
@@ -248,7 +258,8 @@ make_pub!(
 
         #[serde(default, skip_serializing_if = "Option::is_none")]
         #[cfg_attr(feature = "builder", getset(get = "pub"))]
-        /// AdditionalGids are additional group ids set for the container's process.
+        /// AdditionalGids are additional group ids set for the container's
+        /// process.
         additional_gids: Option<Vec<u32>>,
 
         #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -266,8 +277,8 @@ make_pub!(
         builder(default, pattern = "owned", setter(into, strip_option)),
         getset(get = "pub")
     )]
-    /// LinuxCapabilities specifies the list of allowed capabilities that are kept for a process.
-    /// <http://man7.org/linux/man-pages/man7/capabilities.7.html>
+    /// LinuxCapabilities specifies the list of allowed capabilities that are
+    /// kept for a process. <http://man7.org/linux/man-pages/man7/capabilities.7.html>
     struct LinuxCapabilities {
         #[serde(default, skip_serializing_if = "Option::is_none")]
         /// Bounding is the set of capabilities checked by the kernel.

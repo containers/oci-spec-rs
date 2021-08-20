@@ -11,9 +11,10 @@ make_pub!(
         builder(default, pattern = "owned", setter(into, strip_option)),
         getset(get = "pub")
     )]
-    /// The image configuration is associated with an image and describes some basic
-    /// information about the image such as date created, author, as well as
-    /// execution/runtime configuration like its entrypoint, default arguments, networking, and volumes.
+    /// The image configuration is associated with an image and describes some
+    /// basic information about the image such as date created, author, as
+    /// well as execution/runtime configuration like its entrypoint, default
+    /// arguments, networking, and volumes.
     struct ImageConfiguration {
         /// An combined date and time at which the image was created,
         /// formatted as defined by [RFC 3339, section 5.6.](https://tools.ietf.org/html/rfc3339#section-5.6)
@@ -24,40 +25,46 @@ make_pub!(
         #[serde(skip_serializing_if = "Option::is_none")]
         author: Option<String>,
         /// The CPU architecture which the binaries in this
-        /// image are built to run on. Configurations SHOULD use, and implementations
-        /// SHOULD understand, values listed in the Go Language document for
-        /// [GOARCH](https://golang.org/doc/install/source#environment).
+        /// image are built to run on. Configurations SHOULD use, and
+        /// implementations SHOULD understand, values listed in the Go
+        /// Language document for [GOARCH](https://golang.org/doc/install/source#environment).
         architecture: String,
         /// The name of the operating system which the image is built to run on.
-        /// Configurations SHOULD use, and implementations SHOULD understand, values
-        /// listed in the Go Language document for [GOOS](https://golang.org/doc/install/source#environment).
+        /// Configurations SHOULD use, and implementations SHOULD understand,
+        /// values listed in the Go Language document for [GOOS](https://golang.org/doc/install/source#environment).
         os: String,
         /// This OPTIONAL property specifies the version of the operating
-        /// system targeted by the referenced blob. Implementations MAY refuse to use manifests
-        /// where os.version is not known to work with the host OS version. Valid values are
+        /// system targeted by the referenced blob. Implementations MAY refuse
+        /// to use manifests where os.version is not known to work with
+        /// the host OS version. Valid values are
         /// implementation-defined. e.g. 10.0.14393.1066 on windows.
         #[serde(rename = "os.version", skip_serializing_if = "Option::is_none")]
         os_version: Option<String>,
         /// This OPTIONAL property specifies an array of strings,
-        /// each specifying a mandatory OS feature. When os is windows, image indexes SHOULD use,
-        /// and implementations SHOULD understand the following values:
-        /// - win32k: image requires win32k.sys on the host (Note: win32k.sys is missing on Nano Server)
+        /// each specifying a mandatory OS feature. When os is windows, image
+        /// indexes SHOULD use, and implementations SHOULD understand
+        /// the following values:
+        /// - win32k: image requires win32k.sys on the host (Note: win32k.sys is
+        ///   missing on Nano Server)
         #[serde(rename = "os.features", skip_serializing_if = "Option::is_none")]
         os_features: Option<Vec<String>>,
-        /// The variant of the specified CPU architecture. Configurations SHOULD use, and implementations
-        /// SHOULD understand, variant values listed in the
-        /// [Platform Variants](https://github.com/opencontainers/image-spec/blob/main/image-index.md#platform-variants) table.
+        /// The variant of the specified CPU architecture. Configurations SHOULD
+        /// use, and implementations SHOULD understand, variant values
+        /// listed in the [Platform Variants](https://github.com/opencontainers/image-spec/blob/main/image-index.md#platform-variants) table.
         #[serde(skip_serializing_if = "Option::is_none")]
         variant: Option<String>,
         /// The execution parameters which SHOULD be used as a base when
-        /// running a container using the image. This field can be None, in which case any
-        /// execution parameters should be specified at creation of the container.
+        /// running a container using the image. This field can be None, in
+        /// which case any execution parameters should be specified at
+        /// creation of the container.
         #[serde(skip_serializing_if = "Option::is_none")]
         config: Option<Config>,
-        /// The rootfs key references the layer content addresses used by the image.
-        /// This makes the image config hash depend on the filesystem hash.
+        /// The rootfs key references the layer content addresses used by the
+        /// image. This makes the image config hash depend on the
+        /// filesystem hash.
         rootfs: RootFs,
-        /// Describes the history of each layer. The array is ordered from first to last.
+        /// Describes the history of each layer. The array is ordered from first
+        /// to last.
         history: Vec<History>,
     }
 );

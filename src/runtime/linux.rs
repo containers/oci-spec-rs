@@ -11,7 +11,8 @@ make_pub!(
         builder(default, pattern = "owned", setter(into, strip_option)),
         getset(get = "pub")
     )]
-    /// Linux contains platform-specific configuration for Linux based containers.
+    /// Linux contains platform-specific configuration for Linux based
+    /// containers.
     struct Linux {
         #[serde(default, skip_serializing_if = "Option::is_none")]
         /// UIDMappings specifies user mappings for supporting user namespaces.
@@ -22,25 +23,30 @@ make_pub!(
         gid_mappings: Option<Vec<LinuxIdMapping>>,
 
         #[serde(default, skip_serializing_if = "Option::is_none")]
-        /// Sysctl are a set of key value pairs that are set for the container on start.
+        /// Sysctl are a set of key value pairs that are set for the container
+        /// on start.
         sysctl: Option<HashMap<String, String>>,
 
         #[serde(default, skip_serializing_if = "Option::is_none")]
-        /// Resources contain cgroup information for handling resource constraints for the container.
+        /// Resources contain cgroup information for handling resource
+        /// constraints for the container.
         resources: Option<LinuxResources>,
 
         #[serde(default, skip_serializing_if = "Option::is_none")]
-        /// CgroupsPath specifies the path to cgroups that are created and/or joined by the container.
-        /// The path is expected to be relative to the cgroups mountpoint. If resources are specified,
+        /// CgroupsPath specifies the path to cgroups that are created and/or
+        /// joined by the container. The path is expected to be relative
+        /// to the cgroups mountpoint. If resources are specified,
         /// the cgroups at CgroupsPath will be updated based on resources.
         cgroups_path: Option<PathBuf>,
 
         #[serde(default, skip_serializing_if = "Option::is_none")]
-        /// Namespaces contains the namespaces that are created and/or joined by the container.
+        /// Namespaces contains the namespaces that are created and/or joined by
+        /// the container.
         namespaces: Option<Vec<LinuxNamespace>>,
 
         #[serde(default, skip_serializing_if = "Option::is_none")]
-        /// Devices are a list of device nodes that are created for the container.
+        /// Devices are a list of device nodes that are created for the
+        /// container.
         devices: Option<Vec<LinuxDevice>>,
 
         #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -48,7 +54,8 @@ make_pub!(
         seccomp: Option<LinuxSeccomp>,
 
         #[serde(default, skip_serializing_if = "Option::is_none")]
-        /// RootfsPropagation is the rootfs mount propagation mode for the container.
+        /// RootfsPropagation is the rootfs mount propagation mode for the
+        /// container.
         rootfs_propagation: Option<String>,
 
         #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -60,16 +67,19 @@ make_pub!(
         readonly_paths: Option<Vec<String>>,
 
         #[serde(default, skip_serializing_if = "Option::is_none")]
-        /// MountLabel specifies the selinux context for the mounts in the container.
+        /// MountLabel specifies the selinux context for the mounts in the
+        /// container.
         mount_label: Option<String>,
 
         #[serde(default, skip_serializing_if = "Option::is_none")]
-        /// IntelRdt contains Intel Resource Director Technology (RDT) information for handling
-        /// resource constraints (e.g., L3 cache, memory bandwidth) for the container.
+        /// IntelRdt contains Intel Resource Director Technology (RDT)
+        /// information for handling resource constraints (e.g., L3
+        /// cache, memory bandwidth) for the container.
         intel_rdt: Option<LinuxIntelRdt>,
 
         #[serde(default, skip_serializing_if = "Option::is_none")]
-        /// Personality contains configuration for the Linux personality syscall.
+        /// Personality contains configuration for the Linux personality
+        /// syscall.
         personality: Option<LinuxPersonality>,
     }
 );
@@ -132,7 +142,8 @@ make_pub!(
     /// LinuxIDMapping specifies UID/GID mappings.
     struct LinuxIdMapping {
         #[serde(default, rename = "hostID")]
-        /// HostID is the starting UID/GID on the host to be mapped to `container_id`.
+        /// HostID is the starting UID/GID on the host to be mapped to
+        /// `container_id`.
         host_id: u32,
 
         #[serde(default, rename = "containerID")]
@@ -186,7 +197,8 @@ make_pub!(
         derive(derive_builder::Builder, getset::CopyGetters, getset::Getters),
         builder(default, pattern = "owned", setter(into, strip_option))
     )]
-    /// Represents a device rule for the devices specified to the device controller
+    /// Represents a device rule for the devices specified to the device
+    /// controller
     struct LinuxDeviceCgroup {
         #[serde(default)]
         #[cfg_attr(feature = "builder", getset(get_copy = "pub"))]
@@ -270,7 +282,8 @@ make_pub!(
         swappiness: Option<u64>,
 
         #[serde(skip_serializing_if = "Option::is_none", rename = "disableOOMKiller")]
-        /// DisableOOMKiller disables the OOM killer for out of memory conditions.
+        /// DisableOOMKiller disables the OOM killer for out of memory
+        /// conditions.
         disable_oom_killer: Option<bool>,
 
         #[serde(skip_serializing_if = "Option::is_none")]
@@ -291,7 +304,8 @@ make_pub!(
     struct LinuxCpu {
         #[serde(skip_serializing_if = "Option::is_none")]
         #[cfg_attr(feature = "builder", getset(get_copy = "pub"))]
-        /// CPU shares (relative weight (ratio) vs. other cgroups with cpu shares).
+        /// CPU shares (relative weight (ratio) vs. other cgroups with cpu
+        /// shares).
         shares: Option<u64>,
 
         #[serde(skip_serializing_if = "Option::is_none")]
@@ -321,7 +335,8 @@ make_pub!(
 
         #[serde(default, skip_serializing_if = "Option::is_none")]
         #[cfg_attr(feature = "builder", getset(get = "pub"))]
-        /// List of memory nodes in the cpuset. Default is to use any available memory node.
+        /// List of memory nodes in the cpuset. Default is to use any available
+        /// memory node.
         mems: Option<String>,
     }
 );
@@ -351,7 +366,8 @@ make_pub!(
         builder(default, pattern = "owned", setter(into, strip_option)),
         getset(get_copy = "pub")
     )]
-    /// LinuxWeightDevice struct holds a `major:minor weight` pair for weightDevice.
+    /// LinuxWeightDevice struct holds a `major:minor weight` pair for
+    /// weightDevice.
     struct LinuxWeightDevice {
         #[serde(default)]
         /// Major is the device's major number.
@@ -366,8 +382,8 @@ make_pub!(
         weight: Option<u16>,
 
         #[serde(skip_serializing_if = "Option::is_none")]
-        /// LeafWeight is the bandwidth rate for the device while competing with the cgroup's child
-        /// cgroups, CFQ scheduler only.
+        /// LeafWeight is the bandwidth rate for the device while competing with
+        /// the cgroup's child cgroups, CFQ scheduler only.
         leaf_weight: Option<u16>,
     }
 );
@@ -413,8 +429,8 @@ make_pub!(
 
         #[serde(skip_serializing_if = "Option::is_none")]
         #[cfg_attr(feature = "builder", getset(get_copy = "pub"))]
-        /// Specifies tasks' weight in the given cgroup while competing with the cgroup's child
-        /// cgroups, CFQ scheduler only.
+        /// Specifies tasks' weight in the given cgroup while competing with the
+        /// cgroup's child cgroups, CFQ scheduler only.
         leaf_weight: Option<u16>,
 
         #[serde(skip_serializing_if = "Option::is_none")]
@@ -562,8 +578,9 @@ make_pub!(
 
         #[serde(default, skip_serializing_if = "Option::is_none")]
         #[cfg_attr(feature = "builder", getset(get = "pub"))]
-        /// Rdma resource restriction configuration. Limits are a set of key value pairs that define
-        /// RDMA resource limits, where the key is device name and value is resource limits.
+        /// Rdma resource restriction configuration. Limits are a set of key
+        /// value pairs that define RDMA resource limits, where the key
+        /// is device name and value is resource limits.
         rdma: Option<HashMap<String, LinuxRdma>>,
 
         #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -585,11 +602,13 @@ make_pub!(
     /// LinuxRdma for Linux cgroup 'rdma' resource management (Linux 4.11).
     struct LinuxRdma {
         #[serde(skip_serializing_if = "Option::is_none")]
-        /// Maximum number of HCA handles that can be opened. Default is "no limit".
+        /// Maximum number of HCA handles that can be opened. Default is "no
+        /// limit".
         hca_handles: Option<u32>,
 
         #[serde(skip_serializing_if = "Option::is_none")]
-        /// Maximum number of HCA objects that can be created. Default is "no limit".
+        /// Maximum number of HCA objects that can be created. Default is "no
+        /// limit".
         hca_objects: Option<u32>,
     }
 );
@@ -658,8 +677,8 @@ make_pub!(
 
         #[serde(default, skip_serializing_if = "Option::is_none")]
         #[cfg_attr(feature = "builder", getset(get = "pub"))]
-        /// Path is a path to an existing namespace persisted on disk that can be joined and is of the
-        /// same type
+        /// Path is a path to an existing namespace persisted on disk that can
+        /// be joined and is of the same type
         path: Option<PathBuf>,
     }
 );
@@ -698,7 +717,8 @@ make_pub!(
         derive(derive_builder::Builder, getset::CopyGetters, getset::Getters),
         builder(default, pattern = "owned", setter(into, strip_option))
     )]
-    /// LinuxDevice represents the mknod information for a Linux special device file.
+    /// LinuxDevice represents the mknod information for a Linux special device
+    /// file.
     struct LinuxDevice {
         #[serde(default)]
         #[cfg_attr(feature = "builder", getset(get = "pub"))]
@@ -995,8 +1015,8 @@ make_pub!(
         builder(default, pattern = "owned", setter(into, strip_option)),
         getset(get = "pub")
     )]
-    /// LinuxIntelRdt has container runtime resource constraints for Intel RDT CAT and MBA features
-    /// which introduced in Linux 4.10 and 4.12 kernel.
+    /// LinuxIntelRdt has container runtime resource constraints for Intel RDT
+    /// CAT and MBA features which introduced in Linux 4.10 and 4.12 kernel.
     struct LinuxIntelRdt {
         #[serde(default, skip_serializing_if = "Option::is_none")]
         /// The identity for RDT Class of Service.
@@ -1010,8 +1030,9 @@ make_pub!(
         #[serde(default, skip_serializing_if = "Option::is_none")]
         /// The schema of memory bandwidth per L3 cache id.
         /// Format: "MB:<cache_id0>=bandwidth0;<cache_id1>=bandwidth1;..."
-        /// The unit of memory bandwidth is specified in "percentages" by default, and in "MBps" if MBA
-        /// Software Controller is enabled.
+        /// The unit of memory bandwidth is specified in "percentages" by
+        /// default, and in "MBps" if MBA Software Controller is
+        /// enabled.
         mem_bw_schema: Option<String>,
     }
 );

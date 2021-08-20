@@ -9,11 +9,12 @@ make_pub!(
         derive(derive_builder::Builder, getset::CopyGetters, getset::Getters),
         builder(default, pattern = "owned", setter(into, strip_option))
     )]
-    /// Windows defines the runtime configuration for Windows based containers, including Hyper-V
-    /// containers.
+    /// Windows defines the runtime configuration for Windows based containers,
+    /// including Hyper-V containers.
     struct Windows {
         #[cfg_attr(feature = "builder", getset(get = "pub"))]
-        /// LayerFolders contains a list of absolute paths to directories containing image layers.
+        /// LayerFolders contains a list of absolute paths to directories
+        /// containing image layers.
         layer_folders: Vec<String>,
 
         #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -23,30 +24,33 @@ make_pub!(
 
         #[serde(default, skip_serializing_if = "Option::is_none")]
         #[cfg_attr(feature = "builder", getset(get_copy = "pub"))]
-        /// Resources contains information for handling resource constraints for the container.
+        /// Resources contains information for handling resource constraints for
+        /// the container.
         resources: Option<WindowsResources>,
 
         #[serde(default, skip_serializing_if = "Option::is_none")]
         #[cfg_attr(feature = "builder", getset(get = "pub"))]
-        /// CredentialSpec contains a JSON object describing a group Managed Service Account (gMSA)
-        /// specification.
+        /// CredentialSpec contains a JSON object describing a group Managed
+        /// Service Account (gMSA) specification.
         credential_spec: Option<HashMap<String, Option<serde_json::Value>>>,
 
         #[serde(default, skip_serializing_if = "Option::is_none")]
         #[cfg_attr(feature = "builder", getset(get_copy = "pub"))]
-        /// Servicing indicates if the container is being started in a mode to apply a Windows Update
-        /// servicing operation.
+        /// Servicing indicates if the container is being started in a mode to
+        /// apply a Windows Update servicing operation.
         servicing: Option<bool>,
 
         #[serde(default, skip_serializing_if = "Option::is_none")]
         #[cfg_attr(feature = "builder", getset(get_copy = "pub"))]
-        /// IgnoreFlushesDuringBoot indicates if the container is being started in a mode where disk
-        /// writes are not flushed during its boot process.
+        /// IgnoreFlushesDuringBoot indicates if the container is being started
+        /// in a mode where disk writes are not flushed during its boot
+        /// process.
         ignore_flushes_during_boot: Option<bool>,
 
         #[serde(default, skip_serializing_if = "Option::is_none")]
         #[cfg_attr(feature = "builder", getset(get = "pub"))]
-        /// HyperV contains information for running a container with Hyper-V isolation.
+        /// HyperV contains information for running a container with Hyper-V
+        /// isolation.
         hyperv: Option<WindowsHyperV>,
 
         #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -65,7 +69,8 @@ make_pub!(
         builder(default, pattern = "owned", setter(into, strip_option)),
         getset(get = "pub")
     )]
-    /// WindowsDevice represents information about a host device to be mapped into the container.
+    /// WindowsDevice represents information about a host device to be mapped
+    /// into the container.
     struct WindowsDevice {
         /// Device identifier: interface class GUID, etc..
         id: String,
@@ -133,8 +138,8 @@ make_pub!(
         shares: Option<u16>,
 
         #[serde(default, skip_serializing_if = "Option::is_none")]
-        /// Specifies the portion of processor cycles that this container can use as a percentage times
-        /// 100.
+        /// Specifies the portion of processor cycles that this container can
+        /// use as a percentage times 100.
         maximum: Option<u16>,
     }
 );
@@ -159,7 +164,8 @@ make_pub!(
         bps: Option<u64>,
 
         #[serde(default, skip_serializing_if = "Option::is_none")]
-        /// Sandbox size specifies the minimum size of the system drive in bytes.
+        /// Sandbox size specifies the minimum size of the system drive in
+        /// bytes.
         sandbox_size: Option<u64>,
     }
 );
@@ -173,10 +179,12 @@ make_pub!(
         builder(default, pattern = "owned", setter(into, strip_option)),
         getset(get = "pub")
     )]
-    /// WindowsHyperV contains information for configuring a container to run with Hyper-V isolation.
+    /// WindowsHyperV contains information for configuring a container to run
+    /// with Hyper-V isolation.
     struct WindowsHyperV {
         #[serde(default, skip_serializing_if = "Option::is_none")]
-        /// UtilityVMPath is an optional path to the image used for the Utility VM.
+        /// UtilityVMPath is an optional path to the image used for the Utility
+        /// VM.
         utility_vm_path: Option<String>,
     }
 );
@@ -216,12 +224,14 @@ make_pub!(
 
         #[serde(default, skip_serializing_if = "Option::is_none")]
         #[cfg_attr(feature = "builder", getset(get = "pub"))]
-        /// Name (ID) of the container that we will share with the network stack.
+        /// Name (ID) of the container that we will share with the network
+        /// stack.
         network_shared_container_name: Option<String>,
 
         #[serde(default, skip_serializing_if = "Option::is_none")]
         #[cfg_attr(feature = "builder", getset(get = "pub"))]
-        /// name (ID) of the network namespace that will be used for the container.
+        /// name (ID) of the network namespace that will be used for the
+        /// container.
         network_namespace: Option<String>,
     }
 );

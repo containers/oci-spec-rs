@@ -37,25 +37,29 @@ make_pub!(
     )]
     struct Spec {
         #[serde(default, rename = "ociVersion")]
-        ///  MUST be in SemVer v2.0.0 format and specifies the version of the Open Container Initiative
-        ///  Runtime Specification with which the bundle complies. The Open Container Initiative
-        ///  Runtime Specification follows semantic versioning and retains forward and backward
-        ///  compatibility within major versions. For example, if a configuration is compliant with
-        ///  version 1.1 of this specification, it is compatible with all runtimes that support any 1.1
-        ///  or later release of this specification, but is not compatible with a runtime that supports
+        ///  MUST be in SemVer v2.0.0 format and specifies the version of the
+        /// Open Container Initiative  Runtime Specification with which
+        /// the bundle complies. The Open Container Initiative
+        ///  Runtime Specification follows semantic versioning and retains
+        /// forward and backward  compatibility within major versions.
+        /// For example, if a configuration is compliant with
+        ///  version 1.1 of this specification, it is compatible with all
+        /// runtimes that support any 1.1  or later release of this
+        /// specification, but is not compatible with a runtime that supports
         ///  1.0 and not 1.1.
         version: String,
 
         #[serde(default, skip_serializing_if = "Option::is_none")]
-        /// Specifies the container's root filesystem. On Windows, for Windows Server Containers, this
-        /// field is REQUIRED. For Hyper-V Containers, this field MUST NOT be set.
+        /// Specifies the container's root filesystem. On Windows, for Windows
+        /// Server Containers, this field is REQUIRED. For Hyper-V
+        /// Containers, this field MUST NOT be set.
         ///
         /// On all other platforms, this field is REQUIRED.
         root: Option<Root>,
 
         #[serde(default, skip_serializing_if = "Option::is_none")]
-        /// Specifies additional mounts beyond `root`. The runtime MUST mount entries in the listed
-        /// order.
+        /// Specifies additional mounts beyond `root`. The runtime MUST mount
+        /// entries in the listed order.
         ///
         /// For Linux, the parameters are as documented in
         /// [`mount(2)`](http://man7.org/linux/man-pages/man2/mount.2.html) system call man page. For
@@ -70,30 +74,34 @@ make_pub!(
         process: Option<Process>,
 
         #[serde(default, skip_serializing_if = "Option::is_none")]
-        /// Specifies the container's hostname as seen by processes running inside the container. On
-        /// Linux, for example, this will change the hostname in the container [UTS
-        /// namespace](http://man7.org/linux/man-pages/man7/namespaces.7.html). Depending on your
+        /// Specifies the container's hostname as seen by processes running
+        /// inside the container. On Linux, for example, this will
+        /// change the hostname in the container [UTS namespace](http://man7.org/linux/man-pages/man7/namespaces.7.html). Depending on your
         /// [namespace
         /// configuration](https://github.com/opencontainers/runtime-spec/blob/master/config-linux.md#namespaces),
         /// the container UTS namespace may be the runtime UTS namespace.
         hostname: Option<String>,
 
         #[serde(default, skip_serializing_if = "Option::is_none")]
-        /// Hooks allow users to specify programs to run before or after various lifecycle events.
-        /// Hooks MUST be called in the listed order. The state of the container MUST be passed to
-        /// hooks over stdin so that they may do work appropriate to the current state of the
-        /// container.
+        /// Hooks allow users to specify programs to run before or after various
+        /// lifecycle events. Hooks MUST be called in the listed order.
+        /// The state of the container MUST be passed to hooks over
+        /// stdin so that they may do work appropriate to the current state of
+        /// the container.
         hooks: Option<Hooks>,
 
         #[serde(default, skip_serializing_if = "Option::is_none")]
-        /// Annotations contains arbitrary metadata for the container. This information MAY be
-        /// structured or unstructured. Annotations MUST be a key-value map. If there are no
-        /// annotations then this property MAY either be absent or an empty map.
+        /// Annotations contains arbitrary metadata for the container. This
+        /// information MAY be structured or unstructured. Annotations
+        /// MUST be a key-value map. If there are no annotations then
+        /// this property MAY either be absent or an empty map.
         ///
-        /// Keys MUST be strings. Keys MUST NOT be an empty string. Keys SHOULD be named using a
-        /// reverse domain notation - e.g. com.example.myKey. Keys using the org.opencontainers
-        /// namespace are reserved and MUST NOT be used by subsequent specifications. Runtimes MUST
-        /// handle unknown annotation keys like any other unknown property.
+        /// Keys MUST be strings. Keys MUST NOT be an empty string. Keys SHOULD
+        /// be named using a reverse domain notation - e.g.
+        /// com.example.myKey. Keys using the org.opencontainers
+        /// namespace are reserved and MUST NOT be used by subsequent
+        /// specifications. Runtimes MUST handle unknown annotation keys
+        /// like any other unknown property.
         ///
         /// Values MUST be strings. Values MAY be an empty string.
         annotations: Option<HashMap<String, String>>,
@@ -103,11 +111,13 @@ make_pub!(
         linux: Option<Linux>,
 
         #[serde(default, skip_serializing_if = "Option::is_none")]
-        /// Solaris is platform-specific configuration for Solaris based containers.
+        /// Solaris is platform-specific configuration for Solaris based
+        /// containers.
         solaris: Option<Solaris>,
 
         #[serde(default, skip_serializing_if = "Option::is_none")]
-        /// Windows is platform-specific configuration for Windows based containers.
+        /// Windows is platform-specific configuration for Windows based
+        /// containers.
         windows: Option<Windows>,
 
         #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -116,9 +126,10 @@ make_pub!(
     }
 );
 
-// This gives a basic boilerplate for Spec that can be used calling Default::default().
-// The values given are similar to the defaults seen in docker and runc, it creates a containerized shell!
-// (see respective types default impl for more info)
+// This gives a basic boilerplate for Spec that can be used calling
+// Default::default(). The values given are similar to the defaults seen in
+// docker and runc, it creates a containerized shell! (see respective types
+// default impl for more info)
 impl Default for Spec {
     fn default() -> Self {
         Spec {

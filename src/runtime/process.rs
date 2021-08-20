@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 use caps::Capability;
 use serde::{Deserialize, Serialize};
 
@@ -43,7 +45,7 @@ make_pub!(
         #[cfg_attr(feature = "builder", getset(get = "pub"))]
         /// Cwd is the current working directory for the process and must be relative to the
         /// container's root.
-        cwd: String,
+        cwd: PathBuf,
 
         #[serde(default, skip_serializing_if = "Option::is_none")]
         #[cfg_attr(feature = "builder", getset(get = "pub"))]

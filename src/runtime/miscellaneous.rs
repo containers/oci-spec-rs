@@ -8,22 +8,24 @@ make_pub!(
         derive(derive_builder::Builder, getset::CopyGetters, getset::Getters),
         builder(default, pattern = "owned", setter(into, strip_option))
     )]
-    /// Root contains information about the container's root filesystem on the host.
+    /// Root contains information about the container's root filesystem on the
+    /// host.
     struct Root {
         /// Path is the absolute path to the container's root filesystem.
         #[serde(default)]
         #[cfg_attr(feature = "builder", getset(get = "pub"))]
         path: PathBuf,
 
-        /// Readonly makes the root filesystem for the container readonly before the process is
-        /// executed.
+        /// Readonly makes the root filesystem for the container readonly before
+        /// the process is executed.
         #[serde(default, skip_serializing_if = "Option::is_none")]
         #[cfg_attr(feature = "builder", getset(get_copy = "pub"))]
         readonly: Option<bool>,
     }
 );
 
-/// Default path for container root is "./rootfs" from config.json, with readonly true
+/// Default path for container root is "./rootfs" from config.json, with
+/// readonly true
 impl Default for Root {
     fn default() -> Self {
         Root {
@@ -43,7 +45,8 @@ make_pub!(
     )]
     /// Mount specifies a mount for a container.
     struct Mount {
-        /// Destination is the absolute path where the mount will be placed in the container.
+        /// Destination is the absolute path where the mount will be placed in
+        /// the container.
         destination: PathBuf,
 
         #[serde(default, skip_serializing_if = "Option::is_none", rename = "type")]

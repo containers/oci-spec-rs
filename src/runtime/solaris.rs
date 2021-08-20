@@ -9,10 +9,12 @@ make_pub!(
         builder(default, pattern = "owned", setter(into, strip_option)),
         getset(get = "pub")
     )]
-    /// Solaris contains platform-specific configuration for Solaris application containers.
+    /// Solaris contains platform-specific configuration for Solaris application
+    /// containers.
     struct Solaris {
         #[serde(default, skip_serializing_if = "Option::is_none")]
-        /// SMF FMRI which should go "online" before we start the container process.
+        /// SMF FMRI which should go "online" before we start the container
+        /// process.
         milestone: Option<String>,
 
         #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -24,7 +26,8 @@ make_pub!(
         max_shm_memory: Option<String>,
 
         #[serde(default, skip_serializing_if = "Option::is_none")]
-        /// Specification for automatic creation of network resources for this container.
+        /// Specification for automatic creation of network resources for this
+        /// container.
         anet: Option<Vec<SolarisAnet>>,
 
         #[serde(default, skip_serializing_if = "Option::is_none", rename = "cappedCPU")]
@@ -32,7 +35,8 @@ make_pub!(
         capped_cpu: Option<SolarisCappedCPU>,
 
         #[serde(default, skip_serializing_if = "Option::is_none")]
-        /// The physical and swap caps on the memory that can be used by this container.
+        /// The physical and swap caps on the memory that can be used by this
+        /// container.
         capped_memory: Option<SolarisCappedMemory>,
     }
 );
@@ -46,8 +50,8 @@ make_pub!(
         builder(default, pattern = "owned", setter(into, strip_option)),
         getset(get = "pub")
     )]
-    /// SolarisAnet provides the specification for automatic creation of network resources for this
-    /// container.
+    /// SolarisAnet provides the specification for automatic creation of network
+    /// resources for this container.
     struct SolarisAnet {
         #[serde(default, skip_serializing_if = "Option::is_none")]
         /// Specify a name for the automatically created VNIC datalink.
@@ -62,7 +66,8 @@ make_pub!(
         allowed_address: Option<String>,
 
         #[serde(default, skip_serializing_if = "Option::is_none")]
-        /// Specifies whether allowedAddress limitation is to be applied to the VNIC.
+        /// Specifies whether allowedAddress limitation is to be applied to the
+        /// VNIC.
         configure_allowed_address: Option<String>,
 
         #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -87,8 +92,8 @@ make_pub!(
         builder(default, pattern = "owned", setter(into, strip_option)),
         getset(get = "pub")
     )]
-    /// SolarisCappedCPU allows users to set limit on the amount of CPU time that can be used by
-    /// container.
+    /// SolarisCappedCPU allows users to set limit on the amount of CPU time
+    /// that can be used by container.
     struct SolarisCappedCPU {
         #[serde(default, skip_serializing_if = "Option::is_none")]
         ncpus: Option<String>,
@@ -103,8 +108,8 @@ make_pub!(
         builder(default, pattern = "owned", setter(into, strip_option)),
         getset(get = "pub")
     )]
-    /// SolarisCappedMemory allows users to set the physical and swap caps on the memory that can be
-    /// used by this container.
+    /// SolarisCappedMemory allows users to set the physical and swap caps on
+    /// the memory that can be used by this container.
     struct SolarisCappedMemory {
         #[serde(default, skip_serializing_if = "Option::is_none")]
         /// The physical caps on the memory.

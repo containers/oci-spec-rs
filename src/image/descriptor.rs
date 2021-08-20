@@ -6,9 +6,8 @@ make_pub!(
     #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
     #[cfg_attr(
         feature = "builder",
-        derive(derive_builder::Builder, getset::Getters),
-        builder(pattern = "owned", setter(into, strip_option)),
-        getset(get = "pub")
+        derive(derive_builder::Builder, getset::CopyGetters, getset::Getters),
+        builder(pattern = "owned", setter(into, strip_option))
     )]
     /// A Content Descriptor (or simply Descriptor) describes the disposition of the targeted content.
     /// It includes the type of the content, a content identifier (digest), and the byte-size of the raw content.
@@ -18,11 +17,13 @@ make_pub!(
         /// content. Values MUST comply with RFC 6838, including the naming
         /// requirements in its section 4.2.
         #[serde(rename = "mediaType")]
+        #[cfg_attr(feature = "builder", getset(get = "pub"))]
         media_type: String,
         /// This REQUIRED property is the digest of the targeted content,
         /// conforming to the requirements outlined in Digests. Retrieved
         /// content SHOULD be verified against this digest when consumed via
         /// untrusted sources.
+        #[cfg_attr(feature = "builder", getset(get = "pub"))]
         digest: String,
         /// This REQUIRED property specifies the size, in bytes, of the raw content.
         /// This property exists so that a client will have an expected size for the
@@ -35,14 +36,17 @@ make_pub!(
         /// Entries SHOULD use the http and https schemes, as defined
         /// in [RFC 7230](https://tools.ietf.org/html/rfc7230#section-2.7).
         #[serde(skip_serializing_if = "Option::is_none")]
+        #[cfg_attr(feature = "builder", getset(get = "pub"))]
         urls: Option<Vec<String>>,
         /// This OPTIONAL property contains arbitrary metadata for this descriptor.
         /// This OPTIONAL property MUST use the annotation rules.
         #[serde(skip_serializing_if = "Option::is_none")]
+        #[cfg_attr(feature = "builder", getset(get = "pub"))]
         annotations: Option<HashMap<String, String>>,
         /// This OPTIONAL property describes the minimum runtime requirements of the image.
         /// This property SHOULD be present if its target is platform-specific.
         #[serde(skip_serializing_if = "Option::is_none")]
+        #[cfg_attr(feature = "builder", getset(get = "pub"))]
         platform: Option<Platform>,
     }
 );

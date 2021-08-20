@@ -9,9 +9,8 @@ make_pub!(
     #[serde(rename_all = "camelCase")]
     #[cfg_attr(
         feature = "builder",
-        derive(derive_builder::Builder, getset::Getters),
-        builder(pattern = "owned", setter(into, strip_option)),
-        getset(get = "pub")
+        derive(derive_builder::Builder, getset::CopyGetters, getset::Getters),
+        builder(pattern = "owned", setter(into, strip_option))
     )]
     /// Unlike the image index, which contains information about a set of images
     /// that can span a variety of architectures and operating systems, an image
@@ -28,6 +27,7 @@ make_pub!(
         /// this field contains the media type of this document, which differs from
         /// the descriptor use of mediaType.
         #[serde(skip_serializing_if = "Option::is_none")]
+        #[cfg_attr(feature = "builder", getset(get = "pub"))]
         media_type: Option<String>,
         /// This REQUIRED property references a configuration object for a container,
         /// by digest. Beyond the descriptor requirements, the value has the following additional restrictions:
@@ -35,21 +35,34 @@ make_pub!(
         /// Implementations MUST support at least the following media types:
         /// - application/vnd.oci.image.config.v1+json
         /// Manifests concerned with portability SHOULD use one of the above media types.
+        #[cfg_attr(feature = "builder", getset(get = "pub"))]
         config: Descriptor,
         /// Each item in the array MUST be a descriptor. The array MUST have the base
         /// layer at index 0. Subsequent layers MUST then follow in stack order (i.e. from layers[0]
         /// to layers[len(layers)-1]). The final filesystem layout MUST match the result of applying
         /// the layers to an empty directory. The ownership, mode, and other attributes of the initial
         /// empty directory are unspecified.
+        #[cfg_attr(feature = "builder", getset(get = "pub"))]
         layers: Vec<Descriptor>,
         /// This OPTIONAL property contains arbitrary metadata for the image manifest.
         /// This OPTIONAL property MUST use the annotation rules.
         #[serde(skip_serializing_if = "Option::is_none")]
+        #[cfg_attr(feature = "builder", getset(get = "pub"))]
         annotations: Option<HashMap<String, String>>,
     }
 );
 
 impl ImageManifest {
+    /// Attempts to load an image manifest.
+    /// # Errors
+    /// This function will return an error if the image manifest does
+    /// not exist or is invalid.
+    /// # Example
+    /// ``` no_run
+    /// use oci_spec::image::ImageManifest;
+    ///
+    /// let image_manifest = ImageManifest::load("my-manifest.json").unwrap();
+    /// ```
     pub fn load<P: AsRef<Path>>(path: P) -> Result<ImageManifest> {
         let path = path.as_ref();
         let manifest_file = fs::File::open(path)?;
@@ -67,7 +80,7 @@ mod tests {
     #[test]
     fn test_load_manifest() {
         let manifest_path =
-            PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("test_files/image/manifest.json");
+            PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("test/data/manifest.json");
         let result = ImageManifest::load(manifest_path);
         assert!(result.is_ok());
     }

@@ -10,9 +10,8 @@ make_pub!(
     #[serde(rename_all = "camelCase")]
     #[cfg_attr(
         feature = "builder",
-        derive(derive_builder::Builder, getset::Getters),
-        builder(default, pattern = "owned", setter(into, strip_option)),
-        getset(get = "pub")
+        derive(derive_builder::Builder, getset::CopyGetters, getset::Getters),
+        builder(default, pattern = "owned", setter(into, strip_option))
     )]
     /// The image index is a higher-level manifest which points to specific image manifests,
     /// ideal for one or more platforms. While the use of an image index is OPTIONAL for
@@ -28,18 +27,31 @@ make_pub!(
         /// this field contains the media type of this document, which differs from
         /// the descriptor use of mediaType.
         #[serde(skip_serializing_if = "Option::is_none")]
+        #[cfg_attr(feature = "builder", getset(get = "pub"))]
         media_type: Option<String>,
         /// This REQUIRED property contains a list of manifests for specific platforms.
         /// While this property MUST be present, the size of the array MAY be zero.
+        #[cfg_attr(feature = "builder", getset(get = "pub"))]
         manifests: Vec<Descriptor>,
         /// This OPTIONAL property contains arbitrary metadata for the image index.
         /// This OPTIONAL property MUST use the annotation rules.
         #[serde(skip_serializing_if = "Option::is_none")]
+        #[cfg_attr(feature = "builder", getset(get = "pub"))]
         annotations: Option<HashMap<String, String>>,
     }
 );
 
 impl ImageIndex {
+    /// Attempts to load an image index.
+    /// # Errors
+    /// This function will return an error if the image index does
+    /// not exist or is invalid.
+    /// # Example
+    /// ``` no_run
+    /// use oci_spec::image::ImageIndex;
+    ///
+    /// let image_index = ImageIndex::load("my-index.json").unwrap();
+    /// ```
     pub fn load<P: AsRef<Path>>(path: P) -> Result<ImageIndex> {
         let path = path.as_ref();
         let index_file = fs::File::open(path)?;
@@ -67,8 +79,7 @@ mod tests {
 
     #[test]
     fn test_load_index() {
-        let index_path =
-            PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("test_files/image/index.json");
+        let index_path = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("test/data/index.json");
         let result = ImageIndex::load(index_path);
         println!("{:#?}", result);
         assert!(result.is_ok());

@@ -1,8 +1,7 @@
 use std::{collections::HashMap, fs, path::Path};
 
 use anyhow::Result;
-use serde::ser::SerializeMap;
-use serde::{Deserialize, Deserializer, Serialize, Serializer};
+use serde::{ser::SerializeMap, Deserialize, Deserializer, Serialize, Serializer};
 
 make_pub!(
     #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
@@ -64,6 +63,16 @@ make_pub!(
 );
 
 impl ImageConfiguration {
+    /// Attempts to load an image configuration.
+    /// # Errors
+    /// This function will return an error if the image configuration does
+    /// not exist or is invalid.
+    /// # Example
+    /// ``` no_run
+    /// use oci_spec::image::ImageConfiguration;
+    ///
+    /// let image_config = ImageConfiguration::load("my-config.json").unwrap();
+    /// ```
     pub fn load<P: AsRef<Path>>(path: P) -> Result<ImageConfiguration> {
         let path = path.as_ref();
         let file = fs::File::open(path)?;
@@ -242,29 +251,33 @@ make_pub!(
     #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
     #[cfg_attr(
         feature = "builder",
-        derive(derive_builder::Builder, getset::Getters),
-        builder(default, pattern = "owned", setter(into, strip_option)),
-        getset(get = "pub")
+        derive(derive_builder::Builder, getset::CopyGetters, getset::Getters),
+        builder(default, pattern = "owned", setter(into, strip_option))
     )]
     /// Describes the history of a layer.
     struct History {
         /// A combined date and time at which the layer was created,
-        /// formatted as defined by RFC 3339, section 5.6.
+        /// formatted as defined by [RFC 3339, section 5.6.](https://tools.ietf.org/html/rfc3339#section-5.6).
         #[serde(skip_serializing_if = "Option::is_none")]
+        #[cfg_attr(feature = "builder", getset(get = "pub"))]
         created: Option<String>,
         /// The author of the build point.
         #[serde(skip_serializing_if = "Option::is_none")]
+        #[cfg_attr(feature = "builder", getset(get = "pub"))]
         author: Option<String>,
-        #[serde(skip_serializing_if = "Option::is_none")]
         /// The command which created the layer.
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[cfg_attr(feature = "builder", getset(get = "pub"))]
         created_by: Option<String>,
         /// A custom message set when creating the layer.
         #[serde(skip_serializing_if = "Option::is_none")]
+        #[cfg_attr(feature = "builder", getset(get = "pub"))]
         comment: Option<String>,
         /// This field is used to mark if the history item created
         /// a filesystem diff. It is set to true if this history item
         /// doesn't correspond to an actual layer in the rootfs section
         #[serde(skip_serializing_if = "Option::is_none")]
+        #[cfg_attr(feature = "builder", getset(get_copy = "pub"))]
         empty_layer: Option<bool>,
     }
 );
@@ -277,7 +290,7 @@ mod tests {
 
     #[test]
     fn test_load_image() {
-        let config = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("test_files/image/config.json");
+        let config = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("test/data/config.json");
         let result = ImageConfiguration::load(config);
         assert!(result.is_ok());
     }

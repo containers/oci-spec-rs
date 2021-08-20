@@ -760,18 +760,22 @@ make_pub!(
     /// LinuxSeccomp represents syscall restrictions.
     struct LinuxSeccomp {
         #[cfg_attr(feature = "builder", getset(get_copy = "pub"))]
+        /// The default action to be done.
         default_action: LinuxSeccompAction,
 
         #[serde(default, skip_serializing_if = "Option::is_none")]
         #[cfg_attr(feature = "builder", getset(get = "pub"))]
+        /// Available architectures for the restriction.
         architectures: Option<Vec<Arch>>,
 
         #[serde(default, skip_serializing_if = "Option::is_none")]
         #[cfg_attr(feature = "builder", getset(get = "pub"))]
+        /// Flags added to the seccomp restriction.
         flags: Option<Vec<String>>,
 
         #[serde(default, skip_serializing_if = "Option::is_none")]
         #[cfg_attr(feature = "builder", getset(get = "pub"))]
+        /// The syscalls for the restriction.
         syscalls: Option<Vec<LinuxSyscall>>,
     }
 );
@@ -779,11 +783,30 @@ make_pub!(
 #[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 #[repr(u32)]
+/// Available seccomp actions.
 pub enum LinuxSeccompAction {
+    /// Kill the thread, defined for backward compatibility.
     ScmpActKill = 0x00000000,
+
+    /// Kill the process.
+    ScmpActKillProcess = 0x80000000,
+
+    /// Throw a SIGSYS signal.
     ScmpActTrap = 0x00030000,
+
+    /// Return the specified error code.
     ScmpActErrno = 0x00050001,
+
+    /// Notifies userspace.
+    ScmpActNotify = 0x7fc00000,
+
+    /// Notify a tracing process with the specified value.
     ScmpActTrace = 0x7ff00001,
+
+    /// Allow the syscall to be executed after the action has been logged.
+    ScmpActLog = 0x7ffc0000,
+
+    /// Allow the syscall to be executed.
     ScmpActAllow = 0x7fff0000,
 }
 
@@ -794,38 +817,89 @@ impl Default for LinuxSeccompAction {
 }
 
 #[allow(clippy::enum_clike_unportable_variant)]
-#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+/// Available seccomp architectures.
 pub enum Arch {
+    /// The native architecture.
     ScmpArchNative = 0x00000000,
+
+    /// The x86 (32-bit) architecture.
     ScmpArchX86 = 0x40000003,
+
+    /// The x86-64 (64-bit) architecture.
     ScmpArchX86_64 = 0xc000003e,
+
+    /// The x32 (32-bit x86_64) architecture.
+    ///
+    /// This is different from the value used by the kernel because we need to be able to
+    /// distinguish between x32 and x86_64.
     ScmpArchX32 = 0x4000003e,
+
+    /// The ARM architecture.
     ScmpArchArm = 0x40000028,
+
+    /// The AArch64 architecture.
     ScmpArchAarch64 = 0xc00000b7,
+
+    /// The MIPS architecture.
     ScmpArchMips = 0x00000008,
+
+    /// The MIPS64 architecture.
     ScmpArchMips64 = 0x80000008,
+
+    /// The MIPS64n32 architecture.
     ScmpArchMips64n32 = 0xa0000008,
+
+    /// The MIPSel architecture.
     ScmpArchMipsel = 0x40000008,
+
+    /// The MIPSel64 architecture.
     ScmpArchMipsel64 = 0xc0000008,
+
+    /// The MIPSel64n32 architecture.
     ScmpArchMipsel64n32 = 0xe0000008,
+
+    /// The PowerPC architecture.
     ScmpArchPpc = 0x00000014,
+
+    /// The PowerPC64 architecture.
     ScmpArchPpc64 = 0x80000015,
+
+    /// The PowerPC64le architecture.
     ScmpArchPpc64le = 0xc0000015,
+
+    /// The S390 architecture.
     ScmpArchS390 = 0x00000016,
+
+    /// The S390x architecture.
     ScmpArchS390x = 0x80000016,
 }
 
 #[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 #[repr(u32)]
+/// The seccomp operator to be used for args.
 pub enum LinuxSeccompOperator {
+    /// Refers to the SCMP_CMP_NE operator (not equal).
     ScmpCmpNe = 1,
+
+    /// Refers to the SCMP_CMP_LT operator (less than).
     ScmpCmpLt = 2,
+
+    /// Refers to the SCMP_CMP_LE operator (less equal).
     ScmpCmpLe = 3,
+
+    /// Refers to the SCMP_CMP_EQ operator (equal to).
     ScmpCmpEq = 4,
+
+    /// Refers to the SCMP_CMP_GE operator (greater equal).
     ScmpCmpGe = 5,
+
+    /// Refers to the SCMP_CMP_GT operator (greater than).
     ScmpCmpGt = 6,
+
+    /// Refers to the SCMP_CMP_MASKED_EQ operator (masked equal).
     ScmpCmpMaskedEq = 7,
 }
 

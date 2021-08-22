@@ -1,7 +1,9 @@
 use std::{collections::HashMap, fs, path::Path};
 
+use crate::error::Result;
+
 use super::Descriptor;
-use anyhow::Result;
+
 use serde::{Deserialize, Serialize};
 
 make_pub!(
@@ -61,8 +63,9 @@ make_pub!(
 impl ImageManifest {
     /// Attempts to load an image manifest.
     /// # Errors
-    /// This function will return an error if the image manifest does
-    /// not exist or is invalid.
+    /// This function will return an [OciSpecError::Io](crate::OciSpecError::Io)
+    /// if the image manifest does not exist or an
+    /// [OciSpecError::SerDe](crate::OciSpecError::SerDe) if it is invalid.
     /// # Example
     /// ``` no_run
     /// use oci_spec::image::ImageManifest;

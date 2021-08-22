@@ -1,9 +1,7 @@
-use std::{collections::HashMap, fs, path::Path};
-
 use super::Descriptor;
-
-use anyhow::Result;
+use crate::error::Result;
 use serde::{Deserialize, Serialize};
+use std::{collections::HashMap, fs, path::Path};
 
 make_pub!(
     #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
@@ -47,8 +45,9 @@ make_pub!(
 impl ImageIndex {
     /// Attempts to load an image index.
     /// # Errors
-    /// This function will return an error if the image index does
-    /// not exist or is invalid.
+    /// This function will return an [OciSpecError::Io](crate::OciSpecError::Io)
+    /// if the image index does not exist or an
+    /// [OciSpecError::SerDe](crate::OciSpecError::SerDe) if it is invalid.
     /// # Example
     /// ``` no_run
     /// use oci_spec::image::ImageIndex;
@@ -84,7 +83,6 @@ mod tests {
     fn test_load_index() {
         let index_path = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("test/data/index.json");
         let result = ImageIndex::load(index_path);
-        println!("{:#?}", result);
         assert!(result.is_ok());
     }
 }

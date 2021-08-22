@@ -1,4 +1,5 @@
-use anyhow::{bail, Result};
+use crate::error::{oci_error, OciSpecError};
+
 use serde::{Deserialize, Serialize};
 use std::{collections::HashMap, convert::TryFrom, path::PathBuf};
 
@@ -639,7 +640,7 @@ pub enum LinuxNamespaceType {
 }
 
 impl TryFrom<&str> for LinuxNamespaceType {
-    type Error = anyhow::Error;
+    type Error = OciSpecError;
 
     fn try_from(namespace: &str) -> Result<Self, Self::Error> {
         match namespace {
@@ -650,7 +651,10 @@ impl TryFrom<&str> for LinuxNamespaceType {
             "user" => Ok(LinuxNamespaceType::User),
             "pid" => Ok(LinuxNamespaceType::Pid),
             "net" => Ok(LinuxNamespaceType::Network),
-            _ => bail!("unknown namespace {}, could not convert", namespace),
+            _ => Err(oci_error(format!(
+                "unknown namespace {}, could not convert",
+                namespace
+            ))),
         }
     }
 }
@@ -852,8 +856,8 @@ pub enum Arch {
 
     /// The x32 (32-bit x86_64) architecture.
     ///
-    /// This is different from the value used by the kernel because we need to be able to
-    /// distinguish between x32 and x86_64.
+    /// This is different from the value used by the kernel because we need to
+    /// be able to distinguish between x32 and x86_64.
     ScmpArchX32 = 0x4000003e,
 
     /// The ARM architecture.

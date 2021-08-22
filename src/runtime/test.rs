@@ -10,14 +10,14 @@ fn serialize_and_deserialize_spec() {
 }
 
 #[test]
-fn test_linux_device_cgroup_to_string() -> Result<()> {
+fn test_linux_device_cgroup_to_string() {
     cfg_if::cfg_if!(
         if #[cfg(feature = "builder")] {
             let ldc = LinuxDeviceCgroupBuilder::default().
                 allow(true).
                 typ(LinuxDeviceType::B).
                 access("rwm".to_string()).
-                build()?;
+                build().expect("build device cgroup");
         } else {
             let ldc = LinuxDeviceCgroup {
                 allow: true,
@@ -38,7 +38,7 @@ fn test_linux_device_cgroup_to_string() -> Result<()> {
                 .major(1)
                 .minor(9)
                 .access("rwm".to_string())
-                .build()?;
+                .build().expect("build device cgroup");
         } else {
             let ldc = LinuxDeviceCgroup {
                 allow: true,
@@ -50,5 +50,4 @@ fn test_linux_device_cgroup_to_string() -> Result<()> {
         }
     );
     assert_eq!(ldc.to_string(), "b 1:9 rwm");
-    Ok(())
 }

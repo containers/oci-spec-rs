@@ -181,6 +181,7 @@ impl Default for LinuxDeviceType {
 }
 
 impl LinuxDeviceType {
+    /// Retrieve a string reference for the device type.
     pub fn as_str(&self) -> &str {
         match self {
             Self::B => "b",
@@ -616,6 +617,7 @@ make_pub!(
 
 #[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "snake_case")]
+/// Available Linux namespaces.
 pub enum LinuxNamespaceType {
     /// Mount Namespace for isolating mount points
     Mount = 0x00020000,
@@ -687,7 +689,7 @@ make_pub!(
     }
 );
 
-// Utility function to get default namespaces
+/// Utility function to get default namespaces.
 pub fn get_default_namespaces() -> Vec<LinuxNamespace> {
     vec![
         LinuxNamespace {
@@ -943,17 +945,21 @@ make_pub!(
     /// LinuxSyscall is used to match a syscall in seccomp.
     struct LinuxSyscall {
         #[cfg_attr(feature = "builder", getset(get = "pub"))]
+        /// The names of the syscalls.
         names: Vec<String>,
 
         #[cfg_attr(feature = "builder", getset(get_copy = "pub"))]
+        /// The action to be done for the syscalls.
         action: LinuxSeccompAction,
 
         #[serde(default, skip_serializing_if = "Option::is_none")]
         #[cfg_attr(feature = "builder", getset(get_copy = "pub"))]
+        /// The error return value.
         errno_ret: Option<u32>,
 
         #[serde(default, skip_serializing_if = "Option::is_none")]
         #[cfg_attr(feature = "builder", getset(get = "pub"))]
+        /// The arguments for the syscalls.
         args: Option<Vec<LinuxSeccompArg>>,
     }
 );
@@ -969,18 +975,22 @@ make_pub!(
     )]
     /// LinuxSeccompArg used for matching specific syscall arguments in seccomp.
     struct LinuxSeccompArg {
+        /// The index of the argument.
         index: usize,
 
+        /// The value of the argument.
         value: u64,
 
         #[serde(default, skip_serializing_if = "Option::is_none")]
+        /// The second value of the argument.
         value_two: Option<u64>,
 
+        /// The operator for the argument.
         op: LinuxSeccompOperator,
     }
 );
 
-// Default masks paths, cannot read these host files
+/// Default masks paths, cannot read these host files.
 pub fn get_default_maskedpaths() -> Vec<String> {
     vec![
         // For example now host interfaces such as
@@ -998,8 +1008,8 @@ pub fn get_default_maskedpaths() -> Vec<String> {
     ]
 }
 
-// Default readonly paths,
-// For example most containers shouldn't have permission to write to /proc/sys
+/// Default readonly paths, for example most containers shouldn't have permission to write to
+/// `/proc/sys`.
 pub fn get_default_readonly_paths() -> Vec<String> {
     vec![
         "/proc/bus".to_string(),

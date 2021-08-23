@@ -9,6 +9,7 @@ use std::{
 
 use crate::error::{oci_error, Result};
 
+mod capability;
 mod hooks;
 mod linux;
 mod miscellaneous;
@@ -19,6 +20,7 @@ mod vm;
 mod windows;
 
 // re-export for ease of use
+pub use capability::*;
 pub use hooks::*;
 pub use linux::*;
 pub use miscellaneous::*;

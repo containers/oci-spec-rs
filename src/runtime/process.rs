@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-use caps::Capability;
+use crate::runtime::Capability;
 use serde::{Deserialize, Serialize};
 
 make_pub!(
@@ -308,9 +308,9 @@ make_pub!(
 // CAP_NET_BIND_SERVICE allows container to bind to ports below 1024
 impl Default for LinuxCapabilities {
     fn default() -> Self {
-        let audit_write = Capability::CAP_AUDIT_WRITE;
-        let cap_kill = Capability::CAP_KILL;
-        let net_bind = Capability::CAP_NET_BIND_SERVICE;
+        let audit_write = Capability::AuditWrite;
+        let cap_kill = Capability::Kill;
+        let net_bind = Capability::NetBindService;
         let default_vec = vec![audit_write, cap_kill, net_bind];
         LinuxCapabilities {
             bounding: default_vec.clone().into(),

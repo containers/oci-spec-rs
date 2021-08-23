@@ -1,12 +1,13 @@
 //! [OCI runtime spec](https://github.com/opencontainers/runtime-spec) types and definitions.
 
-use anyhow::{Context, Result};
 use serde::{Deserialize, Serialize};
 use std::{
     collections::HashMap,
     fs,
     path::{Path, PathBuf},
 };
+
+use crate::error::{oci_error, Result};
 
 mod hooks;
 mod linux;
@@ -153,31 +154,53 @@ impl Default for Spec {
 
 impl Spec {
     /// Load a new `Spec` from the provided JSON file `path`.
+    /// # Errors
+    /// This function will return an [OciSpecError::Io](crate::OciSpecError::Io)
+    /// if the spec does not exist or an
+    /// [OciSpecError::SerDe](crate::OciSpecError::SerDe) if it is invalid.
+    /// # Example
+    /// ``` no_run
+    /// use oci_spec::runtime::Spec;
+    ///
+    /// let spec = Spec::load("config.json").unwrap();
+    /// ```
     pub fn load<P: AsRef<Path>>(path: P) -> Result<Self> {
         let path = path.as_ref();
-        let file = fs::File::open(path)
-            .with_context(|| format!("load spec: failed to open {}", path.display()))?;
-        serde_json::from_reader(&file).context("deserialize spec")
+        let file = fs::File::open(path)?;
+        let s = serde_json::from_reader(&file)?;
+        Ok(s)
     }
 
     /// Save a `Spec` to the provided JSON file `path`.
+    /// # Errors
+    /// This function will return an [OciSpecError::Io](crate::OciSpecError::Io)
+    /// if a file cannot be created at the provided path or an
+    /// [OciSpecError::SerDe](crate::OciSpecError::SerDe) if the spec cannot be
+    /// serialized.
+    /// # Example
+    /// ``` no_run
+    /// use oci_spec::runtime::Spec;
+    ///
+    /// let mut spec = Spec::load("config.json").unwrap();
+    /// spec.save("my_config.json").unwrap();
+    /// ```
     pub fn save<P: AsRef<Path>>(&self, path: P) -> Result<()> {
         let path = path.as_ref();
-        let file = fs::File::create(path)
-            .with_context(|| format!("save spec: failed to create/open {}", path.display()))?;
-        serde_json::to_writer(&file, self)
-            .with_context(|| format!("failed to save spec to {}", path.display()))
+        let file = fs::File::create(path)?;
+        serde_json::to_writer(&file, self)?;
+        Ok(())
     }
 
     /// Canonicalize the `root.path` of the `Spec` for the provided `bundle`.
     pub fn canonicalize_rootfs<P: AsRef<Path>>(&mut self, bundle: P) -> Result<()> {
         cfg_if::cfg_if!(
             if #[cfg(feature = "builder")] {
-                let root = self.root.as_ref().context("no root path provided")?;
+                let root = self.root.as_ref().ok_or_else(||oci_error("no root path provided for canonicalization"))?;
                 let path = Self::canonicalize_path(bundle, root.path())?;
-                self.root = RootBuilder::default().path(path).readonly(root.readonly()).build()?.into();
+                self.root = Some(RootBuilder::default().path(path).readonly(root.readonly()).build()
+                .map_err(|_| oci_error("failed to set canonicalized root"))?);
             } else {
-                let root = self.root.as_mut().context("no root path provided")?;
+                let root = self.root.as_mut().ok_or_else(||oci_error("no root path provided for canonicalization"))?;
                 root.path = Self::canonicalize_path(bundle, &root.path)?;
             }
         );
@@ -190,18 +213,10 @@ impl Spec {
         P: AsRef<Path>,
     {
         Ok(if path.as_ref().is_absolute() {
-            fs::canonicalize(path.as_ref())
-                .with_context(|| format!("failed to canonicalize {}", path.as_ref().display()))?
+            fs::canonicalize(path.as_ref())?
         } else {
-            let canonical_bundle_path = fs::canonicalize(&bundle).context(format!(
-                "failed to canonicalize bundle: {}",
-                bundle.as_ref().display()
-            ))?;
-
-            fs::canonicalize(canonical_bundle_path.join(path.as_ref())).context(format!(
-                "failed to canonicalize rootfs: {}",
-                path.as_ref().display()
-            ))?
+            let canonical_bundle_path = fs::canonicalize(&bundle)?;
+            fs::canonicalize(canonical_bundle_path.join(path.as_ref()))?
         })
     }
 }
@@ -211,15 +226,15 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_canonicalize_rootfs() -> Result<()> {
+    fn test_canonicalize_rootfs() {
         let rootfs_name = "rootfs";
-        let bundle = tempfile::tempdir().context("failed to create tmp test bundle dir")?;
+        let bundle = tempfile::tempdir().expect("failed to create tmp test bundle dir");
         let rootfs_absolute_path = bundle.path().join(rootfs_name);
         assert!(
             rootfs_absolute_path.is_absolute(),
             "rootfs path is not absolute path"
         );
-        fs::create_dir_all(&rootfs_absolute_path).context("failed to create the testing rootfs")?;
+        fs::create_dir_all(&rootfs_absolute_path).expect("failed to create the testing rootfs");
         {
             // Test the case with absolute path
             cfg_if::cfg_if!(
@@ -227,8 +242,8 @@ mod tests {
                     let mut spec = SpecBuilder::default()
                         .root(RootBuilder::default()
                             .path(rootfs_absolute_path.clone())
-                            .build()?)
-                        .build()?;
+                            .build().unwrap())
+                        .build().unwrap();
                 } else {
                     let mut spec = Spec {
                         root: Root {
@@ -242,18 +257,18 @@ mod tests {
             );
 
             spec.canonicalize_rootfs(bundle.path())
-                .context("failed to canonicalize rootfs")?;
+                .expect("failed to canonicalize rootfs");
 
             cfg_if::cfg_if!(
                 if #[cfg(feature = "builder")] {
                     assert_eq!(
                         &rootfs_absolute_path,
-                        spec.root.context("no root in spec")?.path()
+                        spec.root.expect("no root in spec").path()
                     );
                 } else {
                     assert_eq!(
                         rootfs_absolute_path,
-                        spec.root.context("no root in spec")?.path
+                        spec.root.expect("no root in spec").path
                     );
                 }
             );
@@ -266,8 +281,8 @@ mod tests {
                     let mut spec = SpecBuilder::default()
                         .root(RootBuilder::default()
                             .path(rootfs_name)
-                            .build()?)
-                        .build()?;
+                            .build().unwrap())
+                        .build().unwrap();
                 } else {
                     let mut spec = Spec {
                         root: Root {
@@ -281,43 +296,39 @@ mod tests {
             );
 
             spec.canonicalize_rootfs(bundle.path())
-                .context("failed to canonicalize rootfs")?;
+                .expect("failed to canonicalize rootfs");
 
             cfg_if::cfg_if!(
                 if #[cfg(feature = "builder")] {
                     assert_eq!(
                         &rootfs_absolute_path,
-                        spec.root.context("no root in spec")?.path()
+                        spec.root.expect("no root in spec").path()
                     );
                 } else {
                     assert_eq!(
                         rootfs_absolute_path,
-                        spec.root.context("no root in spec")?.path
+                        spec.root.expect("no root in spec").path
                     );
                 }
             );
         }
-
-        Ok(())
     }
 
     #[test]
-    fn test_load_save() -> Result<()> {
+    fn test_load_save() {
         let spec = Spec {
             ..Default::default()
         };
-        let test_dir = tempfile::tempdir().context("failed to create tmp test dir")?;
+        let test_dir = tempfile::tempdir().expect("failed to create tmp test dir");
         let spec_path = test_dir.into_path().join("config.json");
 
         // Test first save the default config, and then load the saved config.
         // The before and after should be the same.
-        spec.save(&spec_path).context("failed to save spec")?;
-        let loaded_spec = Spec::load(&spec_path).context("failed to load the saved spec.")?;
+        spec.save(&spec_path).expect("failed to save spec");
+        let loaded_spec = Spec::load(&spec_path).expect("failed to load the saved spec.");
         assert_eq!(
             spec, loaded_spec,
             "The saved spec is not the same as the loaded spec"
         );
-
-        Ok(())
     }
 }

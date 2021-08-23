@@ -1,7 +1,8 @@
 use std::{collections::HashMap, fs, path::Path};
 
-use anyhow::Result;
 use serde::{ser::SerializeMap, Deserialize, Deserializer, Serialize, Serializer};
+
+use crate::error::Result;
 
 make_pub!(
     #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
@@ -72,8 +73,9 @@ make_pub!(
 impl ImageConfiguration {
     /// Attempts to load an image configuration.
     /// # Errors
-    /// This function will return an error if the image configuration does
-    /// not exist or is invalid.
+    /// This function will return an [OciSpecError::Io](crate::OciSpecError::Io)
+    /// if the image configuration does not exist or an
+    /// [OciSpecError::SerDe](crate::OciSpecError::SerDe) if it is invalid.
     /// # Example
     /// ``` no_run
     /// use oci_spec::image::ImageConfiguration;
@@ -196,7 +198,7 @@ make_pub!(
 #[derive(Deserialize, Serialize)]
 struct GoMapSerde {}
 
-fn deserialize_as_vec<'de, D>(deserializer: D) -> Result<Option<Vec<String>>, D::Error>
+fn deserialize_as_vec<'de, D>(deserializer: D) -> std::result::Result<Option<Vec<String>>, D::Error>
 where
     D: Deserializer<'de>,
 {
@@ -209,7 +211,10 @@ where
     Ok(None)
 }
 
-fn serialize_as_map<S>(target: &Option<Vec<String>>, serializer: S) -> Result<S::Ok, S::Error>
+fn serialize_as_map<S>(
+    target: &Option<Vec<String>>,
+    serializer: S,
+) -> std::result::Result<S::Ok, S::Error>
 where
     S: Serializer,
 {

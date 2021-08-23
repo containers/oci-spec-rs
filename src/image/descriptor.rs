@@ -2,6 +2,8 @@ use std::collections::HashMap;
 
 use serde::{Deserialize, Serialize};
 
+use super::MediaType;
+
 make_pub!(
     #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
     #[cfg_attr(
@@ -20,7 +22,7 @@ make_pub!(
         /// requirements in its section 4.2.
         #[serde(rename = "mediaType")]
         #[cfg_attr(feature = "builder", getset(get = "pub"))]
-        media_type: String,
+        media_type: MediaType,
         /// This REQUIRED property is the digest of the targeted content,
         /// conforming to the requirements outlined in Digests. Retrieved
         /// content SHOULD be verified against this digest when consumed via

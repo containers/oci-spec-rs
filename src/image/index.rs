@@ -1,4 +1,4 @@
-use super::Descriptor;
+use super::{Descriptor, MediaType};
 use crate::error::Result;
 use serde::{Deserialize, Serialize};
 use std::{collections::HashMap, fs, path::Path};
@@ -28,7 +28,7 @@ make_pub!(
         /// which differs from the descriptor use of mediaType.
         #[serde(skip_serializing_if = "Option::is_none")]
         #[cfg_attr(feature = "builder", getset(get = "pub"))]
-        media_type: Option<String>,
+        media_type: Option<MediaType>,
         /// This REQUIRED property contains a list of manifests for specific
         /// platforms. While this property MUST be present, the size of
         /// the array MAY be zero.

@@ -2,7 +2,7 @@ use std::{collections::HashMap, fs, path::Path};
 
 use crate::error::Result;
 
-use super::Descriptor;
+use super::{Descriptor, MediaType};
 
 use serde::{Deserialize, Serialize};
 
@@ -31,7 +31,7 @@ make_pub!(
         /// which differs from the descriptor use of mediaType.
         #[serde(skip_serializing_if = "Option::is_none")]
         #[cfg_attr(feature = "builder", getset(get = "pub"))]
-        media_type: Option<String>,
+        media_type: Option<MediaType>,
         /// This REQUIRED property references a configuration object for a
         /// container, by digest. Beyond the descriptor requirements,
         /// the value has the following additional restrictions:

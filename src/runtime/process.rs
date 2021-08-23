@@ -1,7 +1,6 @@
-use std::path::PathBuf;
-
-use crate::runtime::Capability;
+use crate::runtime::{Capabilities, Capability};
 use serde::{Deserialize, Serialize};
+use std::path::PathBuf;
 
 make_pub!(
     /// Process contains information to start a specific application inside the
@@ -282,23 +281,23 @@ make_pub!(
     struct LinuxCapabilities {
         #[serde(default, skip_serializing_if = "Option::is_none")]
         /// Bounding is the set of capabilities checked by the kernel.
-        bounding: Option<Vec<Capability>>,
+        bounding: Option<Capabilities>,
 
         #[serde(default, skip_serializing_if = "Option::is_none")]
         /// Effective is the set of capabilities checked by the kernel.
-        effective: Option<Vec<Capability>>,
+        effective: Option<Capabilities>,
 
         #[serde(default, skip_serializing_if = "Option::is_none")]
         /// Inheritable is the capabilities preserved across execve.
-        inheritable: Option<Vec<Capability>>,
+        inheritable: Option<Capabilities>,
 
         #[serde(default, skip_serializing_if = "Option::is_none")]
         /// Permitted is the limiting superset for effective capabilities.
-        permitted: Option<Vec<Capability>>,
+        permitted: Option<Capabilities>,
 
         #[serde(default, skip_serializing_if = "Option::is_none")]
         /// Ambient is the ambient set of capabilities that are kept.
-        ambient: Option<Vec<Capability>>,
+        ambient: Option<Capabilities>,
     }
 );
 
@@ -311,7 +310,9 @@ impl Default for LinuxCapabilities {
         let audit_write = Capability::AuditWrite;
         let cap_kill = Capability::Kill;
         let net_bind = Capability::NetBindService;
-        let default_vec = vec![audit_write, cap_kill, net_bind];
+        let default_vec = vec![audit_write, cap_kill, net_bind]
+            .into_iter()
+            .collect::<Capabilities>();
         LinuxCapabilities {
             bounding: default_vec.clone().into(),
             effective: default_vec.clone().into(),

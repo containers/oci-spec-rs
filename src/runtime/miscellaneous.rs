@@ -63,7 +63,7 @@ make_pub!(
     }
 );
 
-// utility function to generate default config for mounts
+/// utility function to generate default config for mounts.
 pub fn get_default_mounts() -> Vec<Mount> {
     vec![
         Mount {

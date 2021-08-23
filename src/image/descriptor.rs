@@ -95,7 +95,8 @@ make_pub!(
         /// This OPTIONAL property specifies the variant of the CPU.
         /// Image indexes SHOULD use, and implementations SHOULD understand,
         /// variant values listed in the [Platform Variants]
-        /// (https://github.com/opencontainers/image-spec/blob/main/image-index.md#platform-variants) table.
+        /// (<https://github.com/opencontainers/image-spec/blob/main/image-index.md#platform-variants>)
+        /// table.
         #[serde(skip_serializing_if = "Option::is_none")]
         variant: Option<String>,
     }

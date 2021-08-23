@@ -1,3 +1,7 @@
+#![deny(missing_docs, warnings)]
+
+//! Open Container Initiative (OCI) Specifications for Rust.
+
 #[macro_use]
 mod macros;
 

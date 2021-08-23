@@ -1,3 +1,5 @@
+//! Error types of the crate.
+
 use std::{borrow::Cow, io};
 use thiserror::Error;
 

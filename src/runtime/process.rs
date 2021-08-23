@@ -297,7 +297,7 @@ make_pub!(
         permitted: Option<Vec<Capability>>,
 
         #[serde(default, skip_serializing_if = "Option::is_none")]
-        //// Ambient is the ambient set of capabilities that are kept.
+        /// Ambient is the ambient set of capabilities that are kept.
         ambient: Option<Vec<Capability>>,
     }
 );

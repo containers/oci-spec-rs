@@ -88,6 +88,7 @@ make_pub!(
         builder(default, pattern = "owned", setter(into, strip_option)),
         getset(get_copy = "pub")
     )]
+    /// Available windows resources.
     struct WindowsResources {
         #[serde(default, skip_serializing_if = "Option::is_none")]
         /// Memory restriction configuration.

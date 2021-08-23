@@ -45,7 +45,7 @@ make_pub!(
         config: Descriptor,
         /// Each item in the array MUST be a descriptor. The array MUST have the
         /// base layer at index 0. Subsequent layers MUST then follow in
-        /// stack order (i.e. from layers[0] to layers[len(layers)-1]).
+        /// stack order (i.e. from `layers[0]` to `layers[len(layers)-1]`).
         /// The final filesystem layout MUST match the result of applying
         /// the layers to an empty directory. The ownership, mode, and other
         /// attributes of the initial empty directory are unspecified.

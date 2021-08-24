@@ -11,7 +11,12 @@ make_pub!(
     #[cfg_attr(
         feature = "builder",
         derive(derive_builder::Builder, getset::CopyGetters, getset::Getters),
-        builder(default, pattern = "owned", setter(into, strip_option))
+        builder(
+            default,
+            pattern = "owned",
+            setter(into, strip_option),
+            build_fn(error = "crate::error::OciSpecError")
+        )
     )]
     struct Process {
         #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -131,7 +136,12 @@ make_pub!(
     #[cfg_attr(
         feature = "builder",
         derive(derive_builder::Builder, getset::CopyGetters),
-        builder(default, pattern = "owned", setter(into, strip_option)),
+        builder(
+            default,
+            pattern = "owned",
+            setter(into, strip_option),
+            build_fn(error = "crate::error::OciSpecError")
+        ),
         getset(get_copy = "pub")
     )]
     /// Box specifies dimensions of a rectangle. Used for specifying the size of
@@ -217,7 +227,12 @@ make_pub!(
     #[cfg_attr(
         feature = "builder",
         derive(derive_builder::Builder, getset::CopyGetters),
-        builder(default, pattern = "owned", setter(into, strip_option)),
+        builder(
+            default,
+            pattern = "owned",
+            setter(into, strip_option),
+            build_fn(error = "crate::error::OciSpecError")
+        ),
         getset(get_copy = "pub")
     )]
     /// RLimit types and restrictions.
@@ -242,7 +257,12 @@ make_pub!(
     #[cfg_attr(
         feature = "builder",
         derive(derive_builder::Builder, getset::CopyGetters, getset::Getters),
-        builder(default, pattern = "owned", setter(into, strip_option))
+        builder(
+            default,
+            pattern = "owned",
+            setter(into, strip_option),
+            build_fn(error = "crate::error::OciSpecError")
+        )
     )]
     /// User id (uid) and group id (gid) tracks file permssions.
     struct User {
@@ -274,7 +294,12 @@ make_pub!(
     #[cfg_attr(
         feature = "builder",
         derive(derive_builder::Builder, getset::Getters),
-        builder(default, pattern = "owned", setter(into, strip_option)),
+        builder(
+            default,
+            pattern = "owned",
+            setter(into, strip_option),
+            build_fn(error = "crate::error::OciSpecError")
+        ),
         getset(get = "pub")
     )]
     /// LinuxCapabilities specifies the list of allowed capabilities that are

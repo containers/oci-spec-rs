@@ -7,7 +7,11 @@ make_pub!(
     #[cfg_attr(
         feature = "builder",
         derive(derive_builder::Builder, getset::CopyGetters, getset::Getters),
-        builder(pattern = "owned", setter(into, strip_option))
+        builder(
+            pattern = "owned",
+            setter(into, strip_option),
+            build_fn(error = "crate::error::OciSpecError")
+        )
     )]
     /// A Content Descriptor (or simply Descriptor) describes the disposition of
     /// the targeted content. It includes the type of the content, a content
@@ -61,7 +65,11 @@ make_pub!(
     #[cfg_attr(
         feature = "builder",
         derive(derive_builder::Builder, getset::Getters),
-        builder(default, pattern = "owned", setter(into, strip_option)),
+        builder(
+            pattern = "owned",
+            setter(into, strip_option),
+            build_fn(error = "crate::error::OciSpecError")
+        ),
         getset(get = "pub")
     )]
     /// Describes the minimum runtime requirements of the image.

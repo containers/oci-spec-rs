@@ -17,14 +17,21 @@ pub enum OciSpecError {
     /// be mapped to a more specialized error variant.
     #[error("{0}")]
     Other(String),
+
     /// Will be returned when an error happens during
     /// io operations.
     #[error("io operation failed")]
     Io(#[from] io::Error),
+
     /// Will be returned when an error happens during
     /// serialization or deserialization.
     #[error("serde failed")]
     SerDe(#[from] serde_json::Error),
+
+    /// Builder specific errors.
+    #[cfg(feature = "builder")]
+    #[error("uninitialized field")]
+    Builder(#[from] derive_builder::UninitializedFieldError),
 }
 
 pub(crate) fn oci_error<'a, M>(message: M) -> OciSpecError

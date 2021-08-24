@@ -1,6 +1,10 @@
-use std::{collections::HashMap, fs, path::Path};
+use std::{
+    collections::HashMap,
+    io::{Read, Write},
+    path::Path,
+};
 
-use crate::error::Result;
+use crate::{error::Result, from_file, from_reader, to_file, to_writer};
 
 use super::{Descriptor, MediaType};
 
@@ -34,7 +38,7 @@ make_pub!(
         /// used, this field contains the media type of this document,
         /// which differs from the descriptor use of mediaType.
         #[serde(skip_serializing_if = "Option::is_none")]
-        #[cfg_attr(feature = "builder", getset(get = "pub"))]
+        #[cfg_attr(feature = "builder", getset(get = "pub"), builder(default))]
         media_type: Option<MediaType>,
         /// This REQUIRED property references a configuration object for a
         /// container, by digest. Beyond the descriptor requirements,
@@ -59,42 +63,276 @@ make_pub!(
         /// manifest. This OPTIONAL property MUST use the annotation
         /// rules.
         #[serde(skip_serializing_if = "Option::is_none")]
-        #[cfg_attr(feature = "builder", getset(get = "pub"))]
+        #[cfg_attr(feature = "builder", getset(get = "pub"), builder(default))]
         annotations: Option<HashMap<String, String>>,
     }
 );
 
 impl ImageManifest {
-    /// Attempts to load an image manifest.
+    /// Attempts to load an image manifest from a file.
     /// # Errors
     /// This function will return an [OciSpecError::Io](crate::OciSpecError::Io)
-    /// if the image manifest does not exist or an
-    /// [OciSpecError::SerDe](crate::OciSpecError::SerDe) if it is invalid.
+    /// if the file does not exist or an
+    /// [OciSpecError::SerDe](crate::OciSpecError::SerDe) if the image manifest
+    /// cannot be deserialized.
     /// # Example
     /// ``` no_run
     /// use oci_spec::image::ImageManifest;
     ///
-    /// let image_manifest = ImageManifest::load("my-manifest.json").unwrap();
+    /// let image_manifest = ImageManifest::from_file("manifest.json").unwrap();
     /// ```
-    pub fn load<P: AsRef<Path>>(path: P) -> Result<ImageManifest> {
-        let path = path.as_ref();
-        let manifest_file = fs::File::open(path)?;
-        let manifest = serde_json::from_reader(&manifest_file)?;
-        Ok(manifest)
+    pub fn from_file<P: AsRef<Path>>(path: P) -> Result<ImageManifest> {
+        from_file(path)
+    }
+
+    /// Attempts to load an image manifest from a stream.
+    /// # Errors
+    /// This function will return an [OciSpecError::SerDe](crate::OciSpecError::SerDe)
+    /// if the manifest cannot be deserialized.
+    /// # Example
+    /// ``` no_run
+    /// use oci_spec::image::ImageManifest;
+    /// use std::fs::File;
+    ///
+    /// let reader = File::open("manifest.json").unwrap();
+    /// let image_manifest = ImageManifest::from_reader(reader).unwrap();
+    /// ```
+    pub fn from_reader<R: Read>(reader: R) -> Result<ImageManifest> {
+        from_reader(reader)
+    }
+
+    /// Attempts to write an image manifest to a file as JSON. If the file already exists, it
+    /// will be overwritten.
+    /// # Errors
+    /// This function will return an [OciSpecError::SerDe](crate::OciSpecError::SerDe) if
+    /// the image manifest cannot be serialized.
+    /// # Example
+    /// ``` no_run
+    /// use oci_spec::image::ImageManifest;
+    ///
+    /// let image_manifest = ImageManifest::from_file("manifest.json").unwrap();
+    /// image_manifest.to_file("my-manifest.json").unwrap();
+    /// ```
+    pub fn to_file<P: AsRef<Path>>(&self, path: P) -> Result<()> {
+        to_file(&self, path, false)
+    }
+
+    /// Attempts to write an image manifest to a file as pretty printed JSON. If the file already exists, it
+    /// will be overwritten.
+    /// # Errors
+    /// This function will return an [OciSpecError::SerDe](crate::OciSpecError::SerDe) if
+    /// the image manifest cannot be serialized.
+    /// # Example
+    /// ``` no_run
+    /// use oci_spec::image::ImageManifest;
+    ///
+    /// let image_manifest = ImageManifest::from_file("manifest.json").unwrap();
+    /// image_manifest.to_file_pretty("my-manifest.json").unwrap();
+    /// ```
+    pub fn to_file_pretty<P: AsRef<Path>>(&self, path: P) -> Result<()> {
+        to_file(&self, path, true)
+    }
+
+    /// Attempts to write an image manifest to a stream as JSON.
+    /// # Errors
+    /// This function will return an [OciSpecError::SerDe](crate::OciSpecError::SerDe) if
+    /// the image manifest cannot be serialized.
+    /// # Example
+    /// ``` no_run
+    /// use oci_spec::image::ImageManifest;
+    ///
+    /// let image_manifest = ImageManifest::from_file("manifest.json").unwrap();
+    /// let mut writer = Vec::new();
+    /// image_manifest.to_writer(&mut writer);
+    /// ```
+    pub fn to_writer<W: Write>(&self, writer: &mut W) -> Result<()> {
+        to_writer(&self, writer, false)
+    }
+
+    /// Attempts to write an image manifest to a stream as pretty printed JSON.
+    /// # Errors
+    /// This function will return an [OciSpecError::SerDe](crate::OciSpecError::SerDe) if
+    /// the image manifest cannot be serialized.
+    /// # Example
+    /// ``` no_run
+    /// use oci_spec::image::ImageManifest;
+    ///
+    /// let image_manifest = ImageManifest::from_file("manifest.json").unwrap();
+    /// let mut writer = Vec::new();
+    /// image_manifest.to_writer_pretty(&mut writer);
+    /// ```
+    pub fn to_writer_pretty<W: Write>(&self, writer: &mut W) -> Result<()> {
+        to_writer(&self, writer, true)
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use std::path::PathBuf;
+    use std::{fs, path::PathBuf};
 
     use super::*;
+    #[cfg(not(feature = "builder"))]
+    use crate::image::Descriptor;
+    #[cfg(feature = "builder")]
+    use crate::image::{Descriptor, DescriptorBuilder};
+
+    #[cfg(feature = "builder")]
+    fn create_manifest() -> ImageManifest {
+        let config = DescriptorBuilder::default()
+            .media_type(MediaType::ImageConfig)
+            .size(7023)
+            .digest("sha256:b5b2b2c507a0944348e0303114d8d93aaaa081732b86451d9bce1f432a537bc7")
+            .build()
+            .expect("build config descriptor");
+
+        let layers: Vec<Descriptor> = [
+            (
+                32654,
+                "sha256:9834876dcfb05cb167a5c24953eba58c4ac89b1adf57f28f2f9d09af107ee8f0",
+            ),
+            (
+                16724,
+                "sha256:3c3a4604a545cdc127456d94e421cd355bca5b528f4a9c1905b15da2eb4a4c6b",
+            ),
+            (
+                73109,
+                "sha256:ec4b8955958665577945c89419d1af06b5f7636b4ac3da7f12184802ad867736",
+            ),
+        ]
+        .iter()
+        .map(|l| {
+            DescriptorBuilder::default()
+                .media_type(MediaType::ImageLayerGzip)
+                .size(l.0)
+                .digest(l.1.to_owned())
+                .build()
+                .expect("build layer")
+        })
+        .collect();
+
+        let manifest = ImageManifestBuilder::default()
+            .schema_version(2 as u32)
+            .config(config)
+            .layers(layers)
+            .build()
+            .expect("build image manifest");
+
+        manifest
+    }
+
+    #[cfg(not(feature = "builder"))]
+    fn create_manifest() -> ImageManifest {
+        let config = Descriptor {
+            media_type: MediaType::ImageConfig,
+            size: 7023,
+            digest: "sha256:b5b2b2c507a0944348e0303114d8d93aaaa081732b86451d9bce1f432a537bc7"
+                .to_owned(),
+            urls: None,
+            annotations: None,
+            platform: None,
+        };
+
+        let layers = vec![
+            Descriptor {
+                media_type: MediaType::ImageLayerGzip,
+                size: 32654,
+                digest: "sha256:9834876dcfb05cb167a5c24953eba58c4ac89b1adf57f28f2f9d09af107ee8f0"
+                    .to_owned(),
+                urls: None,
+                annotations: None,
+                platform: None,
+            },
+            Descriptor {
+                media_type: MediaType::ImageLayerGzip,
+                size: 16724,
+                digest: "sha256:3c3a4604a545cdc127456d94e421cd355bca5b528f4a9c1905b15da2eb4a4c6b"
+                    .to_owned(),
+                urls: None,
+                annotations: None,
+                platform: None,
+            },
+            Descriptor {
+                media_type: MediaType::ImageLayerGzip,
+                size: 73109,
+                digest: "sha256:ec4b8955958665577945c89419d1af06b5f7636b4ac3da7f12184802ad867736"
+                    .to_owned(),
+                urls: None,
+                annotations: None,
+                platform: None,
+            },
+        ];
+
+        let manifest = ImageManifest {
+            schema_version: 2,
+            media_type: None,
+            config,
+            layers,
+            annotations: None,
+        };
+
+        manifest
+    }
+
+    fn get_manifest_path() -> PathBuf {
+        PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("test/data/manifest.json")
+    }
 
     #[test]
-    fn test_load_manifest() {
-        let manifest_path =
-            PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("test/data/manifest.json");
-        let result = ImageManifest::load(manifest_path);
-        assert!(result.is_ok());
+    fn load_manifest_from_file() {
+        // arrange
+        let manifest_path = get_manifest_path();
+        let expected = create_manifest();
+
+        // act
+        let actual = ImageManifest::from_file(manifest_path).expect("from file");
+
+        // assert
+        assert_eq!(actual, expected);
+    }
+
+    #[test]
+    fn load_manifest_from_reader() {
+        // arrange
+        let reader = fs::read(get_manifest_path()).expect("read manifest");
+
+        // act
+        let actual = ImageManifest::from_reader(&*reader).expect("from reader");
+
+        // assert
+        let expected = create_manifest();
+        assert_eq!(actual, expected);
+    }
+
+    #[test]
+    fn save_manifest_to_file() {
+        // arrange
+        let tmp = std::env::temp_dir().join("save_manifest_to_file");
+        fs::create_dir_all(&tmp).expect("create test directory");
+        let manifest = create_manifest();
+        let manifest_path = tmp.join("manifest.json");
+
+        // act
+        manifest
+            .to_file_pretty(&manifest_path)
+            .expect("write manifest to file");
+
+        // assert
+        let actual = fs::read_to_string(manifest_path).expect("read actual");
+        let expected = fs::read_to_string(get_manifest_path()).expect("read expected");
+        assert_eq!(actual, expected);
+    }
+
+    #[test]
+    fn save_manifest_to_writer() {
+        // arrange
+        let manifest = create_manifest();
+        let mut actual = Vec::new();
+
+        // act
+        manifest.to_writer_pretty(&mut actual).expect("to writer");
+
+        // assert
+        let expected = fs::read(get_manifest_path()).expect("msg");
+        assert_eq!(actual, expected);
     }
 }

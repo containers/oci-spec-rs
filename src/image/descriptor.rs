@@ -45,19 +45,19 @@ make_pub!(
         /// Entries SHOULD use the http and https schemes, as defined
         /// in [RFC 7230](https://tools.ietf.org/html/rfc7230#section-2.7).
         #[serde(skip_serializing_if = "Option::is_none")]
-        #[cfg_attr(feature = "builder", getset(get = "pub"))]
+        #[cfg_attr(feature = "builder", getset(get = "pub"), builder(default))]
         urls: Option<Vec<String>>,
         /// This OPTIONAL property contains arbitrary metadata for this
         /// descriptor. This OPTIONAL property MUST use the annotation
         /// rules.
         #[serde(skip_serializing_if = "Option::is_none")]
-        #[cfg_attr(feature = "builder", getset(get = "pub"))]
+        #[cfg_attr(feature = "builder", getset(get = "pub"), builder(default))]
         annotations: Option<HashMap<String, String>>,
         /// This OPTIONAL property describes the minimum runtime requirements of
         /// the image. This property SHOULD be present if its target is
         /// platform-specific.
         #[serde(skip_serializing_if = "Option::is_none")]
-        #[cfg_attr(feature = "builder", getset(get = "pub"))]
+        #[cfg_attr(feature = "builder", getset(get = "pub"), builder(default))]
         platform: Option<Platform>,
     }
 );

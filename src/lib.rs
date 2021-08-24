@@ -5,6 +5,8 @@
 #[macro_use]
 mod macros;
 
+#[cfg(feature = "distribution")]
+pub mod distribution;
 mod error;
 #[cfg(feature = "image")]
 pub mod image;

@@ -17,9 +17,10 @@ keywords = ["oci", "spec", "container", "runtime", "image"]
 categories = ["api-bindings"]
 
 [features]
-default = ["image", "runtime"]
+default = ["distribution", "image", "runtime"]
 proptests = ["quickcheck"]
 builder = ["derive_builder", "getset"]
+distribution = []
 image = []
 runtime = []
 

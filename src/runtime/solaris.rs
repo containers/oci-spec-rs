@@ -6,7 +6,12 @@ make_pub!(
     #[cfg_attr(
         feature = "builder",
         derive(derive_builder::Builder, getset::Getters),
-        builder(default, pattern = "owned", setter(into, strip_option)),
+        builder(
+            default,
+            pattern = "owned",
+            setter(into, strip_option),
+            build_fn(error = "crate::error::OciSpecError")
+        ),
         getset(get = "pub")
     )]
     /// Solaris contains platform-specific configuration for Solaris application
@@ -47,7 +52,12 @@ make_pub!(
     #[cfg_attr(
         feature = "builder",
         derive(derive_builder::Builder, getset::Getters),
-        builder(default, pattern = "owned", setter(into, strip_option)),
+        builder(
+            default,
+            pattern = "owned",
+            setter(into, strip_option),
+            build_fn(error = "crate::error::OciSpecError")
+        ),
         getset(get = "pub")
     )]
     /// SolarisAnet provides the specification for automatic creation of network
@@ -89,7 +99,12 @@ make_pub!(
     #[cfg_attr(
         feature = "builder",
         derive(derive_builder::Builder, getset::Getters),
-        builder(default, pattern = "owned", setter(into, strip_option)),
+        builder(
+            default,
+            pattern = "owned",
+            setter(into, strip_option),
+            build_fn(error = "crate::error::OciSpecError")
+        ),
         getset(get = "pub")
     )]
     /// SolarisCappedCPU allows users to set limit on the amount of CPU time
@@ -106,7 +121,12 @@ make_pub!(
     #[cfg_attr(
         feature = "builder",
         derive(derive_builder::Builder, getset::Getters),
-        builder(default, pattern = "owned", setter(into, strip_option)),
+        builder(
+            default,
+            pattern = "owned",
+            setter(into, strip_option),
+            build_fn(error = "crate::error::OciSpecError")
+        ),
         getset(get = "pub")
     )]
     /// SolarisCappedMemory allows users to set the physical and swap caps on

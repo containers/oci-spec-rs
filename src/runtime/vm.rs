@@ -6,7 +6,12 @@ make_pub!(
     #[cfg_attr(
         feature = "builder",
         derive(derive_builder::Builder, getset::Getters),
-        builder(default, pattern = "owned", setter(into, strip_option)),
+        builder(
+            default,
+            pattern = "owned",
+            setter(into, strip_option),
+            build_fn(error = "crate::error::OciSpecError")
+        ),
         getset(get = "pub")
     )]
     /// VM contains information for virtual-machine-based containers.
@@ -32,7 +37,12 @@ make_pub!(
     #[cfg_attr(
         feature = "builder",
         derive(derive_builder::Builder, getset::Getters),
-        builder(default, pattern = "owned", setter(into, strip_option)),
+        builder(
+            default,
+            pattern = "owned",
+            setter(into, strip_option),
+            build_fn(error = "crate::error::OciSpecError")
+        ),
         getset(get = "pub")
     )]
     /// VMHypervisor contains information about the hypervisor to use for a
@@ -53,7 +63,12 @@ make_pub!(
     #[cfg_attr(
         feature = "builder",
         derive(derive_builder::Builder, getset::Getters),
-        builder(default, pattern = "owned", setter(into, strip_option)),
+        builder(
+            default,
+            pattern = "owned",
+            setter(into, strip_option),
+            build_fn(error = "crate::error::OciSpecError")
+        ),
         getset(get = "pub")
     )]
     /// VMKernel contains information about the kernel to use for a virtual
@@ -79,7 +94,12 @@ make_pub!(
     #[cfg_attr(
         feature = "builder",
         derive(derive_builder::Builder, getset::Getters),
-        builder(default, pattern = "owned", setter(into, strip_option)),
+        builder(
+            default,
+            pattern = "owned",
+            setter(into, strip_option),
+            build_fn(error = "crate::error::OciSpecError")
+        ),
         getset(get = "pub")
     )]
     /// VMImage contains information about the virtual machine root image.

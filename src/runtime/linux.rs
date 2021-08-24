@@ -9,7 +9,12 @@ make_pub!(
     #[cfg_attr(
         feature = "builder",
         derive(derive_builder::Builder, getset::Getters),
-        builder(default, pattern = "owned", setter(into, strip_option)),
+        builder(
+            default,
+            pattern = "owned",
+            setter(into, strip_option),
+            build_fn(error = "crate::error::OciSpecError")
+        ),
         getset(get = "pub")
     )]
     /// Linux contains platform-specific configuration for Linux based
@@ -137,7 +142,12 @@ make_pub!(
     #[cfg_attr(
         feature = "builder",
         derive(derive_builder::Builder, getset::CopyGetters),
-        builder(default, pattern = "owned", setter(into, strip_option)),
+        builder(
+            default,
+            pattern = "owned",
+            setter(into, strip_option),
+            build_fn(error = "crate::error::OciSpecError")
+        ),
         getset(get_copy = "pub")
     )]
     /// LinuxIDMapping specifies UID/GID mappings.
@@ -197,7 +207,12 @@ make_pub!(
     #[cfg_attr(
         feature = "builder",
         derive(derive_builder::Builder, getset::CopyGetters, getset::Getters),
-        builder(default, pattern = "owned", setter(into, strip_option))
+        builder(
+            default,
+            pattern = "owned",
+            setter(into, strip_option),
+            build_fn(error = "crate::error::OciSpecError")
+        )
     )]
     /// Represents a device rule for the devices specified to the device
     /// controller
@@ -254,7 +269,12 @@ make_pub!(
     #[cfg_attr(
         feature = "builder",
         derive(derive_builder::Builder, getset::CopyGetters),
-        builder(default, pattern = "owned", setter(into, strip_option)),
+        builder(
+            default,
+            pattern = "owned",
+            setter(into, strip_option),
+            build_fn(error = "crate::error::OciSpecError")
+        ),
         getset(get_copy = "pub")
     )]
     /// LinuxMemory for Linux cgroup 'memory' resource management.
@@ -300,7 +320,12 @@ make_pub!(
     #[cfg_attr(
         feature = "builder",
         derive(derive_builder::Builder, getset::CopyGetters, getset::Getters),
-        builder(default, pattern = "owned", setter(into, strip_option))
+        builder(
+            default,
+            pattern = "owned",
+            setter(into, strip_option),
+            build_fn(error = "crate::error::OciSpecError")
+        )
     )]
     /// LinuxCPU for Linux cgroup 'cpu' resource management.
     struct LinuxCpu {
@@ -348,7 +373,12 @@ make_pub!(
     #[cfg_attr(
         feature = "builder",
         derive(derive_builder::Builder, getset::CopyGetters),
-        builder(default, pattern = "owned", setter(into, strip_option)),
+        builder(
+            default,
+            pattern = "owned",
+            setter(into, strip_option),
+            build_fn(error = "crate::error::OciSpecError")
+        ),
         getset(get_copy = "pub")
     )]
     /// LinuxPids for Linux cgroup 'pids' resource management (Linux 4.3).
@@ -365,7 +395,12 @@ make_pub!(
     #[cfg_attr(
         feature = "builder",
         derive(derive_builder::Builder, getset::CopyGetters, getset::Getters),
-        builder(default, pattern = "owned", setter(into, strip_option)),
+        builder(
+            default,
+            pattern = "owned",
+            setter(into, strip_option),
+            build_fn(error = "crate::error::OciSpecError")
+        ),
         getset(get_copy = "pub")
     )]
     /// LinuxWeightDevice struct holds a `major:minor weight` pair for
@@ -395,7 +430,12 @@ make_pub!(
     #[cfg_attr(
         feature = "builder",
         derive(derive_builder::Builder, getset::CopyGetters),
-        builder(default, pattern = "owned", setter(into, strip_option)),
+        builder(
+            default,
+            pattern = "owned",
+            setter(into, strip_option),
+            build_fn(error = "crate::error::OciSpecError")
+        ),
         getset(get_copy = "pub")
     )]
     /// LinuxThrottleDevice struct holds a `major:minor rate_per_second` pair.
@@ -420,7 +460,12 @@ make_pub!(
     #[cfg_attr(
         feature = "builder",
         derive(derive_builder::Builder, getset::CopyGetters, getset::Getters),
-        builder(default, pattern = "owned", setter(into, strip_option))
+        builder(
+            default,
+            pattern = "owned",
+            setter(into, strip_option),
+            build_fn(error = "crate::error::OciSpecError")
+        )
     )]
     /// LinuxBlockIO for Linux cgroup 'blkio' resource management.
     struct LinuxBlockIo {
@@ -468,7 +513,12 @@ make_pub!(
     #[cfg_attr(
         feature = "builder",
         derive(derive_builder::Builder, getset::CopyGetters, getset::Getters),
-        builder(default, pattern = "owned", setter(into, strip_option))
+        builder(
+            default,
+            pattern = "owned",
+            setter(into, strip_option),
+            build_fn(error = "crate::error::OciSpecError")
+        )
     )]
     /// LinuxHugepageLimit structure corresponds to limiting kernel hugepages.
     struct LinuxHugepageLimit {
@@ -490,7 +540,12 @@ make_pub!(
     #[cfg_attr(
         feature = "builder",
         derive(derive_builder::Builder, getset::CopyGetters, getset::Getters),
-        builder(default, pattern = "owned", setter(into, strip_option))
+        builder(
+            default,
+            pattern = "owned",
+            setter(into, strip_option),
+            build_fn(error = "crate::error::OciSpecError")
+        )
     )]
     /// LinuxInterfacePriority for network interfaces.
     struct LinuxInterfacePriority {
@@ -517,7 +572,12 @@ make_pub!(
     #[cfg_attr(
         feature = "builder",
         derive(derive_builder::Builder, getset::CopyGetters, getset::Getters),
-        builder(default, pattern = "owned", setter(into, strip_option))
+        builder(
+            default,
+            pattern = "owned",
+            setter(into, strip_option),
+            build_fn(error = "crate::error::OciSpecError")
+        )
     )]
     /// LinuxNetwork identification and priority configuration.
     struct LinuxNetwork {
@@ -539,7 +599,12 @@ make_pub!(
     #[cfg_attr(
         feature = "builder",
         derive(derive_builder::Builder, getset::CopyGetters, getset::Getters),
-        builder(default, pattern = "owned", setter(into, strip_option))
+        builder(
+            default,
+            pattern = "owned",
+            setter(into, strip_option),
+            build_fn(error = "crate::error::OciSpecError")
+        )
     )]
     /// Resource constraints for container
     struct LinuxResources {
@@ -598,7 +663,12 @@ make_pub!(
     #[cfg_attr(
         feature = "builder",
         derive(derive_builder::Builder, getset::CopyGetters),
-        builder(default, pattern = "owned", setter(into, strip_option)),
+        builder(
+            default,
+            pattern = "owned",
+            setter(into, strip_option),
+            build_fn(error = "crate::error::OciSpecError")
+        ),
         getset(get_copy = "pub")
     )]
     /// LinuxRdma for Linux cgroup 'rdma' resource management (Linux 4.11).
@@ -672,7 +742,12 @@ make_pub!(
     #[cfg_attr(
         feature = "builder",
         derive(derive_builder::Builder, getset::CopyGetters, getset::Getters),
-        builder(default, pattern = "owned", setter(into, strip_option))
+        builder(
+            default,
+            pattern = "owned",
+            setter(into, strip_option),
+            build_fn(error = "crate::error::OciSpecError")
+        )
     )]
     /// LinuxNamespace is the configuration for a Linux namespace.
     struct LinuxNamespace {
@@ -721,7 +796,12 @@ make_pub!(
     #[cfg_attr(
         feature = "builder",
         derive(derive_builder::Builder, getset::CopyGetters, getset::Getters),
-        builder(default, pattern = "owned", setter(into, strip_option))
+        builder(
+            default,
+            pattern = "owned",
+            setter(into, strip_option),
+            build_fn(error = "crate::error::OciSpecError")
+        )
     )]
     /// LinuxDevice represents the mknod information for a Linux special device
     /// file.
@@ -781,7 +861,12 @@ make_pub!(
     #[cfg_attr(
         feature = "builder",
         derive(derive_builder::Builder, getset::CopyGetters, getset::Getters),
-        builder(default, pattern = "owned", setter(into, strip_option))
+        builder(
+            default,
+            pattern = "owned",
+            setter(into, strip_option),
+            build_fn(error = "crate::error::OciSpecError")
+        )
     )]
     /// LinuxSeccomp represents syscall restrictions.
     struct LinuxSeccomp {
@@ -940,7 +1025,12 @@ make_pub!(
     #[cfg_attr(
         feature = "builder",
         derive(derive_builder::Builder, getset::CopyGetters, getset::Getters),
-        builder(default, pattern = "owned", setter(into, strip_option))
+        builder(
+            default,
+            pattern = "owned",
+            setter(into, strip_option),
+            build_fn(error = "crate::error::OciSpecError")
+        )
     )]
     /// LinuxSyscall is used to match a syscall in seccomp.
     struct LinuxSyscall {
@@ -970,7 +1060,12 @@ make_pub!(
     #[cfg_attr(
         feature = "builder",
         derive(derive_builder::Builder, getset::CopyGetters, getset::Getters),
-        builder(default, pattern = "owned", setter(into, strip_option)),
+        builder(
+            default,
+            pattern = "owned",
+            setter(into, strip_option),
+            build_fn(error = "crate::error::OciSpecError")
+        ),
         getset(get_copy = "pub")
     )]
     /// LinuxSeccompArg used for matching specific syscall arguments in seccomp.
@@ -1026,7 +1121,12 @@ make_pub!(
     #[cfg_attr(
         feature = "builder",
         derive(derive_builder::Builder, getset::Getters),
-        builder(default, pattern = "owned", setter(into, strip_option)),
+        builder(
+            default,
+            pattern = "owned",
+            setter(into, strip_option),
+            build_fn(error = "crate::error::OciSpecError")
+        ),
         getset(get = "pub")
     )]
     /// LinuxIntelRdt has container runtime resource constraints for Intel RDT
@@ -1056,7 +1156,12 @@ make_pub!(
     #[cfg_attr(
         feature = "builder",
         derive(derive_builder::Builder, getset::CopyGetters, getset::Getters),
-        builder(default, pattern = "owned", setter(into, strip_option))
+        builder(
+            default,
+            pattern = "owned",
+            setter(into, strip_option),
+            build_fn(error = "crate::error::OciSpecError")
+        )
     )]
     /// LinuxPersonality represents the Linux personality syscall input.
     struct LinuxPersonality {

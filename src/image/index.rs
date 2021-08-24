@@ -9,7 +9,11 @@ make_pub!(
     #[cfg_attr(
         feature = "builder",
         derive(derive_builder::Builder, getset::CopyGetters, getset::Getters),
-        builder(default, pattern = "owned", setter(into, strip_option))
+        builder(
+            pattern = "owned",
+            setter(into, strip_option),
+            build_fn(error = "crate::error::OciSpecError")
+        )
     )]
     /// The image index is a higher-level manifest which points to specific
     /// image manifests, ideal for one or more platforms. While the use of

@@ -12,7 +12,11 @@ make_pub!(
     #[cfg_attr(
         feature = "builder",
         derive(derive_builder::Builder, getset::CopyGetters, getset::Getters),
-        builder(pattern = "owned", setter(into, strip_option))
+        builder(
+            pattern = "owned",
+            setter(into, strip_option),
+            build_fn(error = "crate::error::OciSpecError")
+        )
     )]
     /// Unlike the image index, which contains information about a set of images
     /// that can span a variety of architectures and operating systems, an image

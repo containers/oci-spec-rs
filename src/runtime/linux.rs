@@ -685,7 +685,7 @@ make_pub!(
     }
 );
 
-#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize, Hash)]
 #[serde(rename_all = "snake_case")]
 /// Available Linux namespaces.
 pub enum LinuxNamespaceType {

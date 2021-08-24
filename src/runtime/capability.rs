@@ -2,8 +2,12 @@ use serde::{
     de::{Deserializer, Error},
     Deserialize, Serialize,
 };
+use std::collections::HashSet;
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize)]
+/// Capabilities is a unique set of Capability values.
+pub type Capabilities = HashSet<Capability>;
+
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Serialize)]
 /// All available capabilities.
 ///
 /// For the purpose of performing permission checks, traditional UNIX
@@ -588,6 +592,22 @@ mod tests {
             let res: Capability = serde_json::from_str(&format!("\"{}\"", case))?;
             assert_eq!(Capability::Syslog, res);
         }
+        Ok(())
+    }
+
+    #[test]
+    fn capabilities() -> Result<()> {
+        let res: Capabilities = serde_json::from_str(
+            r#"[
+                "syslog",
+                "SYSLOG",
+                "chown",
+                "cap_chown"
+            ]"#,
+        )?;
+        assert_eq!(res.len(), 2);
+        assert!(res.contains(&Capability::Syslog));
+        assert!(res.contains(&Capability::Chown));
         Ok(())
     }
 }

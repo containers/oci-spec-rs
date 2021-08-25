@@ -3,8 +3,6 @@ use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 
 make_pub!(
-    /// Process contains information to start a specific application inside the
-    /// container.
     #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
     #[serde(rename_all = "camelCase")]
     #[cfg_attr(
@@ -17,6 +15,8 @@ make_pub!(
             build_fn(error = "crate::error::OciSpecError")
         )
     )]
+    /// Process contains information to start a specific application inside the
+    /// container.
     struct Process {
         #[serde(default, skip_serializing_if = "Option::is_none")]
         #[cfg_attr(feature = "builder", getset(get_copy = "pub"))]

@@ -14,7 +14,9 @@
 mod error;
 mod repository;
 mod tag;
+mod version;
 
 pub use error::*;
 pub use repository::*;
 pub use tag::*;
+pub use version::*;

@@ -16,6 +16,7 @@ mod miscellaneous;
 mod process;
 mod solaris;
 mod test;
+mod version;
 mod vm;
 mod windows;
 
@@ -26,6 +27,7 @@ pub use linux::*;
 pub use miscellaneous::*;
 pub use process::*;
 pub use solaris::*;
+pub use version::*;
 pub use vm::*;
 pub use windows::*;
 

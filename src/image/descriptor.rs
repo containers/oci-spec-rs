@@ -90,6 +90,7 @@ make_pub!(
         /// version. Valid values are implementation-defined. e.g.
         /// 10.0.14393.1066 on windows.
         #[serde(skip_serializing_if = "Option::is_none")]
+        #[cfg_attr(feature = "builder", builder(default))]
         os_version: Option<String>,
         /// This OPTIONAL property specifies an array of strings, each
         /// specifying a mandatory OS feature. When os is windows, image
@@ -101,6 +102,7 @@ make_pub!(
         /// When os is not windows, values are implementation-defined and SHOULD
         /// be submitted to this specification for standardization.
         #[serde(skip_serializing_if = "Option::is_none")]
+        #[cfg_attr(feature = "builder", builder(default))]
         os_features: Option<Vec<String>>,
         /// This OPTIONAL property specifies the variant of the CPU.
         /// Image indexes SHOULD use, and implementations SHOULD understand,
@@ -108,6 +110,7 @@ make_pub!(
         /// (<https://github.com/opencontainers/image-spec/blob/main/image-index.md#platform-variants>)
         /// table.
         #[serde(skip_serializing_if = "Option::is_none")]
+        #[cfg_attr(feature = "builder", builder(default))]
         variant: Option<String>,
     }
 );

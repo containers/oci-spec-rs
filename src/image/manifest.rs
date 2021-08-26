@@ -332,7 +332,7 @@ mod tests {
         manifest.to_writer_pretty(&mut actual).expect("to writer");
 
         // assert
-        let expected = fs::read(get_manifest_path()).expect("msg");
+        let expected = fs::read(get_manifest_path()).expect("read expected");
         assert_eq!(actual, expected);
     }
 }

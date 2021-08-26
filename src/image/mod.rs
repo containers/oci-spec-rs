@@ -5,6 +5,7 @@ mod config;
 mod descriptor;
 mod index;
 mod manifest;
+mod version;
 
 use std::fmt::Display;
 
@@ -15,6 +16,7 @@ pub use config::*;
 pub use descriptor::*;
 pub use index::*;
 pub use manifest::*;
+pub use version::*;
 
 /// Media types used by OCI image format spec. Values MUST comply with RFC 6838,
 /// including the naming requirements in its section 4.2.

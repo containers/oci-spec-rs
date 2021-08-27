@@ -1,6 +1,6 @@
 [package]
 name = "oci-spec"
-version = "0.3.0"
+version = "0.4.0"
 edition = "2018"
 authors = [
     "Furisto",
@@ -36,4 +36,3 @@ cfg-if = "1.0.0"
 [dev-dependencies]
 tempfile = "3.2.0"
 serde_json = { version = "1.0.66", features = ["preserve_order"] }
-

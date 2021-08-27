@@ -1,5 +1,6 @@
 //! [OCI runtime spec](https://github.com/opencontainers/runtime-spec) types and definitions.
 
+use nix;
 use serde::{Deserialize, Serialize};
 use std::{
     collections::HashMap,
@@ -227,6 +228,72 @@ impl Spec {
             let canonical_bundle_path = fs::canonicalize(&bundle)?;
             fs::canonicalize(canonical_bundle_path.join(path.as_ref()))?
         })
+    }
+
+    /// Converts the given spec file into one that should work with rootless containers,
+    /// by removing incompatible options and adding others that are needed.
+    pub fn set_for_rootless(&mut self) -> Result<()> {
+        let linux = self.linux.as_mut().unwrap();
+        linux.resources = None;
+
+        // Remove network from the default spec
+        let mut namespaces = vec![];
+        for ns in linux.namespaces.as_ref().unwrap().iter() {
+            if ns.typ != LinuxNamespaceType::Network && ns.typ != LinuxNamespaceType::User {
+                namespaces.push(ns.clone());
+            }
+        }
+        // Add user namespace
+        namespaces.push(LinuxNamespace {
+            typ: LinuxNamespaceType::User,
+            path: None,
+        });
+        linux.namespaces = Some(namespaces);
+
+        linux.uid_mappings = Some(vec![LinuxIdMapping {
+            host_id: nix::unistd::geteuid().as_raw(),
+            container_id: 0,
+            size: 1,
+        }]);
+        linux.gid_mappings = Some(vec![LinuxIdMapping {
+            host_id: nix::unistd::getegid().as_raw(),
+            container_id: 0,
+            size: 1,
+        }]);
+
+        // Fix the mounts
+        let mut mounts = vec![];
+        for mount in self.mounts.as_ref().unwrap().iter() {
+            let dest = mount.destination.clone();
+            if fs::canonicalize(dest).unwrap().to_str() == Some("/sys") {
+                mounts.push(Mount {
+                    destination: PathBuf::from("/sys"),
+                    source: Some(PathBuf::from("/sys")),
+                    typ: Some("none".to_string()),
+                    options: Some(vec![
+                        "rbind".to_string(),
+                        "nosuid".to_string(),
+                        "noexec".to_string(),
+                        "nodev".to_string(),
+                        "ro".to_string(),
+                    ]),
+                });
+            } else {
+                let options: Vec<String> = mount
+                    .options
+                    .as_ref()
+                    .unwrap_or(&vec![])
+                    .iter()
+                    .filter(|&o| !o.starts_with("gid=") && !o.starts_with("uid="))
+                    .map(|o| o.to_string())
+                    .collect();
+                let mut t = mount.clone();
+                t.options = Some(options);
+                mounts.push(t);
+            }
+        }
+        self.mounts = Some(mounts);
+        Ok(())
     }
 }
 

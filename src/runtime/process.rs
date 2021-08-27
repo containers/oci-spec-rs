@@ -92,8 +92,8 @@ make_pub!(
 impl Default for Process {
     fn default() -> Self {
         Process {
-            // Creates an interactive terminal for container by default
-            terminal: true.into(),
+            // Don't create an interactive terminal for container by default
+            terminal: false.into(),
             // Gives default console size of 0, 0
             console_size: Default::default(),
             // Gives process a uid and gid of 0 (root)

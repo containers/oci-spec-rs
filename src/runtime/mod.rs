@@ -201,18 +201,31 @@ impl Spec {
         Ok(())
     }
 
+    #[cfg(not(feature = "builder"))]
     /// Canonicalize the `root.path` of the `Spec` for the provided `bundle`.
     pub fn canonicalize_rootfs<P: AsRef<Path>>(&mut self, bundle: P) -> Result<()> {
-        cfg_if::cfg_if!(
-            if #[cfg(feature = "builder")] {
-                let root = self.root.as_ref().ok_or_else(||oci_error("no root path provided for canonicalization"))?;
-                let path = Self::canonicalize_path(bundle, root.path())?;
-                self.root = Some(RootBuilder::default().path(path).readonly(root.readonly()).build()
-                .map_err(|_| oci_error("failed to set canonicalized root"))?);
-            } else {
-                let root = self.root.as_mut().ok_or_else(||oci_error("no root path provided for canonicalization"))?;
-                root.path = Self::canonicalize_path(bundle, &root.path)?;
-            }
+        let root = self
+            .root
+            .as_mut()
+            .ok_or_else(|| oci_error("no root path provided for canonicalization"))?;
+        root.path = Self::canonicalize_path(bundle, &root.path)?;
+        Ok(())
+    }
+
+    #[cfg(feature = "builder")]
+    /// Canonicalize the `root.path` of the `Spec` for the provided `bundle`.
+    pub fn canonicalize_rootfs<P: AsRef<Path>>(&mut self, bundle: P) -> Result<()> {
+        let root = self
+            .root
+            .as_ref()
+            .ok_or_else(|| oci_error("no root path provided for canonicalization"))?;
+        let path = Self::canonicalize_path(bundle, root.path())?;
+        self.root = Some(
+            RootBuilder::default()
+                .path(path)
+                .readonly(root.readonly())
+                .build()
+                .map_err(|_| oci_error("failed to set canonicalized root"))?,
         );
         Ok(())
     }
@@ -302,6 +315,7 @@ mod tests {
     use super::*;
 
     #[test]
+    #[cfg(feature = "builder")]
     fn test_canonicalize_rootfs() {
         let rootfs_name = "rootfs";
         let bundle = tempfile::tempdir().expect("failed to create tmp test bundle dir");
@@ -313,79 +327,88 @@ mod tests {
         fs::create_dir_all(&rootfs_absolute_path).expect("failed to create the testing rootfs");
         {
             // Test the case with absolute path
-            cfg_if::cfg_if!(
-                if #[cfg(feature = "builder")] {
-                    let mut spec = SpecBuilder::default()
-                        .root(RootBuilder::default()
-                            .path(rootfs_absolute_path.clone())
-                            .build().unwrap())
-                        .build().unwrap();
-                } else {
-                    let mut spec = Spec {
-                        root: Root {
-                            path: rootfs_absolute_path.clone(),
-                            ..Default::default()
-                        }
-                        .into(),
-                        ..Default::default()
-                    };
-                }
-            );
+            let mut spec = SpecBuilder::default()
+                .root(
+                    RootBuilder::default()
+                        .path(rootfs_absolute_path.clone())
+                        .build()
+                        .unwrap(),
+                )
+                .build()
+                .unwrap();
 
             spec.canonicalize_rootfs(bundle.path())
                 .expect("failed to canonicalize rootfs");
 
-            cfg_if::cfg_if!(
-                if #[cfg(feature = "builder")] {
-                    assert_eq!(
-                        &rootfs_absolute_path,
-                        spec.root.expect("no root in spec").path()
-                    );
-                } else {
-                    assert_eq!(
-                        rootfs_absolute_path,
-                        spec.root.expect("no root in spec").path
-                    );
-                }
+            assert_eq!(
+                &rootfs_absolute_path,
+                spec.root.expect("no root in spec").path()
             );
         }
-
         {
             // Test the case with relative path
-            cfg_if::cfg_if!(
-                if #[cfg(feature = "builder")] {
-                    let mut spec = SpecBuilder::default()
-                        .root(RootBuilder::default()
-                            .path(rootfs_name)
-                            .build().unwrap())
-                        .build().unwrap();
-                } else {
-                    let mut spec = Spec {
-                        root: Root {
-                            path: PathBuf::from(rootfs_name),
-                            ..Default::default()
-                        }
-                        .into(),
-                        ..Default::default()
-                    };
-                }
-            );
+            let mut spec = SpecBuilder::default()
+                .root(RootBuilder::default().path(rootfs_name).build().unwrap())
+                .build()
+                .unwrap();
 
             spec.canonicalize_rootfs(bundle.path())
                 .expect("failed to canonicalize rootfs");
 
-            cfg_if::cfg_if!(
-                if #[cfg(feature = "builder")] {
-                    assert_eq!(
-                        &rootfs_absolute_path,
-                        spec.root.expect("no root in spec").path()
-                    );
-                } else {
-                    assert_eq!(
-                        rootfs_absolute_path,
-                        spec.root.expect("no root in spec").path
-                    );
+            assert_eq!(
+                &rootfs_absolute_path,
+                spec.root.expect("no root in spec").path()
+            );
+        }
+    }
+
+    #[test]
+    #[cfg(not(feature = "builder"))]
+    fn test_canonicalize_rootfs() {
+        let rootfs_name = "rootfs";
+        let bundle = tempfile::tempdir().expect("failed to create tmp test bundle dir");
+        let rootfs_absolute_path = bundle.path().join(rootfs_name);
+        assert!(
+            rootfs_absolute_path.is_absolute(),
+            "rootfs path is not absolute path"
+        );
+        fs::create_dir_all(&rootfs_absolute_path).expect("failed to create the testing rootfs");
+        {
+            // Test the case with absolute path
+            let mut spec = Spec {
+                root: Root {
+                    path: rootfs_absolute_path.clone(),
+                    ..Default::default()
                 }
+                .into(),
+                ..Default::default()
+            };
+
+            spec.canonicalize_rootfs(bundle.path())
+                .expect("failed to canonicalize rootfs");
+
+            assert_eq!(
+                rootfs_absolute_path,
+                spec.root.expect("no root in spec").path
+            );
+        }
+        {
+            // Test the case with relative path
+            let mut spec = Spec {
+                root: Root {
+                    path: PathBuf::from(rootfs_name),
+                    ..Default::default()
+                }
+                .into(),
+                ..Default::default()
+            };
+
+            spec.canonicalize_rootfs(bundle.path())
+                .expect("failed to canonicalize rootfs");
+
+            assert_eq!(
+                rootfs_absolute_path,
+                spec.root.expect("no root in spec").path
             );
         }
     }

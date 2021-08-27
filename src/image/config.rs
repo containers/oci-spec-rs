@@ -231,6 +231,7 @@ make_pub!(
         /// These values act as defaults and are merged with any
         /// specified when creating a container.
         #[serde(
+            default,
             skip_serializing_if = "Option::is_none",
             deserialize_with = "deserialize_as_vec",
             serialize_with = "serialize_as_map"

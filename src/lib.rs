@@ -1,6 +1,5 @@
 #![deny(missing_docs, warnings)]
-
-//! Open Container Initiative (OCI) Specifications for Rust.
+#![doc = include_str!("../README.md")]
 
 #[macro_use]
 mod macros;

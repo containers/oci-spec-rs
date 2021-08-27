@@ -8,3 +8,5 @@
 [![docs.rs](https://docs.rs/oci-spec/badge.svg)](https://docs.rs/oci-spec)
 [![dependencies](https://deps.rs/repo/github/containers/oci-spec-rs/status.svg)](https://deps.rs/repo/github/containers/oci-spec-rs)
 [![license](https://img.shields.io/github/license/containers/oci-spec-rs.svg)](https://github.com/containers/oci-spec-rs/blob/master/LICENSE)
+
+### Open Container Initiative (OCI) Specifications for Rust

@@ -7,6 +7,9 @@ use std::{
     path::Path,
 };
 
+/// The expected schema version; equals 2 for compatibility with older versions of Docker.
+pub const SCHEMA_VERSION: u32 = 2;
+
 make_pub!(
     #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
     #[serde(rename_all = "camelCase")]
@@ -151,7 +154,7 @@ impl ImageIndex {
 impl Default for ImageIndex {
     fn default() -> Self {
         Self {
-            schema_version: 2,
+            schema_version: SCHEMA_VERSION,
             media_type: Default::default(),
             manifests: Default::default(),
             annotations: Default::default(),
@@ -200,7 +203,7 @@ mod tests {
             .expect("build amd64 manifest descriptor");
 
         let index = ImageIndexBuilder::default()
-            .schema_version(2 as u32)
+            .schema_version(SCHEMA_VERSION)
             .manifests(vec![ppc_manifest, amd64_manifest])
             .build()
             .expect("build image index");
@@ -243,7 +246,7 @@ mod tests {
         };
 
         let index = ImageIndex {
-            schema_version: 2,
+            schema_version: SCHEMA_VERSION,
             media_type: None,
             manifests: vec![ppc_manifest, amd64_manifest],
             annotations: None,

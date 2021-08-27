@@ -178,6 +178,8 @@ mod tests {
 
     #[cfg(feature = "builder")]
     fn create_manifest() -> ImageManifest {
+        use crate::image::SCHEMA_VERSION;
+
         let config = DescriptorBuilder::default()
             .media_type(MediaType::ImageConfig)
             .size(7023)
@@ -211,7 +213,7 @@ mod tests {
         .collect();
 
         let manifest = ImageManifestBuilder::default()
-            .schema_version(2 as u32)
+            .schema_version(SCHEMA_VERSION)
             .config(config)
             .layers(layers)
             .build()
@@ -222,6 +224,8 @@ mod tests {
 
     #[cfg(not(feature = "builder"))]
     fn create_manifest() -> ImageManifest {
+        use crate::image::SCHEMA_VERSION;
+
         let config = Descriptor {
             media_type: MediaType::ImageConfig,
             size: 7023,
@@ -263,7 +267,7 @@ mod tests {
         ];
 
         let manifest = ImageManifest {
-            schema_version: 2,
+            schema_version: SCHEMA_VERSION,
             media_type: None,
             config,
             layers,

@@ -407,4 +407,15 @@ mod tests {
             "The saved spec is not the same as the loaded spec"
         );
     }
+
+    #[test]
+    fn test_set_for_rootless() {
+        let mut spec = Spec {
+            ..Default::default()
+        };
+        spec.set_for_rootless()
+            .expect("failed to set spec for rootless");
+        assert_eq!(spec.linux.as_ref().unwrap().uid_mappings.is_some(), true);
+        assert_eq!(spec.linux.as_ref().unwrap().gid_mappings.is_some(), true);
+    }
 }

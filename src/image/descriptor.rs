@@ -126,3 +126,17 @@ impl Default for Platform {
         }
     }
 }
+
+impl Descriptor {
+    /// Construct a new descriptor with the required fields.
+    pub fn new(media_type: MediaType, size: i64, digest: impl Into<String>) -> Self {
+        Self {
+            media_type,
+            size,
+            digest: digest.into(),
+            urls: Default::default(),
+            annotations: Default::default(),
+            platform: Default::default(),
+        }
+    }
+}

@@ -1,8 +1,14 @@
-use std::{collections::HashMap, fs, path::Path};
+#[cfg(test)]
+use std::collections::BTreeMap;
+use std::{
+    collections::HashMap,
+    io::{Read, Write},
+    path::Path,
+};
 
 use serde::{ser::SerializeMap, Deserialize, Deserializer, Serialize, Serializer};
 
-use crate::error::Result;
+use crate::{error::Result, from_file, from_reader, to_file, to_writer};
 
 make_pub!(
     #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
@@ -76,22 +82,100 @@ make_pub!(
 );
 
 impl ImageConfiguration {
-    /// Attempts to load an image configuration.
+    /// Attempts to load an image configuration from a file.
     /// # Errors
     /// This function will return an [OciSpecError::Io](crate::OciSpecError::Io)
-    /// if the image configuration does not exist or an
-    /// [OciSpecError::SerDe](crate::OciSpecError::SerDe) if it is invalid.
+    /// if the file does not exist or an
+    /// [OciSpecError::SerDe](crate::OciSpecError::SerDe) if the image configuration
+    /// cannot be deserialized.
     /// # Example
     /// ``` no_run
     /// use oci_spec::image::ImageConfiguration;
     ///
-    /// let image_config = ImageConfiguration::load("my-config.json").unwrap();
+    /// let image_index = ImageConfiguration::from_file("config.json").unwrap();
     /// ```
-    pub fn load<P: AsRef<Path>>(path: P) -> Result<ImageConfiguration> {
-        let path = path.as_ref();
-        let file = fs::File::open(path)?;
-        let image = serde_json::from_reader(file)?;
-        Ok(image)
+    pub fn from_file<P: AsRef<Path>>(path: P) -> Result<ImageConfiguration> {
+        from_file(path)
+    }
+
+    /// Attempts to load an image configuration from a stream.
+    /// # Errors
+    /// This function will return an [OciSpecError::SerDe](crate::OciSpecError::SerDe)
+    /// if the image configuration cannot be deserialized.
+    /// # Example
+    /// ``` no_run
+    /// use oci_spec::image::ImageConfiguration;
+    /// use std::fs::File;
+    ///
+    /// let reader = File::open("config.json").unwrap();
+    /// let image_index = ImageConfiguration::from_reader(reader).unwrap();
+    /// ```
+    pub fn from_reader<R: Read>(reader: R) -> Result<ImageConfiguration> {
+        from_reader(reader)
+    }
+
+    /// Attempts to write an image configuration to a file as JSON. If the file already exists, it
+    /// will be overwritten.
+    /// # Errors
+    /// This function will return an [OciSpecError::SerDe](crate::OciSpecError::SerDe) if
+    /// the image configuration cannot be serialized.
+    /// # Example
+    /// ``` no_run
+    /// use oci_spec::image::ImageConfiguration;
+    ///
+    /// let image_index = ImageConfiguration::from_file("config.json").unwrap();
+    /// image_index.to_file("my-config.json").unwrap();
+    /// ```
+    pub fn to_file<P: AsRef<Path>>(&self, path: P) -> Result<()> {
+        to_file(&self, path, false)
+    }
+
+    /// Attempts to write an image configuration to a file as pretty printed JSON. If the file
+    /// already exists, it will be overwritten.
+    /// # Errors
+    /// This function will return an [OciSpecError::SerDe](crate::OciSpecError::SerDe) if
+    /// the image configuration cannot be serialized.
+    /// # Example
+    /// ``` no_run
+    /// use oci_spec::image::ImageConfiguration;
+    ///
+    /// let image_index = ImageConfiguration::from_file("config.json").unwrap();
+    /// image_index.to_file_pretty("my-config.json").unwrap();
+    /// ```
+    pub fn to_file_pretty<P: AsRef<Path>>(&self, path: P) -> Result<()> {
+        to_file(&self, path, true)
+    }
+
+    /// Attempts to write an image configuration to a stream as JSON.
+    /// # Errors
+    /// This function will return an [OciSpecError::SerDe](crate::OciSpecError::SerDe) if
+    /// the image configuration cannot be serialized.
+    /// # Example
+    /// ``` no_run
+    /// use oci_spec::image::ImageConfiguration;
+    ///
+    /// let image_index = ImageConfiguration::from_file("config.json").unwrap();
+    /// let mut writer = Vec::new();
+    /// image_index.to_writer(&mut writer);
+    /// ```
+    pub fn to_writer<W: Write>(&self, writer: &mut W) -> Result<()> {
+        to_writer(&self, writer, false)
+    }
+
+    /// Attempts to write an image configuration to a stream as pretty printed JSON.
+    /// # Errors
+    /// This function will return an [OciSpecError::SerDe](crate::OciSpecError::SerDe) if
+    /// the image configuration cannot be serialized.
+    /// # Example
+    /// ``` no_run
+    /// use oci_spec::image::ImageConfiguration;
+    ///
+    /// let image_index = ImageConfiguration::from_file("config.json").unwrap();
+    /// let mut writer = Vec::new();
+    /// image_index.to_writer_pretty(&mut writer);
+    /// ```
+    pub fn to_writer_pretty<W: Write>(&self, writer: &mut W) -> Result<()> {
+        to_writer(&self, writer, true)
     }
 }
 
@@ -178,11 +262,11 @@ make_pub!(
             serialize_with = "serialize_as_map"
         )]
         volumes: Option<Vec<String>>,
-        #[serde(skip_serializing_if = "Option::is_none")]
         /// Sets the current working directory of the entrypoint process
         /// in the container. This value acts as a default and may be
         /// replaced by a working directory specified when creating
         /// a container.
+        #[serde(skip_serializing_if = "Option::is_none")]
         working_dir: Option<String>,
         /// The field contains arbitrary metadata for the container.
         /// This property MUST use the annotation rules.
@@ -212,7 +296,12 @@ fn deserialize_as_vec<'de, D>(deserializer: D) -> std::result::Result<Option<Vec
 where
     D: Deserializer<'de>,
 {
+    // ensure stable order of keys in json document for comparison between expected and actual
+    #[cfg(test)]
+    let opt = Option::<BTreeMap<String, GoMapSerde>>::deserialize(deserializer)?;
+    #[cfg(not(test))]
     let opt = Option::<HashMap<String, GoMapSerde>>::deserialize(deserializer)?;
+
     if let Some(data) = opt {
         let vec: Vec<String> = data.keys().cloned().collect();
         return Ok(Some(vec));
@@ -230,7 +319,12 @@ where
 {
     match target {
         Some(values) => {
+            // ensure stable order of keys in json document for comparison between expected and actual
+            #[cfg(test)]
+            let map: BTreeMap<_, _> = values.iter().map(|v| (v, GoMapSerde {})).collect();
+            #[cfg(not(test))]
             let map: HashMap<_, _> = values.iter().map(|v| (v, GoMapSerde {})).collect();
+
             let mut map_ser = serializer.serialize_map(Some(map.len()))?;
             for (key, value) in map {
                 map_ser.serialize_entry(key, &value)?;
@@ -316,34 +410,196 @@ make_pub!(
 
 #[cfg(test)]
 mod tests {
-    use std::path::PathBuf;
+    use std::{fs, path::PathBuf};
 
     use super::*;
 
-    #[test]
-    fn test_load_image() {
-        let config = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("test/data/config.json");
-        let result = ImageConfiguration::load(config);
-        assert!(result.is_ok());
+    #[cfg(feature = "builder")]
+    fn create_config() -> ImageConfiguration {
+        let configuration = ImageConfigurationBuilder::default()
+            .created("2015-10-31T22:22:56.015925234Z".to_owned())
+            .author("Alyssa P. Hacker <alyspdev@example.com>".to_owned())
+            .architecture("amd64")
+            .os("linux")
+            .config(
+                ConfigBuilder::default()
+                    .user("alice".to_owned())
+                    .exposed_ports(vec!["8080/tcp".to_owned()])
+                    .env(vec![
+                        "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin".to_owned(),
+                        "FOO=oci_is_a".to_owned(),
+                        "BAR=well_written_spec".to_owned(),
+                    ])
+                    .entrypoint(vec!["/bin/my-app-binary".to_owned()])
+                    .cmd(vec![
+                        "--foreground".to_owned(),
+                        "--config".to_owned(),
+                        "/etc/my-app.d/default.cfg".to_owned(),
+                    ])
+                    .volumes(vec![
+                        "/var/job-result-data".to_owned(),
+                        "/var/log/my-app-logs".to_owned(),
+                    ])
+                    .working_dir("/home/alice".to_owned())
+                    .build().expect("build config"),
+            )
+            .rootfs(RootFsBuilder::default()
+            .diff_ids(vec![
+                "sha256:c6f988f4874bb0add23a778f753c65efe992244e148a1d2ec2a8b664fb66bbd1".to_owned(),
+                "sha256:5f70bf18a086007016e948b04aed3b82103a36bea41755b6cddfaf10ace3c6ef".to_owned(),
+            ])
+            .build()
+            .expect("build rootfs"))
+            .history(vec![
+                HistoryBuilder::default()
+                .created("2015-10-31T22:22:54.690851953Z".to_owned())
+                .created_by("/bin/sh -c #(nop) ADD file:a3bc1e842b69636f9df5256c49c5374fb4eef1e281fe3f282c65fb853ee171c5 in /".to_owned())
+                .build()
+                .expect("build history"),
+                HistoryBuilder::default()
+                .created("2015-10-31T22:22:55.613815829Z".to_owned())
+                .created_by("/bin/sh -c #(nop) CMD [\"sh\"]".to_owned())
+                .empty_layer(true)
+                .build()
+                .expect("build history"),
+            ])
+            .build()
+            .expect("build configuration");
+
+        configuration
+    }
+
+    #[cfg(not(feature = "builder"))]
+    fn create_config() -> ImageConfiguration {
+        let config = Config {
+            user: Some("alice".to_owned()),
+            exposed_ports: Some(vec!["8080/tcp".to_owned()]),
+            env: Some(vec![
+                "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin".to_owned(),
+                "FOO=oci_is_a".to_owned(),
+                "BAR=well_written_spec".to_owned(),
+            ]),
+            entrypoint: Some(vec!["/bin/my-app-binary".to_owned()]),
+            cmd: Some(vec![
+                "--foreground".to_owned(),
+                "--config".to_owned(),
+                "/etc/my-app.d/default.cfg".to_owned(),
+            ]),
+            volumes: Some(vec![
+                "/var/job-result-data".to_owned(),
+                "/var/log/my-app-logs".to_owned(),
+            ]),
+            working_dir: Some("/home/alice".to_owned()),
+            labels: None,
+            stop_signal: None,
+        };
+
+        let rootfs = RootFs {
+            diff_ids: vec![
+                "sha256:c6f988f4874bb0add23a778f753c65efe992244e148a1d2ec2a8b664fb66bbd1"
+                    .to_owned(),
+                "sha256:5f70bf18a086007016e948b04aed3b82103a36bea41755b6cddfaf10ace3c6ef"
+                    .to_owned(),
+            ],
+            ..Default::default()
+        };
+
+        let history = vec![
+            History {
+                created: Some("2015-10-31T22:22:54.690851953Z".to_owned()),
+                author: None,
+                created_by: Some("/bin/sh -c #(nop) ADD file:a3bc1e842b69636f9df5256c49c5374fb4eef1e281fe3f282c65fb853ee171c5 in /".to_owned()),
+                comment: None,
+                empty_layer: None,
+            },
+            History {
+                created: Some("2015-10-31T22:22:55.613815829Z".to_owned()),
+                author: None,
+                created_by: Some("/bin/sh -c #(nop) CMD [\"sh\"]".to_owned()),
+                comment: None,
+                empty_layer: Some(true),
+            }
+        ];
+
+        let configuration = ImageConfiguration {
+            created: Some("2015-10-31T22:22:56.015925234Z".to_owned()),
+            author: Some("Alyssa P. Hacker <alyspdev@example.com>".to_owned()),
+            architecture: "amd64".to_owned(),
+            os: "linux".to_owned(),
+            os_version: None,
+            os_features: None,
+            variant: None,
+            config: Some(config),
+            rootfs,
+            history,
+        };
+
+        configuration
+    }
+
+    fn get_config_path() -> PathBuf {
+        PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("test/data/config.json")
     }
 
     #[test]
-    fn test_serialize_config() {
-        let config = Config {
-            user: Some("me".to_owned()),
-            env: Some(vec![
-                "SHELL=/bin/bash".to_owned(),
-                "XDG_RUNTIME_DIR=/run/user/1000".to_owned(),
-            ]),
-            entrypoint: None,
-            cmd: None,
-            working_dir: None,
-            labels: None,
-            stop_signal: None,
-            exposed_ports: Some(vec!["tpc/8080".to_owned(), "udp/8080".to_owned()]),
-            volumes: Some(vec!["/a/b/c".to_owned(), "/b/c/g".to_owned()]),
-        };
+    fn load_configuration_from_file() {
+        // arrange
+        let config_path = get_config_path();
+        let expected = create_config();
 
-        let _ = serde_json::to_string(&config).expect("failed to serialize");
+        // act
+        let actual = ImageConfiguration::from_file(config_path).expect("from file");
+
+        // assert
+        assert_eq!(actual, expected);
+    }
+
+    #[test]
+    fn load_configuration_from_reader() {
+        // arrange
+        let reader = fs::read(get_config_path()).expect("read config");
+
+        // act
+        let actual = ImageConfiguration::from_reader(&*reader).expect("from reader");
+        println!("{:#?}", actual);
+
+        // assert
+        let expected = create_config();
+        println!("{:#?}", expected);
+
+        assert_eq!(actual, expected);
+    }
+
+    #[test]
+    fn save_config_to_file() {
+        // arrange
+        let tmp = std::env::temp_dir().join("save_config_to_file");
+        fs::create_dir_all(&tmp).expect("create test directory");
+        let config = create_config();
+        let config_path = tmp.join("config.json");
+
+        // act
+        config
+            .to_file_pretty(&config_path)
+            .expect("write config to file");
+
+        // assert
+        let actual = fs::read_to_string(config_path).expect("read actual");
+        let expected = fs::read_to_string(get_config_path()).expect("read expected");
+        assert_eq!(actual, expected);
+    }
+
+    #[test]
+    fn save_config_to_writer() {
+        // arrange
+        let config = create_config();
+        let mut actual = Vec::new();
+
+        // act
+        config.to_writer_pretty(&mut actual).expect("to writer");
+
+        // assert
+        let expected = fs::read(get_config_path()).expect("read expected");
+        assert_eq!(actual, expected);
     }
 }

@@ -276,6 +276,11 @@ make_pub!(
         gid: u32,
 
         #[serde(default, skip_serializing_if = "Option::is_none")]
+        #[cfg_attr(feature = "builder", getset(get_copy = "pub"))]
+        /// Specifies the umask of the user.
+        umask: Option<u32>,
+
+        #[serde(default, skip_serializing_if = "Option::is_none")]
         #[cfg_attr(feature = "builder", getset(get = "pub"))]
         /// AdditionalGids are additional group ids set for the container's
         /// process.

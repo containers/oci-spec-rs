@@ -334,13 +334,13 @@ impl Spec {
 
         linux.set_uid_mappings(Some(vec![LinuxIdMappingBuilder::default()
             .host_id(nix::unistd::geteuid().as_raw())
-            .container_id(0 as u32)
-            .size(1 as u32)
+            .container_id(0_u32)
+            .size(1_u32)
             .build()?]));
         linux.set_gid_mappings(Some(vec![LinuxIdMappingBuilder::default()
             .host_id(nix::unistd::getegid().as_raw())
-            .container_id(0 as u32)
-            .size(1 as u32)
+            .container_id(0_u32)
+            .size(1_u32)
             .build()?]));
 
         // Fix the mounts

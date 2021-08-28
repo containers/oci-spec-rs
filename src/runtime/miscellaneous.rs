@@ -44,14 +44,14 @@ make_pub!(
     #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
     #[cfg_attr(
         feature = "builder",
-        derive(derive_builder::Builder, getset::Getters),
+        derive(derive_builder::Builder, getset::Getters, getset::Setters),
         builder(
             default,
             pattern = "owned",
             setter(into, strip_option),
             build_fn(error = "crate::error::OciSpecError")
         ),
-        getset(get = "pub")
+        getset(get = "pub", set = "pub")
     )]
     /// Mount specifies a mount for a container.
     struct Mount {

@@ -37,14 +37,14 @@ make_pub!(
     #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
     #[cfg_attr(
         feature = "builder",
-        derive(derive_builder::Builder, getset::Getters),
+        derive(derive_builder::Builder, getset::Getters, getset::Setters),
         builder(
             default,
             pattern = "owned",
             setter(into, strip_option),
             build_fn(error = "crate::error::OciSpecError")
         ),
-        getset(get = "pub")
+        getset(get = "pub", set = "pub")
     )]
     struct Spec {
         #[serde(default, rename = "ociVersion")]
@@ -243,6 +243,7 @@ impl Spec {
         })
     }
 
+    #[cfg(not(feature = "builder"))]
     /// Converts the given spec file into one that should work with rootless containers,
     /// by removing incompatible options and adding others that are needed.
     pub fn set_for_rootless(&mut self) -> Result<()> {
@@ -306,6 +307,75 @@ impl Spec {
             }
         }
         self.mounts = Some(mounts);
+        Ok(())
+    }
+
+    #[cfg(feature = "builder")]
+    /// Converts the given spec file into one that should work with rootless containers,
+    /// by removing incompatible options and adding others that are needed.
+    pub fn set_for_rootless(&mut self) -> Result<()> {
+        let linux = self.linux.as_mut().unwrap();
+        linux.set_resources(None);
+
+        // Remove network from the default spec
+        let mut namespaces = vec![];
+        for ns in linux.namespaces().as_ref().unwrap().iter() {
+            if ns.typ() != LinuxNamespaceType::Network && ns.typ() != LinuxNamespaceType::User {
+                namespaces.push(ns.clone());
+            }
+        }
+        // Add user namespace
+        namespaces.push(
+            LinuxNamespaceBuilder::default()
+                .typ(LinuxNamespaceType::User)
+                .build()?,
+        );
+        linux.set_namespaces(Some(namespaces));
+
+        linux.set_uid_mappings(Some(vec![LinuxIdMappingBuilder::default()
+            .host_id(nix::unistd::geteuid().as_raw())
+            .container_id(0 as u32)
+            .size(1 as u32)
+            .build()?]));
+        linux.set_gid_mappings(Some(vec![LinuxIdMappingBuilder::default()
+            .host_id(nix::unistd::getegid().as_raw())
+            .container_id(0 as u32)
+            .size(1 as u32)
+            .build()?]));
+
+        // Fix the mounts
+        let mut mounts = vec![];
+        for mount in self.mounts().as_ref().unwrap().iter() {
+            let dest = mount.destination().clone();
+            if fs::canonicalize(dest).unwrap().to_str() == Some("/sys") {
+                let mount = MountBuilder::default()
+                    .destination(PathBuf::from("/sys"))
+                    .source(PathBuf::from("/sys"))
+                    .typ("none".to_string())
+                    .options(Some(vec![
+                        "rbind".to_string(),
+                        "nosuid".to_string(),
+                        "noexec".to_string(),
+                        "nodev".to_string(),
+                        "ro".to_string(),
+                    ]))
+                    .build()?;
+                mounts.push(mount);
+            } else {
+                let options: Vec<String> = mount
+                    .options()
+                    .as_ref()
+                    .unwrap_or(&vec![])
+                    .iter()
+                    .filter(|&o| !o.starts_with("gid=") && !o.starts_with("uid="))
+                    .map(|o| o.to_string())
+                    .collect();
+                let mut t = mount.clone();
+                t.set_options(Some(options));
+                mounts.push(t);
+            }
+        }
+        self.set_mounts(Some(mounts));
         Ok(())
     }
 }

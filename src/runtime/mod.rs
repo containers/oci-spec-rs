@@ -502,6 +502,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(not(feature = "builder"))]
     fn test_set_for_rootless() {
         let mut spec = Spec {
             ..Default::default()
@@ -510,5 +511,23 @@ mod tests {
             .expect("failed to set spec for rootless");
         assert_eq!(spec.linux.as_ref().unwrap().uid_mappings.is_some(), true);
         assert_eq!(spec.linux.as_ref().unwrap().gid_mappings.is_some(), true);
+    }
+
+    #[test]
+    #[cfg(feature = "builder")]
+    fn test_set_for_rootless() {
+        let mut spec = Spec {
+            ..Default::default()
+        };
+        spec.set_for_rootless()
+            .expect("failed to set spec for rootless");
+        assert_eq!(
+            spec.linux().as_ref().unwrap().uid_mappings().is_some(),
+            true
+        );
+        assert_eq!(
+            spec.linux().as_ref().unwrap().gid_mappings().is_some(),
+            true
+        );
     }
 }

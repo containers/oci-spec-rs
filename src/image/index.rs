@@ -213,20 +213,20 @@ mod tests {
 
     #[cfg(not(feature = "builder"))]
     fn create_index() -> ImageIndex {
-        let ppc_manifest = Descriptor {
-            media_type: MediaType::ImageManifest,
-            digest: "sha256:e692418e4cbaf90ca69d05a66403747baa33ee08806650b51fab815ad7fc331f"
-                .to_owned(),
-            size: 7143,
-            urls: None,
-            annotations: None,
-            platform: Some(Platform {
+        let ppc_manifest = {
+            let mut r = Descriptor::new(
+                MediaType::ImageManifest,
+                7143,
+                "sha256:e692418e4cbaf90ca69d05a66403747baa33ee08806650b51fab815ad7fc331f",
+            );
+            r.platform = Some(Platform {
                 architecture: "ppc64le".to_owned(),
                 os: "linux".to_owned(),
                 os_version: None,
                 os_features: None,
                 variant: None,
-            }),
+            });
+            r
         };
 
         let amd64_manifest = Descriptor {

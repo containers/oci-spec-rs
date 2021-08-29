@@ -124,3 +124,101 @@ impl<'de> Deserialize<'de> for MediaType {
         Ok(media_type)
     }
 }
+
+/// Name of the target operating system
+#[allow(missing_docs)]
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum Os {
+    AIX,
+    Android,
+    Darwin,
+    DragonFlyBSD,
+    FreeBSD,
+    Hurd,
+    Illumos,
+    #[allow(non_camel_case_types)]
+    iOS,
+    Js,
+    Linux,
+    Nacl,
+    NetBSD,
+    OpenBSD,
+    Plan9,
+    Solaris,
+    Windows,
+    #[allow(non_camel_case_types)]
+    zOS,
+    Other(String),
+}
+
+impl From<&str> for Os {
+    fn from(os: &str) -> Self {
+        match os {
+            "aix" => Os::AIX,
+            "android" => Os::Android,
+            "darwin" => Os::Darwin,
+            "dragonfly" => Os::DragonFlyBSD,
+            "freebsd" => Os::FreeBSD,
+            "hurd" => Os::Hurd,
+            "illumos" => Os::Illumos,
+            "ios" => Os::iOS,
+            "js" => Os::Js,
+            "linux" => Os::Linux,
+            "nacl" => Os::Nacl,
+            "netbsd" => Os::NetBSD,
+            "openbsd" => Os::OpenBSD,
+            "plan9" => Os::Plan9,
+            "solaris" => Os::Solaris,
+            "windows" => Os::Windows,
+            "zos" => Os::zOS,
+            name => Os::Other(name.to_owned()),
+        }
+    }
+}
+
+impl Display for Os {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let print = match self {
+            Os::AIX => "aix",
+            Os::Android => "android",
+            Os::Darwin => "darwin",
+            Os::DragonFlyBSD => "dragonfly",
+            Os::FreeBSD => "freebsd",
+            Os::Hurd => "hurd",
+            Os::Illumos => "illumos",
+            Os::iOS => "ios",
+            Os::Js => "js",
+            Os::Linux => "linux",
+            Os::Nacl => "nacl",
+            Os::NetBSD => "netbsd",
+            Os::OpenBSD => "openbsd",
+            Os::Plan9 => "plan9",
+            Os::Solaris => "solaris",
+            Os::Windows => "windows",
+            Os::zOS => "zos",
+            Os::Other(name) => name,
+        };
+
+        write!(f, "{}", print)
+    }
+}
+
+impl Serialize for Os {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        let os = format!("{}", self);
+        os.serialize(serializer)
+    }
+}
+
+impl<'de> Deserialize<'de> for Os {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let os = String::deserialize(deserializer)?;
+        Ok(os.as_str().into())
+    }
+}

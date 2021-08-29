@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use serde::{Deserialize, Serialize};
 
-use super::MediaType;
+use super::{MediaType, Os};
 
 make_pub!(
     #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
@@ -83,7 +83,7 @@ make_pub!(
         /// This REQUIRED property specifies the operating system.
         /// Image indexes SHOULD use, and implementations SHOULD understand,
         /// values listed in the Go Language document for GOOS.
-        os: String,
+        os: Os,
         /// This OPTIONAL property specifies the version of the operating system
         /// targeted by the referenced blob. Implementations MAY refuse to use
         /// manifests where os.version is not known to work with the host OS
@@ -119,7 +119,7 @@ impl Default for Platform {
     fn default() -> Self {
         Self {
             architecture: "amd64".to_owned(),
-            os: "linux".to_owned(),
+            os: Os::Linux,
             os_version: Default::default(),
             os_features: Default::default(),
             variant: Default::default(),

@@ -167,6 +167,7 @@ mod tests {
     use std::{fs, path::PathBuf};
 
     use super::*;
+    use crate::image::Os;
     #[cfg(not(feature = "builder"))]
     use crate::image::{Descriptor, Platform};
     #[cfg(feature = "builder")]
@@ -181,7 +182,7 @@ mod tests {
             .platform(
                 PlatformBuilder::default()
                     .architecture("ppc64le")
-                    .os("linux")
+                    .os(Os::Linux)
                     .build()
                     .expect("build ppc64le platform"),
             )
@@ -195,7 +196,7 @@ mod tests {
             .platform(
                 PlatformBuilder::default()
                     .architecture("amd64")
-                    .os("linux")
+                    .os(Os::Linux)
                     .build()
                     .expect("build amd64 platform"),
             )
@@ -221,7 +222,7 @@ mod tests {
             );
             r.platform = Some(Platform {
                 architecture: "ppc64le".to_owned(),
-                os: "linux".to_owned(),
+                os: Os::Linux,
                 os_version: None,
                 os_features: None,
                 variant: None,
@@ -238,7 +239,7 @@ mod tests {
             annotations: None,
             platform: Some(Platform {
                 architecture: "amd64".to_owned(),
-                os: "linux".to_owned(),
+                os: Os::Linux,
                 os_version: None,
                 os_features: None,
                 variant: None,

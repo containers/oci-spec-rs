@@ -94,10 +94,6 @@ impl Default for Process {
         Process {
             // Don't create an interactive terminal for container by default
             terminal: false.into(),
-            // Gives default console size of 0, 0
-            console_size: Default::default(),
-            // Gives process a uid and gid of 0 (root)
-            user: Default::default(),
             // By default executes sh command, giving user shell
             args: vec!["sh".to_string()].into(),
             // Sets linux default enviroment for binaries and default xterm emulator
@@ -110,22 +106,13 @@ impl Default for Process {
             cwd: "/".into(),
             // By default does not allow process to gain additional privileges
             no_new_privileges: true.into(),
-            // Empty String, no default apparmor
-            apparmor_profile: Default::default(),
-            // Empty String, no default selinux
-            selinux_label: Default::default(),
-            // See impl Default for LinuxCapabilities
-            capabilities: Some(Default::default()),
-            // Sets the default maximum of 1024 files the process can open
-            // This is the same as the linux kernel default
             rlimits: vec![LinuxRlimit {
                 typ: LinuxRlimitType::RlimitNofile,
                 hard: 1024,
                 soft: 1024,
             }]
             .into(),
-            oom_score_adj: None,
-            command_line: None,
+            ..Default::default()
         }
     }
 }

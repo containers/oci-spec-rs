@@ -182,16 +182,9 @@ impl ImageConfiguration {
 impl Default for ImageConfiguration {
     fn default() -> Self {
         Self {
-            created: Default::default(),
-            author: Default::default(),
             architecture: "amd64".to_owned(),
             os: "linux".to_owned(),
-            os_version: Default::default(),
-            os_features: Default::default(),
-            variant: Default::default(),
-            config: Default::default(),
-            rootfs: Default::default(),
-            history: Default::default(),
+            ..Default::default()
         }
     }
 }
@@ -365,7 +358,7 @@ impl Default for RootFs {
     fn default() -> Self {
         Self {
             typ: "layers".to_owned(),
-            diff_ids: Default::default(),
+            ..Default::default()
         }
     }
 }

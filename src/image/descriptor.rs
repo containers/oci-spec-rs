@@ -120,9 +120,7 @@ impl Default for Platform {
         Self {
             architecture: "amd64".to_owned(),
             os: "linux".to_owned(),
-            os_version: Default::default(),
-            os_features: Default::default(),
-            variant: Default::default(),
+            ..Default::default()
         }
     }
 }

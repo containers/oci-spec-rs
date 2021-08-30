@@ -94,44 +94,19 @@ make_pub!(
 impl Default for Linux {
     fn default() -> Self {
         Linux {
-            // Creates empty Vec
-            uid_mappings: Default::default(),
-            // Creates empty Vec
-            gid_mappings: Default::default(),
-            // Empty sysctl Hashmap
-            sysctl: Default::default(),
             resources: Some(LinuxResources {
                 devices: vec![LinuxDeviceCgroup {
                     access: "rwm".to_string().into(),
                     allow: false,
-                    typ: Default::default(),
-                    major: Default::default(),
-                    minor: Default::default(),
+                    ..Default::default()
                 }]
                 .into(),
-                memory: Default::default(),
-                cpu: Default::default(),
-                pids: Default::default(),
-                block_io: Default::default(),
-                hugepage_limits: Default::default(),
-                network: Default::default(),
-                rdma: Default::default(),
-                unified: Default::default(),
+                ..Default::default()
             }),
-            // Defaults to None
-            cgroups_path: Default::default(),
             namespaces: get_default_namespaces().into(),
-            // Empty Vec
-            devices: Default::default(),
-            // Empty String
-            rootfs_propagation: Default::default(),
             masked_paths: get_default_maskedpaths().into(),
             readonly_paths: get_default_readonly_paths().into(),
-            // Empty String
-            mount_label: Default::default(),
-            seccomp: None,
-            intel_rdt: None,
-            personality: None,
+            ..Default::default()
         }
     }
 }

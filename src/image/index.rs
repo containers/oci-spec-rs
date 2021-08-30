@@ -167,7 +167,7 @@ mod tests {
     use std::{fs, path::PathBuf};
 
     use super::*;
-    use crate::image::Os;
+    use crate::image::{Arch, Os};
     #[cfg(not(feature = "builder"))]
     use crate::image::{Descriptor, Platform};
     #[cfg(feature = "builder")]
@@ -181,7 +181,7 @@ mod tests {
             .size(7143)
             .platform(
                 PlatformBuilder::default()
-                    .architecture("ppc64le")
+                    .architecture(Arch::PowerPC64le)
                     .os(Os::Linux)
                     .build()
                     .expect("build ppc64le platform"),
@@ -195,7 +195,7 @@ mod tests {
             .size(7682)
             .platform(
                 PlatformBuilder::default()
-                    .architecture("amd64")
+                    .architecture(Arch::Amd64)
                     .os(Os::Linux)
                     .build()
                     .expect("build amd64 platform"),
@@ -221,7 +221,7 @@ mod tests {
                 "sha256:e692418e4cbaf90ca69d05a66403747baa33ee08806650b51fab815ad7fc331f",
             );
             r.platform = Some(Platform {
-                architecture: "ppc64le".to_owned(),
+                architecture: Arch::PowerPC64le,
                 os: Os::Linux,
                 os_version: None,
                 os_features: None,
@@ -238,7 +238,7 @@ mod tests {
             urls: None,
             annotations: None,
             platform: Some(Platform {
-                architecture: "amd64".to_owned(),
+                architecture: Arch::Amd64,
                 os: Os::Linux,
                 os_version: None,
                 os_features: None,

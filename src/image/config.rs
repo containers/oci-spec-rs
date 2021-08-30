@@ -10,7 +10,7 @@ use serde::{ser::SerializeMap, Deserialize, Deserializer, Serialize, Serializer}
 
 use crate::{error::Result, from_file, from_reader, to_file, to_writer};
 
-use super::Os;
+use super::{Arch, Os};
 
 make_pub!(
     #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
@@ -42,7 +42,7 @@ make_pub!(
         /// image are built to run on. Configurations SHOULD use, and
         /// implementations SHOULD understand, values listed in the Go
         /// Language document for [GOARCH](https://golang.org/doc/install/source#environment).
-        architecture: String,
+        architecture: Arch,
         /// The name of the operating system which the image is built to run on.
         /// Configurations SHOULD use, and implementations SHOULD understand,
         /// values listed in the Go Language document for [GOOS](https://golang.org/doc/install/source#environment).
@@ -186,7 +186,7 @@ impl Default for ImageConfiguration {
         Self {
             created: Default::default(),
             author: Default::default(),
-            architecture: "amd64".to_owned(),
+            architecture: Arch::Amd64,
             os: Os::Linux,
             os_version: Default::default(),
             os_features: Default::default(),
@@ -424,7 +424,7 @@ mod tests {
         let configuration = ImageConfigurationBuilder::default()
             .created("2015-10-31T22:22:56.015925234Z".to_owned())
             .author("Alyssa P. Hacker <alyspdev@example.com>".to_owned())
-            .architecture("amd64")
+            .architecture(Arch::Amd64)
             .os(Os::Linux)
             .config(
                 ConfigBuilder::default()
@@ -529,7 +529,7 @@ mod tests {
         let configuration = ImageConfiguration {
             created: Some("2015-10-31T22:22:56.015925234Z".to_owned()),
             author: Some("Alyssa P. Hacker <alyspdev@example.com>".to_owned()),
-            architecture: "amd64".to_owned(),
+            architecture: Arch::Amd64,
             os: Os::Linux,
             os_version: None,
             os_features: None,

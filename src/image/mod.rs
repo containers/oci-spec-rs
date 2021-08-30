@@ -222,3 +222,147 @@ impl<'de> Deserialize<'de> for Os {
         Ok(os.as_str().into())
     }
 }
+
+/// Name of the CPU target architecture
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum Arch {
+    /// 32 bit x86, little-endian
+    #[allow(non_camel_case_types)]
+    i386,
+    /// 64 bit x86, little-endian
+    Amd64,
+    /// 64 bit x86 with 32 bit pointers, little-endian
+    Amd64p32,
+    /// 32 bit ARM, little-endian
+    ARM,
+    /// 32 bit ARM, big-endian
+    ARMbe,
+    /// 64 bit ARM, little-endian
+    ARM64,
+    /// 64 bit ARM, big-endian
+    ARM64be,
+    /// 64 bit Loongson RISC CPU, little-endian
+    LoongArch64,
+    /// 32 bit Mips, big-endian
+    Mips,
+    /// 32 bit Mips, little-endian
+    Mipsle,
+    /// 64 bit Mips, big-endian
+    Mips64,
+    /// 64 bit Mips, little-endian
+    Mips64le,
+    /// 64 bit Mips with 32 bit pointers, big-endian
+    Mips64p32,
+    /// 64 bit Mips with 32 bit pointers, little-endian
+    Mips64p32le,
+    /// 32 bit PowerPC, big endian
+    PowerPC,
+    /// 64 bit PowerPC, big-endian
+    PowerPC64,
+    /// 64 bit PowerPC, little-endian
+    PowerPC64le,
+    /// 32 bit RISC-V, little-endian
+    RISCV,
+    /// 64 bit RISC-V, little-endian
+    RISCV64,
+    /// 32 bit IBM System/390, big-endian
+    #[allow(non_camel_case_types)]
+    s390,
+    /// 64 bit IBM System/390, big-endian
+    #[allow(non_camel_case_types)]
+    s390x,
+    /// 32 bit SPARC, big-endian
+    SPARC,
+    /// 64 bit SPARC, bi-endian
+    SPARC64,
+    /// 32 bit Web Assembly
+    Wasm,
+    /// Architecture not specified by OCI image format
+    Other(String),
+}
+
+impl Display for Arch {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let print = match self {
+            Arch::i386 => "386",
+            Arch::Amd64 => "amd64",
+            Arch::Amd64p32 => "amd64p32",
+            Arch::ARM => "arm",
+            Arch::ARMbe => "armbe",
+            Arch::ARM64 => "arm64",
+            Arch::ARM64be => "arm64be",
+            Arch::LoongArch64 => "loong64",
+            Arch::Mips => "mips",
+            Arch::Mipsle => "mipsle",
+            Arch::Mips64 => "mips64",
+            Arch::Mips64le => "mips64le",
+            Arch::Mips64p32 => "mips64p32",
+            Arch::Mips64p32le => "mips64p32le",
+            Arch::PowerPC => "ppc",
+            Arch::PowerPC64 => "ppc64",
+            Arch::PowerPC64le => "ppc64le",
+            Arch::RISCV => "riscv",
+            Arch::RISCV64 => "riscv64",
+            Arch::s390 => "s390",
+            Arch::s390x => "s390",
+            Arch::SPARC => "sparc",
+            Arch::SPARC64 => "sparc64",
+            Arch::Wasm => "wasm",
+            Arch::Other(arch) => arch,
+        };
+
+        write!(f, "{}", print)
+    }
+}
+
+impl From<&str> for Arch {
+    fn from(arch: &str) -> Self {
+        match arch {
+            "386" => Arch::i386,
+            "amd64" => Arch::Amd64,
+            "amd64p32" => Arch::Amd64p32,
+            "arm" => Arch::ARM,
+            "armbe" => Arch::ARM64be,
+            "arm64" => Arch::ARM64,
+            "arm64be" => Arch::ARM64be,
+            "loong64" => Arch::LoongArch64,
+            "mips" => Arch::Mips,
+            "mipsle" => Arch::Mipsle,
+            "mips64" => Arch::Mips64,
+            "mips64le" => Arch::Mips64le,
+            "mips64p32" => Arch::Mips64p32,
+            "mips64p32le" => Arch::Mips64p32le,
+            "ppc" => Arch::PowerPC,
+            "ppc64" => Arch::PowerPC64,
+            "ppc64le" => Arch::PowerPC64le,
+            "riscv" => Arch::RISCV,
+            "riscv64" => Arch::RISCV64,
+            "s390" => Arch::s390,
+            "s390x" => Arch::s390x,
+            "sparc" => Arch::SPARC,
+            "sparc64" => Arch::SPARC64,
+            "wasm" => Arch::Wasm,
+            arch => Arch::Other(arch.to_owned()),
+        }
+    }
+}
+
+impl Serialize for Arch {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        let arch = format!("{}", self);
+        arch.serialize(serializer)
+    }
+}
+
+impl<'de> Deserialize<'de> for Arch {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let arch = String::deserialize(deserializer)?;
+        Ok(arch.as_str().into())
+    }
+}

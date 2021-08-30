@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use serde::{Deserialize, Serialize};
 
-use super::{MediaType, Os};
+use super::{Arch, MediaType, Os};
 
 make_pub!(
     #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
@@ -79,7 +79,7 @@ make_pub!(
         /// This REQUIRED property specifies the CPU architecture.
         /// Image indexes SHOULD use, and implementations SHOULD understand,
         /// values listed in the Go Language document for GOARCH.
-        architecture: String,
+        architecture: Arch,
         /// This REQUIRED property specifies the operating system.
         /// Image indexes SHOULD use, and implementations SHOULD understand,
         /// values listed in the Go Language document for GOOS.
@@ -118,7 +118,7 @@ make_pub!(
 impl Default for Platform {
     fn default() -> Self {
         Self {
-            architecture: "amd64".to_owned(),
+            architecture: Arch::Amd64,
             os: Os::Linux,
             os_version: Default::default(),
             os_features: Default::default(),

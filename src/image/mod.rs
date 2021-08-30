@@ -84,23 +84,9 @@ impl Display for MediaType {
     }
 }
 
-impl Serialize for MediaType {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: serde::Serializer,
-    {
-        let media_type = format!("{}", self);
-        media_type.serialize(serializer)
-    }
-}
-
-impl<'de> Deserialize<'de> for MediaType {
-    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-    where
-        D: serde::Deserializer<'de>,
-    {
-        let stringified_type = String::deserialize(deserializer)?;
-        let media_type = match stringified_type.as_str() {
+impl From<&str> for MediaType {
+    fn from(media_type: &str) -> Self {
+        match media_type {
             "application/vnd.oci.descriptor" => MediaType::Descriptor,
             "application/vnd.oci.layout.header.v1+json" => MediaType::LayoutHeader,
             "application/vnd.oci.image.manifest.v1+json" => MediaType::ImageManifest,
@@ -118,14 +104,32 @@ impl<'de> Deserialize<'de> for MediaType {
                 MediaType::ImageLayerNonDistributableZstd
             }
             "application/vnd.oci.image.config.v1+json" => MediaType::ImageConfig,
-            _ => MediaType::Other(stringified_type),
-        };
-
-        Ok(media_type)
+            media => MediaType::Other(media.to_owned()),
+        }
     }
 }
 
-/// Name of the target operating system
+impl Serialize for MediaType {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        let media_type = format!("{}", self);
+        media_type.serialize(serializer)
+    }
+}
+
+impl<'de> Deserialize<'de> for MediaType {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let media_type = String::deserialize(deserializer)?;
+        Ok(media_type.as_str().into())
+    }
+}
+
+/// Name of the target operating system.
 #[allow(missing_docs)]
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Os {
@@ -223,7 +227,7 @@ impl<'de> Deserialize<'de> for Os {
     }
 }
 
-/// Name of the CPU target architecture
+/// Name of the CPU target architecture.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Arch {
     /// 32 bit x86, little-endian
@@ -304,7 +308,7 @@ impl Display for Arch {
             Arch::RISCV => "riscv",
             Arch::RISCV64 => "riscv64",
             Arch::s390 => "s390",
-            Arch::s390x => "s390",
+            Arch::s390x => "s390x",
             Arch::SPARC => "sparc",
             Arch::SPARC64 => "sparc64",
             Arch::Wasm => "wasm",

@@ -10,6 +10,8 @@ use serde::{ser::SerializeMap, Deserialize, Deserializer, Serialize, Serializer}
 
 use crate::{error::Result, from_file, from_reader, to_file, to_writer};
 
+use super::{Arch, Os};
+
 make_pub!(
     #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
     #[cfg_attr(
@@ -40,11 +42,11 @@ make_pub!(
         /// image are built to run on. Configurations SHOULD use, and
         /// implementations SHOULD understand, values listed in the Go
         /// Language document for [GOARCH](https://golang.org/doc/install/source#environment).
-        architecture: String,
+        architecture: Arch,
         /// The name of the operating system which the image is built to run on.
         /// Configurations SHOULD use, and implementations SHOULD understand,
         /// values listed in the Go Language document for [GOOS](https://golang.org/doc/install/source#environment).
-        os: String,
+        os: Os,
         /// This OPTIONAL property specifies the version of the operating
         /// system targeted by the referenced blob. Implementations MAY refuse
         /// to use manifests where os.version is not known to work with
@@ -184,8 +186,8 @@ impl Default for ImageConfiguration {
         Self {
             created: Default::default(),
             author: Default::default(),
-            architecture: "amd64".to_owned(),
-            os: "linux".to_owned(),
+            architecture: Arch::Amd64,
+            os: Os::Linux,
             os_version: Default::default(),
             os_features: Default::default(),
             variant: Default::default(),
@@ -415,14 +417,15 @@ mod tests {
     use std::{fs, path::PathBuf};
 
     use super::*;
+    use crate::image::Os;
 
     #[cfg(feature = "builder")]
     fn create_config() -> ImageConfiguration {
         let configuration = ImageConfigurationBuilder::default()
             .created("2015-10-31T22:22:56.015925234Z".to_owned())
             .author("Alyssa P. Hacker <alyspdev@example.com>".to_owned())
-            .architecture("amd64")
-            .os("linux")
+            .architecture(Arch::Amd64)
+            .os(Os::Linux)
             .config(
                 ConfigBuilder::default()
                     .user("alice".to_owned())
@@ -526,8 +529,8 @@ mod tests {
         let configuration = ImageConfiguration {
             created: Some("2015-10-31T22:22:56.015925234Z".to_owned()),
             author: Some("Alyssa P. Hacker <alyspdev@example.com>".to_owned()),
-            architecture: "amd64".to_owned(),
-            os: "linux".to_owned(),
+            architecture: Arch::Amd64,
+            os: Os::Linux,
             os_version: None,
             os_features: None,
             variant: None,

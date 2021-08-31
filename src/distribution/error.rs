@@ -7,6 +7,41 @@ use thiserror::Error;
 /// The string returned by and ErrorResponse error.
 pub const ERR_REGISTRY: &str = "distribution: registry returned error";
 
+/// Unique identifier representing error code.
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+pub enum ErrorCode {
+    /// Blob unknown to registry.
+    BlobUnknown,
+    /// Blob upload invalid.
+    BlobUploadInvalid,
+    /// Blob upload unknown to registry.
+    BlobUploadUnknown,
+    /// Provided digest did not match uploaded content.
+    DigestInvalid,
+    /// Blob unknown to registry.
+    ManifestBlobUnknown,
+    /// Manifest invalid.
+    ManifestInvalid,
+    /// Manifest unknown.
+    ManifestUnknown,
+    /// Invalid repository name.
+    NameInvalid,
+    /// Repository name not known to registry.
+    NameUnknown,
+    /// Provided length did not match content length.
+    SizeInvalid,
+    /// Authentication required.
+    Unauthorized,
+    /// Requested access to the resource is denied.
+    Denied,
+    /// The operation is unsupported.
+    Unsupported,
+    /// Too many requests.
+    #[serde(rename = "TOOMANYREQUESTS")]
+    TooManyRequests,
+}
+
 make_pub!(
     #[derive(Clone, Debug, Deserialize, Eq, Error, PartialEq, Serialize)]
     #[cfg_attr(
@@ -54,7 +89,7 @@ make_pub!(
     struct ErrorInfo {
         /// The code field MUST be a unique identifier, containing only uppercase alphabetic
         /// characters and underscores.
-        code: String,
+        code: ErrorCode,
 
         #[serde(default, skip_serializing_if = "Option::is_none")]
         #[cfg_attr(feature = "builder", builder(default = "None"))]
@@ -91,8 +126,10 @@ mod tests {
 
     #[test]
     fn error_info_success() -> Result<()> {
-        let info = ErrorInfoBuilder::default().code("200").build()?;
-        assert_eq!(info.code(), "200");
+        let info = ErrorInfoBuilder::default()
+            .code(ErrorCode::BlobUnknown)
+            .build()?;
+        assert_eq!(info.code(), &ErrorCode::BlobUnknown);
         assert!(info.message().is_none());
         assert!(info.detail().is_none());
         Ok(())

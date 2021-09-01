@@ -1,6 +1,6 @@
 //! [OCI runtime spec](https://github.com/opencontainers/runtime-spec) types and definitions.
 
-use nix;
+use path_clean;
 use serde::{Deserialize, Serialize};
 use std::{
     collections::HashMap,
@@ -246,7 +246,7 @@ impl Spec {
     #[cfg(not(feature = "builder"))]
     /// Converts the given spec file into one that should work with rootless containers,
     /// by removing incompatible options and adding others that are needed.
-    pub fn set_for_rootless(&mut self) -> Result<()> {
+    pub fn set_for_rootless(&mut self, uid: u32, gid: u32) -> Result<()> {
         let linux = self.linux.as_mut().unwrap();
         linux.resources = None;
 
@@ -265,12 +265,12 @@ impl Spec {
         linux.namespaces = Some(namespaces);
 
         linux.uid_mappings = Some(vec![LinuxIdMapping {
-            host_id: nix::unistd::geteuid().as_raw(),
+            host_id: uid,
             container_id: 0,
             size: 1,
         }]);
         linux.gid_mappings = Some(vec![LinuxIdMapping {
-            host_id: nix::unistd::getegid().as_raw(),
+            host_id: gid,
             container_id: 0,
             size: 1,
         }]);
@@ -279,7 +279,7 @@ impl Spec {
         let mut mounts = vec![];
         for mount in self.mounts.as_ref().unwrap().iter() {
             let dest = mount.destination.clone();
-            if fs::canonicalize(dest).unwrap().to_str() == Some("/sys") {
+            if path_clean::clean(dest.as_path().to_str().unwrap()) == "/sys" {
                 mounts.push(Mount {
                     destination: PathBuf::from("/sys"),
                     source: Some(PathBuf::from("/sys")),
@@ -313,7 +313,7 @@ impl Spec {
     #[cfg(feature = "builder")]
     /// Converts the given spec file into one that should work with rootless containers,
     /// by removing incompatible options and adding others that are needed.
-    pub fn set_for_rootless(&mut self) -> Result<()> {
+    pub fn set_for_rootless(&mut self, uid: u32, gid: u32) -> Result<()> {
         let linux = self.linux.as_mut().unwrap();
         linux.set_resources(None);
 
@@ -333,12 +333,12 @@ impl Spec {
         linux.set_namespaces(Some(namespaces));
 
         linux.set_uid_mappings(Some(vec![LinuxIdMappingBuilder::default()
-            .host_id(nix::unistd::geteuid().as_raw())
+            .host_id(uid)
             .container_id(0_u32)
             .size(1_u32)
             .build()?]));
         linux.set_gid_mappings(Some(vec![LinuxIdMappingBuilder::default()
-            .host_id(nix::unistd::getegid().as_raw())
+            .host_id(gid)
             .container_id(0_u32)
             .size(1_u32)
             .build()?]));
@@ -347,7 +347,7 @@ impl Spec {
         let mut mounts = vec![];
         for mount in self.mounts().as_ref().unwrap().iter() {
             let dest = mount.destination().clone();
-            if fs::canonicalize(dest).unwrap().to_str() == Some("/sys") {
+            if path_clean::clean(dest.as_path().to_str().unwrap()) == "/sys" {
                 let mount = MountBuilder::default()
                     .destination(PathBuf::from("/sys"))
                     .source(PathBuf::from("/sys"))
@@ -507,7 +507,7 @@ mod tests {
         let mut spec = Spec {
             ..Default::default()
         };
-        spec.set_for_rootless()
+        spec.set_for_rootless(1, 2)
             .expect("failed to set spec for rootless");
         assert_eq!(spec.linux.as_ref().unwrap().uid_mappings.is_some(), true);
         assert_eq!(spec.linux.as_ref().unwrap().gid_mappings.is_some(), true);
@@ -519,7 +519,7 @@ mod tests {
         let mut spec = Spec {
             ..Default::default()
         };
-        spec.set_for_rootless()
+        spec.set_for_rootless(1, 2)
             .expect("failed to set spec for rootless");
         assert_eq!(
             spec.linux().as_ref().unwrap().uid_mappings().is_some(),

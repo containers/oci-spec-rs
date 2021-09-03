@@ -1,94 +1,90 @@
 use crate::error::{oci_error, OciSpecError};
 
+use derive_builder::Builder;
+use getset::{CopyGetters, Getters};
 use serde::{Deserialize, Serialize};
 use std::{collections::HashMap, convert::TryFrom, path::PathBuf};
 
-make_pub!(
-    #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
-    #[serde(rename_all = "camelCase")]
-    #[cfg_attr(
-        feature = "builder",
-        derive(derive_builder::Builder, getset::Getters),
-        builder(
-            default,
-            pattern = "owned",
-            setter(into, strip_option),
-            build_fn(error = "crate::error::OciSpecError")
-        ),
-        getset(get = "pub")
-    )]
-    /// Linux contains platform-specific configuration for Linux based
-    /// containers.
-    struct Linux {
-        #[serde(default, skip_serializing_if = "Option::is_none")]
-        /// UIDMappings specifies user mappings for supporting user namespaces.
-        uid_mappings: Option<Vec<LinuxIdMapping>>,
+#[derive(Builder, Clone, Debug, Deserialize, Eq, Getters, PartialEq, Serialize)]
+#[serde(rename_all = "camelCase")]
+#[builder(
+    default,
+    pattern = "owned",
+    setter(into, strip_option),
+    build_fn(error = "OciSpecError")
+)]
+#[getset(get = "pub")]
+/// Linux contains platform-specific configuration for Linux based
+/// containers.
+pub struct Linux {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    /// UIDMappings specifies user mappings for supporting user namespaces.
+    uid_mappings: Option<Vec<LinuxIdMapping>>,
 
-        #[serde(default, skip_serializing_if = "Option::is_none")]
-        /// GIDMappings specifies group mappings for supporting user namespaces.
-        gid_mappings: Option<Vec<LinuxIdMapping>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    /// GIDMappings specifies group mappings for supporting user namespaces.
+    gid_mappings: Option<Vec<LinuxIdMapping>>,
 
-        #[serde(default, skip_serializing_if = "Option::is_none")]
-        /// Sysctl are a set of key value pairs that are set for the container
-        /// on start.
-        sysctl: Option<HashMap<String, String>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    /// Sysctl are a set of key value pairs that are set for the container
+    /// on start.
+    sysctl: Option<HashMap<String, String>>,
 
-        #[serde(default, skip_serializing_if = "Option::is_none")]
-        /// Resources contain cgroup information for handling resource
-        /// constraints for the container.
-        resources: Option<LinuxResources>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    /// Resources contain cgroup information for handling resource
+    /// constraints for the container.
+    resources: Option<LinuxResources>,
 
-        #[serde(default, skip_serializing_if = "Option::is_none")]
-        /// CgroupsPath specifies the path to cgroups that are created and/or
-        /// joined by the container. The path is expected to be relative
-        /// to the cgroups mountpoint. If resources are specified,
-        /// the cgroups at CgroupsPath will be updated based on resources.
-        cgroups_path: Option<PathBuf>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    /// CgroupsPath specifies the path to cgroups that are created and/or
+    /// joined by the container. The path is expected to be relative
+    /// to the cgroups mountpoint. If resources are specified,
+    /// the cgroups at CgroupsPath will be updated based on resources.
+    cgroups_path: Option<PathBuf>,
 
-        #[serde(default, skip_serializing_if = "Option::is_none")]
-        /// Namespaces contains the namespaces that are created and/or joined by
-        /// the container.
-        namespaces: Option<Vec<LinuxNamespace>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    /// Namespaces contains the namespaces that are created and/or joined by
+    /// the container.
+    namespaces: Option<Vec<LinuxNamespace>>,
 
-        #[serde(default, skip_serializing_if = "Option::is_none")]
-        /// Devices are a list of device nodes that are created for the
-        /// container.
-        devices: Option<Vec<LinuxDevice>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    /// Devices are a list of device nodes that are created for the
+    /// container.
+    devices: Option<Vec<LinuxDevice>>,
 
-        #[serde(default, skip_serializing_if = "Option::is_none")]
-        /// Seccomp specifies the seccomp security settings for the container.
-        seccomp: Option<LinuxSeccomp>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    /// Seccomp specifies the seccomp security settings for the container.
+    seccomp: Option<LinuxSeccomp>,
 
-        #[serde(default, skip_serializing_if = "Option::is_none")]
-        /// RootfsPropagation is the rootfs mount propagation mode for the
-        /// container.
-        rootfs_propagation: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    /// RootfsPropagation is the rootfs mount propagation mode for the
+    /// container.
+    rootfs_propagation: Option<String>,
 
-        #[serde(default, skip_serializing_if = "Option::is_none")]
-        /// MaskedPaths masks over the provided paths inside the container.
-        masked_paths: Option<Vec<String>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    /// MaskedPaths masks over the provided paths inside the container.
+    masked_paths: Option<Vec<String>>,
 
-        #[serde(default, skip_serializing_if = "Option::is_none")]
-        /// ReadonlyPaths sets the provided paths as RO inside the container.
-        readonly_paths: Option<Vec<String>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    /// ReadonlyPaths sets the provided paths as RO inside the container.
+    readonly_paths: Option<Vec<String>>,
 
-        #[serde(default, skip_serializing_if = "Option::is_none")]
-        /// MountLabel specifies the selinux context for the mounts in the
-        /// container.
-        mount_label: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    /// MountLabel specifies the selinux context for the mounts in the
+    /// container.
+    mount_label: Option<String>,
 
-        #[serde(default, skip_serializing_if = "Option::is_none")]
-        /// IntelRdt contains Intel Resource Director Technology (RDT)
-        /// information for handling resource constraints (e.g., L3
-        /// cache, memory bandwidth) for the container.
-        intel_rdt: Option<LinuxIntelRdt>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    /// IntelRdt contains Intel Resource Director Technology (RDT)
+    /// information for handling resource constraints (e.g., L3
+    /// cache, memory bandwidth) for the container.
+    intel_rdt: Option<LinuxIntelRdt>,
 
-        #[serde(default, skip_serializing_if = "Option::is_none")]
-        /// Personality contains configuration for the Linux personality
-        /// syscall.
-        personality: Option<LinuxPersonality>,
-    }
-);
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    /// Personality contains configuration for the Linux personality
+    /// syscall.
+    personality: Option<LinuxPersonality>,
+}
 
 // Default impl for Linux (see funtions for more info)
 impl Default for Linux {
@@ -136,36 +132,32 @@ impl Default for Linux {
     }
 }
 
-make_pub!(
-    #[derive(Clone, Copy, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
-    #[serde(rename_all = "camelCase")]
-    #[cfg_attr(
-        feature = "builder",
-        derive(derive_builder::Builder, getset::CopyGetters),
-        builder(
-            default,
-            pattern = "owned",
-            setter(into, strip_option),
-            build_fn(error = "crate::error::OciSpecError")
-        ),
-        getset(get_copy = "pub")
-    )]
-    /// LinuxIDMapping specifies UID/GID mappings.
-    struct LinuxIdMapping {
-        #[serde(default, rename = "hostID")]
-        /// HostID is the starting UID/GID on the host to be mapped to
-        /// `container_id`.
-        host_id: u32,
+#[derive(
+    Builder, Clone, Copy, CopyGetters, Debug, Default, Deserialize, Eq, PartialEq, Serialize,
+)]
+#[serde(rename_all = "camelCase")]
+#[builder(
+    default,
+    pattern = "owned",
+    setter(into, strip_option),
+    build_fn(error = "OciSpecError")
+)]
+#[getset(get_copy = "pub")]
+/// LinuxIDMapping specifies UID/GID mappings.
+pub struct LinuxIdMapping {
+    #[serde(default, rename = "hostID")]
+    /// HostID is the starting UID/GID on the host to be mapped to
+    /// `container_id`.
+    host_id: u32,
 
-        #[serde(default, rename = "containerID")]
-        /// ContainerID is the starting UID/GID in the container.
-        container_id: u32,
+    #[serde(default, rename = "containerID")]
+    /// ContainerID is the starting UID/GID in the container.
+    container_id: u32,
 
-        #[serde(default)]
-        /// Size is the number of IDs to be mapped.
-        size: u32,
-    }
-);
+    #[serde(default)]
+    /// Size is the number of IDs to be mapped.
+    size: u32,
+}
 
 #[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "lowercase")]
@@ -202,45 +194,41 @@ impl LinuxDeviceType {
     }
 }
 
-make_pub!(
-    #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
-    #[cfg_attr(
-        feature = "builder",
-        derive(derive_builder::Builder, getset::CopyGetters, getset::Getters),
-        builder(
-            default,
-            pattern = "owned",
-            setter(into, strip_option),
-            build_fn(error = "crate::error::OciSpecError")
-        )
-    )]
-    /// Represents a device rule for the devices specified to the device
-    /// controller
-    struct LinuxDeviceCgroup {
-        #[serde(default)]
-        #[cfg_attr(feature = "builder", getset(get_copy = "pub"))]
-        /// Allow or deny
-        allow: bool,
+#[derive(
+    Builder, Clone, CopyGetters, Debug, Default, Deserialize, Eq, Getters, PartialEq, Serialize,
+)]
+#[builder(
+    default,
+    pattern = "owned",
+    setter(into, strip_option),
+    build_fn(error = "OciSpecError")
+)]
+/// Represents a device rule for the devices specified to the device
+/// controller
+pub struct LinuxDeviceCgroup {
+    #[serde(default)]
+    #[getset(get_copy = "pub")]
+    /// Allow or deny
+    allow: bool,
 
-        #[serde(default, rename = "type")]
-        #[cfg_attr(feature = "builder", getset(get_copy = "pub"))]
-        /// Device type, block, char, etc.
-        typ: Option<LinuxDeviceType>,
+    #[serde(default, rename = "type")]
+    #[getset(get_copy = "pub")]
+    /// Device type, block, char, etc.
+    typ: Option<LinuxDeviceType>,
 
-        #[cfg_attr(feature = "builder", getset(get_copy = "pub"))]
-        /// Device's major number
-        major: Option<i64>,
+    #[getset(get_copy = "pub")]
+    /// Device's major number
+    major: Option<i64>,
 
-        #[cfg_attr(feature = "builder", getset(get_copy = "pub"))]
-        /// Device's minor number
-        minor: Option<i64>,
+    #[getset(get_copy = "pub")]
+    /// Device's minor number
+    minor: Option<i64>,
 
-        /// Cgroup access premissions format, rwm.
-        #[serde(default)]
-        #[cfg_attr(feature = "builder", getset(get = "pub"))]
-        access: Option<String>,
-    }
-);
+    /// Cgroup access premissions format, rwm.
+    #[serde(default)]
+    #[getset(get = "pub")]
+    access: Option<String>,
+}
 
 impl ToString for LinuxDeviceCgroup {
     fn to_string(&self) -> String {
@@ -263,303 +251,269 @@ impl ToString for LinuxDeviceCgroup {
     }
 }
 
-make_pub!(
-    #[derive(Clone, Copy, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
-    #[serde(rename_all = "camelCase")]
-    #[cfg_attr(
-        feature = "builder",
-        derive(derive_builder::Builder, getset::CopyGetters),
-        builder(
-            default,
-            pattern = "owned",
-            setter(into, strip_option),
-            build_fn(error = "crate::error::OciSpecError")
-        ),
-        getset(get_copy = "pub")
-    )]
-    /// LinuxMemory for Linux cgroup 'memory' resource management.
-    struct LinuxMemory {
-        #[serde(skip_serializing_if = "Option::is_none")]
-        /// Memory limit (in bytes).
-        limit: Option<i64>,
+#[derive(
+    Builder, Clone, Copy, CopyGetters, Debug, Default, Deserialize, Eq, PartialEq, Serialize,
+)]
+#[serde(rename_all = "camelCase")]
+#[builder(
+    default,
+    pattern = "owned",
+    setter(into, strip_option),
+    build_fn(error = "OciSpecError")
+)]
+#[getset(get_copy = "pub")]
+/// LinuxMemory for Linux cgroup 'memory' resource management.
+pub struct LinuxMemory {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    /// Memory limit (in bytes).
+    limit: Option<i64>,
 
-        #[serde(skip_serializing_if = "Option::is_none")]
-        /// Memory reservation or soft_limit (in bytes).
-        reservation: Option<i64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    /// Memory reservation or soft_limit (in bytes).
+    reservation: Option<i64>,
 
-        #[serde(skip_serializing_if = "Option::is_none")]
-        /// Total memory limit (memory + swap).
-        swap: Option<i64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    /// Total memory limit (memory + swap).
+    swap: Option<i64>,
 
-        #[serde(skip_serializing_if = "Option::is_none")]
-        /// Kernel memory limit (in bytes).
-        kernel: Option<i64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    /// Kernel memory limit (in bytes).
+    kernel: Option<i64>,
 
-        #[serde(skip_serializing_if = "Option::is_none", rename = "kernelTCP")]
-        /// Kernel memory limit for tcp (in bytes).
-        kernel_tcp: Option<i64>,
+    #[serde(skip_serializing_if = "Option::is_none", rename = "kernelTCP")]
+    /// Kernel memory limit for tcp (in bytes).
+    kernel_tcp: Option<i64>,
 
-        #[serde(skip_serializing_if = "Option::is_none")]
-        /// How aggressive the kernel will swap memory pages.
-        swappiness: Option<u64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    /// How aggressive the kernel will swap memory pages.
+    swappiness: Option<u64>,
 
-        #[serde(skip_serializing_if = "Option::is_none", rename = "disableOOMKiller")]
-        /// DisableOOMKiller disables the OOM killer for out of memory
-        /// conditions.
-        disable_oom_killer: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none", rename = "disableOOMKiller")]
+    /// DisableOOMKiller disables the OOM killer for out of memory
+    /// conditions.
+    disable_oom_killer: Option<bool>,
 
-        #[serde(skip_serializing_if = "Option::is_none")]
-        /// Enables hierarchical memory accounting
-        use_hierarchy: Option<bool>,
-    }
-);
+    #[serde(skip_serializing_if = "Option::is_none")]
+    /// Enables hierarchical memory accounting
+    use_hierarchy: Option<bool>,
+}
 
-make_pub!(
-    #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
-    #[serde(rename_all = "camelCase")]
-    #[cfg_attr(
-        feature = "builder",
-        derive(derive_builder::Builder, getset::CopyGetters, getset::Getters),
-        builder(
-            default,
-            pattern = "owned",
-            setter(into, strip_option),
-            build_fn(error = "crate::error::OciSpecError")
-        )
-    )]
-    /// LinuxCPU for Linux cgroup 'cpu' resource management.
-    struct LinuxCpu {
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[cfg_attr(feature = "builder", getset(get_copy = "pub"))]
-        /// CPU shares (relative weight (ratio) vs. other cgroups with cpu
-        /// shares).
-        shares: Option<u64>,
+#[derive(
+    Builder, Clone, CopyGetters, Debug, Default, Deserialize, Eq, Getters, PartialEq, Serialize,
+)]
+#[serde(rename_all = "camelCase")]
+#[builder(
+    default,
+    pattern = "owned",
+    setter(into, strip_option),
+    build_fn(error = "OciSpecError")
+)]
+/// LinuxCPU for Linux cgroup 'cpu' resource management.
+pub struct LinuxCpu {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[getset(get_copy = "pub")]
+    /// CPU shares (relative weight (ratio) vs. other cgroups with cpu
+    /// shares).
+    shares: Option<u64>,
 
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[cfg_attr(feature = "builder", getset(get_copy = "pub"))]
-        /// CPU hardcap limit (in usecs). Allowed cpu time in a given period.
-        quota: Option<i64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[getset(get_copy = "pub")]
+    /// CPU hardcap limit (in usecs). Allowed cpu time in a given period.
+    quota: Option<i64>,
 
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[cfg_attr(feature = "builder", getset(get_copy = "pub"))]
-        /// CPU period to be used for hardcapping (in usecs).
-        period: Option<u64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[getset(get_copy = "pub")]
+    /// CPU period to be used for hardcapping (in usecs).
+    period: Option<u64>,
 
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[cfg_attr(feature = "builder", getset(get_copy = "pub"))]
-        /// How much time realtime scheduling may use (in usecs).
-        realtime_runtime: Option<i64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[getset(get_copy = "pub")]
+    /// How much time realtime scheduling may use (in usecs).
+    realtime_runtime: Option<i64>,
 
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[cfg_attr(feature = "builder", getset(get_copy = "pub"))]
-        /// CPU period to be used for realtime scheduling (in usecs).
-        realtime_period: Option<u64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[getset(get_copy = "pub")]
+    /// CPU period to be used for realtime scheduling (in usecs).
+    realtime_period: Option<u64>,
 
-        #[serde(default, skip_serializing_if = "Option::is_none")]
-        #[cfg_attr(feature = "builder", getset(get = "pub"))]
-        /// CPUs to use within the cpuset. Default is to use any CPU available.
-        cpus: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[getset(get = "pub")]
+    /// CPUs to use within the cpuset. Default is to use any CPU available.
+    cpus: Option<String>,
 
-        #[serde(default, skip_serializing_if = "Option::is_none")]
-        #[cfg_attr(feature = "builder", getset(get = "pub"))]
-        /// List of memory nodes in the cpuset. Default is to use any available
-        /// memory node.
-        mems: Option<String>,
-    }
-);
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[getset(get = "pub")]
+    /// List of memory nodes in the cpuset. Default is to use any available
+    /// memory node.
+    mems: Option<String>,
+}
 
-make_pub!(
-    #[derive(Clone, Copy, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
-    #[cfg_attr(
-        feature = "builder",
-        derive(derive_builder::Builder, getset::CopyGetters),
-        builder(
-            default,
-            pattern = "owned",
-            setter(into, strip_option),
-            build_fn(error = "crate::error::OciSpecError")
-        ),
-        getset(get_copy = "pub")
-    )]
-    /// LinuxPids for Linux cgroup 'pids' resource management (Linux 4.3).
-    struct LinuxPids {
-        #[serde(default)]
-        /// Maximum number of PIDs. Default is "no limit".
-        limit: i64,
-    }
-);
+#[derive(Builder, Clone, Copy, Debug, Default, Deserialize, Eq, Getters, PartialEq, Serialize)]
+#[builder(
+    default,
+    pattern = "owned",
+    setter(into, strip_option),
+    build_fn(error = "OciSpecError")
+)]
+#[getset(get_copy = "pub")]
+/// LinuxPids for Linux cgroup 'pids' resource management (Linux 4.3).
+pub struct LinuxPids {
+    #[serde(default)]
+    /// Maximum number of PIDs. Default is "no limit".
+    limit: i64,
+}
 
-make_pub!(
-    #[derive(Clone, Copy, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
-    #[serde(rename_all = "camelCase")]
-    #[cfg_attr(
-        feature = "builder",
-        derive(derive_builder::Builder, getset::CopyGetters, getset::Getters),
-        builder(
-            default,
-            pattern = "owned",
-            setter(into, strip_option),
-            build_fn(error = "crate::error::OciSpecError")
-        ),
-        getset(get_copy = "pub")
-    )]
-    /// LinuxWeightDevice struct holds a `major:minor weight` pair for
-    /// weightDevice.
-    struct LinuxWeightDevice {
-        #[serde(default)]
-        /// Major is the device's major number.
-        major: i64,
+#[derive(
+    Builder, Clone, Copy, CopyGetters, Debug, Default, Deserialize, Eq, PartialEq, Serialize,
+)]
+#[serde(rename_all = "camelCase")]
+#[builder(
+    default,
+    pattern = "owned",
+    setter(into, strip_option),
+    build_fn(error = "OciSpecError")
+)]
+#[getset(get_copy = "pub")]
+/// LinuxWeightDevice struct holds a `major:minor weight` pair for
+/// weightDevice.
+pub struct LinuxWeightDevice {
+    #[serde(default)]
+    /// Major is the device's major number.
+    major: i64,
 
-        #[serde(default)]
-        /// Minor is the device's minor number.
-        minor: i64,
+    #[serde(default)]
+    /// Minor is the device's minor number.
+    minor: i64,
 
-        #[serde(skip_serializing_if = "Option::is_none")]
-        /// Weight is the bandwidth rate for the device.
-        weight: Option<u16>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    /// Weight is the bandwidth rate for the device.
+    weight: Option<u16>,
 
-        #[serde(skip_serializing_if = "Option::is_none")]
-        /// LeafWeight is the bandwidth rate for the device while competing with
-        /// the cgroup's child cgroups, CFQ scheduler only.
-        leaf_weight: Option<u16>,
-    }
-);
+    #[serde(skip_serializing_if = "Option::is_none")]
+    /// LeafWeight is the bandwidth rate for the device while competing with
+    /// the cgroup's child cgroups, CFQ scheduler only.
+    leaf_weight: Option<u16>,
+}
 
-make_pub!(
-    #[derive(Clone, Copy, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
-    #[cfg_attr(
-        feature = "builder",
-        derive(derive_builder::Builder, getset::CopyGetters),
-        builder(
-            default,
-            pattern = "owned",
-            setter(into, strip_option),
-            build_fn(error = "crate::error::OciSpecError")
-        ),
-        getset(get_copy = "pub")
-    )]
-    /// LinuxThrottleDevice struct holds a `major:minor rate_per_second` pair.
-    struct LinuxThrottleDevice {
-        #[serde(default)]
-        /// Major is the device's major number.
-        major: i64,
+#[derive(
+    Builder, Clone, Copy, CopyGetters, Debug, Default, Deserialize, Eq, PartialEq, Serialize,
+)]
+#[builder(
+    default,
+    pattern = "owned",
+    setter(into, strip_option),
+    build_fn(error = "OciSpecError")
+)]
+#[getset(get_copy = "pub")]
+/// LinuxThrottleDevice struct holds a `major:minor rate_per_second` pair.
+pub struct LinuxThrottleDevice {
+    #[serde(default)]
+    /// Major is the device's major number.
+    major: i64,
 
-        #[serde(default)]
-        /// Minor is the device's minor number.
-        minor: i64,
+    #[serde(default)]
+    /// Minor is the device's minor number.
+    minor: i64,
 
-        #[serde(default)]
-        /// Rate is the IO rate limit per cgroup per device.
-        rate: u64,
-    }
-);
+    #[serde(default)]
+    /// Rate is the IO rate limit per cgroup per device.
+    rate: u64,
+}
 
-make_pub!(
-    #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
-    #[serde(rename_all = "camelCase")]
-    #[cfg_attr(
-        feature = "builder",
-        derive(derive_builder::Builder, getset::CopyGetters, getset::Getters),
-        builder(
-            default,
-            pattern = "owned",
-            setter(into, strip_option),
-            build_fn(error = "crate::error::OciSpecError")
-        )
-    )]
-    /// LinuxBlockIO for Linux cgroup 'blkio' resource management.
-    struct LinuxBlockIo {
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[cfg_attr(feature = "builder", getset(get_copy = "pub"))]
-        /// Specifies per cgroup weight.
-        weight: Option<u16>,
+#[derive(
+    Builder, Clone, CopyGetters, Debug, Default, Deserialize, Eq, Getters, PartialEq, Serialize,
+)]
+#[serde(rename_all = "camelCase")]
+#[builder(
+    default,
+    pattern = "owned",
+    setter(into, strip_option),
+    build_fn(error = "OciSpecError")
+)]
+/// LinuxBlockIO for Linux cgroup 'blkio' resource management.
+pub struct LinuxBlockIo {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[getset(get_copy = "pub")]
+    /// Specifies per cgroup weight.
+    weight: Option<u16>,
 
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[cfg_attr(feature = "builder", getset(get_copy = "pub"))]
-        /// Specifies tasks' weight in the given cgroup while competing with the
-        /// cgroup's child cgroups, CFQ scheduler only.
-        leaf_weight: Option<u16>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[getset(get_copy = "pub")]
+    /// Specifies tasks' weight in the given cgroup while competing with the
+    /// cgroup's child cgroups, CFQ scheduler only.
+    leaf_weight: Option<u16>,
 
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[cfg_attr(feature = "builder", getset(get = "pub"))]
-        /// Weight per cgroup per device, can override BlkioWeight.
-        weight_device: Option<Vec<LinuxWeightDevice>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[getset(get = "pub")]
+    /// Weight per cgroup per device, can override BlkioWeight.
+    weight_device: Option<Vec<LinuxWeightDevice>>,
 
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[cfg_attr(feature = "builder", getset(get = "pub"))]
-        /// IO read rate limit per cgroup per device, bytes per second.
-        throttle_read_bps_device: Option<Vec<LinuxThrottleDevice>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[getset(get = "pub")]
+    /// IO read rate limit per cgroup per device, bytes per second.
+    throttle_read_bps_device: Option<Vec<LinuxThrottleDevice>>,
 
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[cfg_attr(feature = "builder", getset(get = "pub"))]
-        /// IO write rate limit per cgroup per device, bytes per second.
-        throttle_write_bps_device: Option<Vec<LinuxThrottleDevice>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[getset(get = "pub")]
+    /// IO write rate limit per cgroup per device, bytes per second.
+    throttle_write_bps_device: Option<Vec<LinuxThrottleDevice>>,
 
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[cfg_attr(feature = "builder", getset(get = "pub"))]
-        /// IO read rate limit per cgroup per device, IO per second.
-        throttle_read_iops_device: Option<Vec<LinuxThrottleDevice>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[getset(get = "pub")]
+    /// IO read rate limit per cgroup per device, IO per second.
+    throttle_read_iops_device: Option<Vec<LinuxThrottleDevice>>,
 
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[cfg_attr(feature = "builder", getset(get = "pub"))]
-        /// IO write rate limit per cgroup per device, IO per second.
-        throttle_write_iops_device: Option<Vec<LinuxThrottleDevice>>,
-    }
-);
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[getset(get = "pub")]
+    /// IO write rate limit per cgroup per device, IO per second.
+    throttle_write_iops_device: Option<Vec<LinuxThrottleDevice>>,
+}
 
-make_pub!(
-    #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
-    #[serde(rename_all = "camelCase")]
-    #[cfg_attr(
-        feature = "builder",
-        derive(derive_builder::Builder, getset::CopyGetters, getset::Getters),
-        builder(
-            default,
-            pattern = "owned",
-            setter(into, strip_option),
-            build_fn(error = "crate::error::OciSpecError")
-        )
-    )]
-    /// LinuxHugepageLimit structure corresponds to limiting kernel hugepages.
-    struct LinuxHugepageLimit {
-        #[serde(default)]
-        #[cfg_attr(feature = "builder", getset(get = "pub"))]
-        /// Pagesize is the hugepage size.
-        /// Format: "<size><unit-prefix>B' (e.g. 64KB, 2MB, 1GB, etc.)
-        page_size: String,
+#[derive(
+    Builder, Clone, CopyGetters, Debug, Default, Deserialize, Eq, Getters, PartialEq, Serialize,
+)]
+#[serde(rename_all = "camelCase")]
+#[builder(
+    default,
+    pattern = "owned",
+    setter(into, strip_option),
+    build_fn(error = "OciSpecError")
+)]
+/// LinuxHugepageLimit structure corresponds to limiting kernel hugepages.
+pub struct LinuxHugepageLimit {
+    #[serde(default)]
+    #[getset(get = "pub")]
+    /// Pagesize is the hugepage size.
+    /// Format: "<size><unit-prefix>B' (e.g. 64KB, 2MB, 1GB, etc.)
+    page_size: String,
 
-        #[serde(default)]
-        #[cfg_attr(feature = "builder", getset(get_copy = "pub"))]
-        /// Limit is the limit of "hugepagesize" hugetlb usage.
-        limit: i64,
-    }
-);
+    #[serde(default)]
+    #[getset(get_copy = "pub")]
+    /// Limit is the limit of "hugepagesize" hugetlb usage.
+    limit: i64,
+}
 
-make_pub!(
-    #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
-    #[cfg_attr(
-        feature = "builder",
-        derive(derive_builder::Builder, getset::CopyGetters, getset::Getters),
-        builder(
-            default,
-            pattern = "owned",
-            setter(into, strip_option),
-            build_fn(error = "crate::error::OciSpecError")
-        )
-    )]
-    /// LinuxInterfacePriority for network interfaces.
-    struct LinuxInterfacePriority {
-        #[serde(default)]
-        #[cfg_attr(feature = "builder", getset(get = "pub"))]
-        /// Name is the name of the network interface.
-        name: String,
+#[derive(
+    Builder, Clone, CopyGetters, Debug, Default, Deserialize, Eq, Getters, PartialEq, Serialize,
+)]
+#[builder(
+    default,
+    pattern = "owned",
+    setter(into, strip_option),
+    build_fn(error = "OciSpecError")
+)]
+/// LinuxInterfacePriority for network interfaces.
+pub struct LinuxInterfacePriority {
+    #[serde(default)]
+    #[getset(get = "pub")]
+    /// Name is the name of the network interface.
+    name: String,
 
-        #[serde(default)]
-        #[cfg_attr(feature = "builder", getset(get_copy = "pub"))]
-        /// Priority for the interface.
-        priority: u32,
-    }
-);
+    #[serde(default)]
+    #[getset(get_copy = "pub")]
+    /// Priority for the interface.
+    priority: u32,
+}
 
 impl ToString for LinuxInterfacePriority {
     fn to_string(&self) -> String {
@@ -567,123 +521,111 @@ impl ToString for LinuxInterfacePriority {
     }
 }
 
-make_pub!(
-    #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
-    #[cfg_attr(
-        feature = "builder",
-        derive(derive_builder::Builder, getset::CopyGetters, getset::Getters),
-        builder(
-            default,
-            pattern = "owned",
-            setter(into, strip_option),
-            build_fn(error = "crate::error::OciSpecError")
-        )
-    )]
-    /// LinuxNetwork identification and priority configuration.
-    struct LinuxNetwork {
-        #[serde(skip_serializing_if = "Option::is_none", rename = "classID")]
-        #[cfg_attr(feature = "builder", getset(get_copy = "pub"))]
-        /// Set class identifier for container's network packets
-        class_id: Option<u32>,
+#[derive(
+    Builder, Clone, CopyGetters, Debug, Default, Deserialize, Eq, Getters, PartialEq, Serialize,
+)]
+#[builder(
+    default,
+    pattern = "owned",
+    setter(into, strip_option),
+    build_fn(error = "OciSpecError")
+)]
+/// LinuxNetwork identification and priority configuration.
+pub struct LinuxNetwork {
+    #[serde(skip_serializing_if = "Option::is_none", rename = "classID")]
+    #[getset(get_copy = "pub")]
+    /// Set class identifier for container's network packets
+    class_id: Option<u32>,
 
-        #[serde(default, skip_serializing_if = "Option::is_none")]
-        #[cfg_attr(feature = "builder", getset(get = "pub"))]
-        /// Set priority of network traffic for container.
-        priorities: Option<Vec<LinuxInterfacePriority>>,
-    }
-);
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[getset(get = "pub")]
+    /// Set priority of network traffic for container.
+    priorities: Option<Vec<LinuxInterfacePriority>>,
+}
 
-make_pub!(
-    #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
-    #[serde(rename_all = "camelCase")]
-    #[cfg_attr(
-        feature = "builder",
-        derive(derive_builder::Builder, getset::CopyGetters, getset::Getters),
-        builder(
-            default,
-            pattern = "owned",
-            setter(into, strip_option),
-            build_fn(error = "crate::error::OciSpecError")
-        )
-    )]
-    /// Resource constraints for container
-    struct LinuxResources {
-        #[serde(default, skip_serializing_if = "Option::is_none")]
-        #[cfg_attr(feature = "builder", getset(get = "pub"))]
-        /// Devices configures the device allowlist.
-        devices: Option<Vec<LinuxDeviceCgroup>>,
+#[derive(
+    Builder, Clone, CopyGetters, Debug, Default, Deserialize, Eq, Getters, PartialEq, Serialize,
+)]
+#[serde(rename_all = "camelCase")]
+#[builder(
+    default,
+    pattern = "owned",
+    setter(into, strip_option),
+    build_fn(error = "OciSpecError")
+)]
+/// Resource constraints for container
+pub struct LinuxResources {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[getset(get = "pub")]
+    /// Devices configures the device allowlist.
+    devices: Option<Vec<LinuxDeviceCgroup>>,
 
-        #[serde(default, skip_serializing_if = "Option::is_none")]
-        #[cfg_attr(feature = "builder", getset(get_copy = "pub"))]
-        /// Memory restriction configuration.
-        memory: Option<LinuxMemory>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[getset(get_copy = "pub")]
+    /// Memory restriction configuration.
+    memory: Option<LinuxMemory>,
 
-        #[serde(default, skip_serializing_if = "Option::is_none")]
-        #[cfg_attr(feature = "builder", getset(get = "pub"))]
-        /// CPU resource restriction configuration.
-        cpu: Option<LinuxCpu>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[getset(get = "pub")]
+    /// CPU resource restriction configuration.
+    cpu: Option<LinuxCpu>,
 
-        #[serde(default, skip_serializing_if = "Option::is_none")]
-        #[cfg_attr(feature = "builder", getset(get_copy = "pub"))]
-        /// Task resource restrictions
-        pids: Option<LinuxPids>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[getset(get_copy = "pub")]
+    /// Task resource restrictions
+    pids: Option<LinuxPids>,
 
-        #[serde(default, skip_serializing_if = "Option::is_none", rename = "blockIO")]
-        #[cfg_attr(feature = "builder", getset(get = "pub"))]
-        /// BlockIO restriction configuration.
-        block_io: Option<LinuxBlockIo>,
+    #[serde(default, skip_serializing_if = "Option::is_none", rename = "blockIO")]
+    #[getset(get = "pub")]
+    /// BlockIO restriction configuration.
+    block_io: Option<LinuxBlockIo>,
 
-        #[serde(default, skip_serializing_if = "Option::is_none")]
-        #[cfg_attr(feature = "builder", getset(get = "pub"))]
-        /// Hugetlb limit (in bytes).
-        hugepage_limits: Option<Vec<LinuxHugepageLimit>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[getset(get = "pub")]
+    /// Hugetlb limit (in bytes).
+    hugepage_limits: Option<Vec<LinuxHugepageLimit>>,
 
-        #[serde(default, skip_serializing_if = "Option::is_none")]
-        #[cfg_attr(feature = "builder", getset(get = "pub"))]
-        /// Network restriction configuration.
-        network: Option<LinuxNetwork>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[getset(get = "pub")]
+    /// Network restriction configuration.
+    network: Option<LinuxNetwork>,
 
-        #[serde(default, skip_serializing_if = "Option::is_none")]
-        #[cfg_attr(feature = "builder", getset(get = "pub"))]
-        /// Rdma resource restriction configuration. Limits are a set of key
-        /// value pairs that define RDMA resource limits, where the key
-        /// is device name and value is resource limits.
-        rdma: Option<HashMap<String, LinuxRdma>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[getset(get = "pub")]
+    /// Rdma resource restriction configuration. Limits are a set of key
+    /// value pairs that define RDMA resource limits, where the key
+    /// is device name and value is resource limits.
+    rdma: Option<HashMap<String, LinuxRdma>>,
 
-        #[serde(default, skip_serializing_if = "Option::is_none")]
-        #[cfg_attr(feature = "builder", getset(get = "pub"))]
-        /// Unified resources.
-        unified: Option<HashMap<String, String>>,
-    }
-);
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[getset(get = "pub")]
+    /// Unified resources.
+    unified: Option<HashMap<String, String>>,
+}
 
-make_pub!(
-    #[derive(Clone, Copy, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
-    #[serde(rename_all = "camelCase")]
-    #[cfg_attr(
-        feature = "builder",
-        derive(derive_builder::Builder, getset::CopyGetters),
-        builder(
-            default,
-            pattern = "owned",
-            setter(into, strip_option),
-            build_fn(error = "crate::error::OciSpecError")
-        ),
-        getset(get_copy = "pub")
-    )]
-    /// LinuxRdma for Linux cgroup 'rdma' resource management (Linux 4.11).
-    struct LinuxRdma {
-        #[serde(skip_serializing_if = "Option::is_none")]
-        /// Maximum number of HCA handles that can be opened. Default is "no
-        /// limit".
-        hca_handles: Option<u32>,
+#[derive(
+    Builder, Clone, Copy, CopyGetters, Debug, Default, Deserialize, Eq, PartialEq, Serialize,
+)]
+#[serde(rename_all = "camelCase")]
+#[builder(
+    default,
+    pattern = "owned",
+    setter(into, strip_option),
+    build_fn(error = "OciSpecError")
+)]
+#[getset(get_copy = "pub")]
+/// LinuxRdma for Linux cgroup 'rdma' resource management (Linux 4.11).
+pub struct LinuxRdma {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    /// Maximum number of HCA handles that can be opened. Default is "no
+    /// limit".
+    hca_handles: Option<u32>,
 
-        #[serde(skip_serializing_if = "Option::is_none")]
-        /// Maximum number of HCA objects that can be created. Default is "no
-        /// limit".
-        hca_objects: Option<u32>,
-    }
-);
+    #[serde(skip_serializing_if = "Option::is_none")]
+    /// Maximum number of HCA objects that can be created. Default is "no
+    /// limit".
+    hca_objects: Option<u32>,
+}
 
 #[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize, Hash)]
 #[serde(rename_all = "snake_case")]
@@ -737,32 +679,28 @@ impl Default for LinuxNamespaceType {
     }
 }
 
-make_pub!(
-    #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
-    #[cfg_attr(
-        feature = "builder",
-        derive(derive_builder::Builder, getset::CopyGetters, getset::Getters),
-        builder(
-            default,
-            pattern = "owned",
-            setter(into, strip_option),
-            build_fn(error = "crate::error::OciSpecError")
-        )
-    )]
-    /// LinuxNamespace is the configuration for a Linux namespace.
-    struct LinuxNamespace {
-        #[serde(rename = "type")]
-        #[cfg_attr(feature = "builder", getset(get_copy = "pub"))]
-        /// Type is the type of namespace.
-        typ: LinuxNamespaceType,
+#[derive(
+    Builder, Clone, CopyGetters, Debug, Default, Deserialize, Eq, Getters, PartialEq, Serialize,
+)]
+#[builder(
+    default,
+    pattern = "owned",
+    setter(into, strip_option),
+    build_fn(error = "OciSpecError")
+)]
+/// LinuxNamespace is the configuration for a Linux namespace.
+pub struct LinuxNamespace {
+    #[serde(rename = "type")]
+    #[getset(get_copy = "pub")]
+    /// Type is the type of namespace.
+    typ: LinuxNamespaceType,
 
-        #[serde(default, skip_serializing_if = "Option::is_none")]
-        #[cfg_attr(feature = "builder", getset(get = "pub"))]
-        /// Path is a path to an existing namespace persisted on disk that can
-        /// be joined and is of the same type
-        path: Option<PathBuf>,
-    }
-);
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[getset(get = "pub")]
+    /// Path is a path to an existing namespace persisted on disk that can
+    /// be joined and is of the same type
+    path: Option<PathBuf>,
+}
 
 /// Utility function to get default namespaces.
 pub fn get_default_namespaces() -> Vec<LinuxNamespace> {
@@ -790,58 +728,54 @@ pub fn get_default_namespaces() -> Vec<LinuxNamespace> {
     ]
 }
 
-make_pub!(
-    #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
-    #[serde(rename_all = "camelCase")]
-    #[cfg_attr(
-        feature = "builder",
-        derive(derive_builder::Builder, getset::CopyGetters, getset::Getters),
-        builder(
-            default,
-            pattern = "owned",
-            setter(into, strip_option),
-            build_fn(error = "crate::error::OciSpecError")
-        )
-    )]
-    /// LinuxDevice represents the mknod information for a Linux special device
-    /// file.
-    struct LinuxDevice {
-        #[serde(default)]
-        #[cfg_attr(feature = "builder", getset(get = "pub"))]
-        /// Path to the device.
-        path: PathBuf,
+#[derive(
+    Builder, Clone, CopyGetters, Debug, Default, Deserialize, Eq, Getters, PartialEq, Serialize,
+)]
+#[serde(rename_all = "camelCase")]
+#[builder(
+    default,
+    pattern = "owned",
+    setter(into, strip_option),
+    build_fn(error = "OciSpecError")
+)]
+/// LinuxDevice represents the mknod information for a Linux special device
+/// file.
+pub struct LinuxDevice {
+    #[serde(default)]
+    #[getset(get = "pub")]
+    /// Path to the device.
+    path: PathBuf,
 
-        #[serde(rename = "type")]
-        #[cfg_attr(feature = "builder", getset(get_copy = "pub"))]
-        /// Device type, block, char, etc..
-        typ: LinuxDeviceType,
+    #[serde(rename = "type")]
+    #[getset(get_copy = "pub")]
+    /// Device type, block, char, etc..
+    typ: LinuxDeviceType,
 
-        #[serde(default)]
-        #[cfg_attr(feature = "builder", getset(get_copy = "pub"))]
-        /// Major is the device's major number.
-        major: i64,
+    #[serde(default)]
+    #[getset(get_copy = "pub")]
+    /// Major is the device's major number.
+    major: i64,
 
-        #[serde(default)]
-        #[cfg_attr(feature = "builder", getset(get_copy = "pub"))]
-        /// Minor is the device's minor number.
-        minor: i64,
+    #[serde(default)]
+    #[getset(get_copy = "pub")]
+    /// Minor is the device's minor number.
+    minor: i64,
 
-        #[serde(default, skip_serializing_if = "Option::is_none")]
-        #[cfg_attr(feature = "builder", getset(get_copy = "pub"))]
-        /// FileMode permission bits for the device.
-        file_mode: Option<u32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[getset(get_copy = "pub")]
+    /// FileMode permission bits for the device.
+    file_mode: Option<u32>,
 
-        #[serde(default, skip_serializing_if = "Option::is_none")]
-        #[cfg_attr(feature = "builder", getset(get_copy = "pub"))]
-        /// UID of the device.
-        uid: Option<u32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[getset(get_copy = "pub")]
+    /// UID of the device.
+    uid: Option<u32>,
 
-        #[serde(default, skip_serializing_if = "Option::is_none")]
-        #[cfg_attr(feature = "builder", getset(get_copy = "pub"))]
-        /// Gid of the device.
-        gid: Option<u32>,
-    }
-);
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[getset(get_copy = "pub")]
+    /// Gid of the device.
+    gid: Option<u32>,
+}
 
 impl From<&LinuxDevice> for LinuxDeviceCgroup {
     fn from(linux_device: &LinuxDevice) -> LinuxDeviceCgroup {
@@ -855,41 +789,37 @@ impl From<&LinuxDevice> for LinuxDeviceCgroup {
     }
 }
 
-make_pub!(
-    #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
-    #[serde(rename_all = "camelCase")]
-    #[cfg_attr(
-        feature = "builder",
-        derive(derive_builder::Builder, getset::CopyGetters, getset::Getters),
-        builder(
-            default,
-            pattern = "owned",
-            setter(into, strip_option),
-            build_fn(error = "crate::error::OciSpecError")
-        )
-    )]
-    /// LinuxSeccomp represents syscall restrictions.
-    struct LinuxSeccomp {
-        #[cfg_attr(feature = "builder", getset(get_copy = "pub"))]
-        /// The default action to be done.
-        default_action: LinuxSeccompAction,
+#[derive(
+    Builder, Clone, CopyGetters, Debug, Default, Deserialize, Eq, Getters, PartialEq, Serialize,
+)]
+#[serde(rename_all = "camelCase")]
+#[builder(
+    default,
+    pattern = "owned",
+    setter(into, strip_option),
+    build_fn(error = "OciSpecError")
+)]
+/// LinuxSeccomp represents syscall restrictions.
+pub struct LinuxSeccomp {
+    #[getset(get_copy = "pub")]
+    /// The default action to be done.
+    default_action: LinuxSeccompAction,
 
-        #[serde(default, skip_serializing_if = "Option::is_none")]
-        #[cfg_attr(feature = "builder", getset(get = "pub"))]
-        /// Available architectures for the restriction.
-        architectures: Option<Vec<Arch>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[getset(get = "pub")]
+    /// Available architectures for the restriction.
+    architectures: Option<Vec<Arch>>,
 
-        #[serde(default, skip_serializing_if = "Option::is_none")]
-        #[cfg_attr(feature = "builder", getset(get = "pub"))]
-        /// Flags added to the seccomp restriction.
-        flags: Option<Vec<String>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[getset(get = "pub")]
+    /// Flags added to the seccomp restriction.
+    flags: Option<Vec<String>>,
 
-        #[serde(default, skip_serializing_if = "Option::is_none")]
-        #[cfg_attr(feature = "builder", getset(get = "pub"))]
-        /// The syscalls for the restriction.
-        syscalls: Option<Vec<LinuxSyscall>>,
-    }
-);
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[getset(get = "pub")]
+    /// The syscalls for the restriction.
+    syscalls: Option<Vec<LinuxSyscall>>,
+}
 
 #[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
@@ -1020,70 +950,62 @@ impl Default for LinuxSeccompOperator {
     }
 }
 
-make_pub!(
-    #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
-    #[cfg_attr(
-        feature = "builder",
-        derive(derive_builder::Builder, getset::CopyGetters, getset::Getters),
-        builder(
-            default,
-            pattern = "owned",
-            setter(into, strip_option),
-            build_fn(error = "crate::error::OciSpecError")
-        )
-    )]
-    /// LinuxSyscall is used to match a syscall in seccomp.
-    struct LinuxSyscall {
-        #[cfg_attr(feature = "builder", getset(get = "pub"))]
-        /// The names of the syscalls.
-        names: Vec<String>,
+#[derive(
+    Builder, Clone, CopyGetters, Debug, Default, Deserialize, Eq, Getters, PartialEq, Serialize,
+)]
+#[builder(
+    default,
+    pattern = "owned",
+    setter(into, strip_option),
+    build_fn(error = "OciSpecError")
+)]
+/// LinuxSyscall is used to match a syscall in seccomp.
+pub struct LinuxSyscall {
+    #[getset(get = "pub")]
+    /// The names of the syscalls.
+    names: Vec<String>,
 
-        #[cfg_attr(feature = "builder", getset(get_copy = "pub"))]
-        /// The action to be done for the syscalls.
-        action: LinuxSeccompAction,
+    #[getset(get_copy = "pub")]
+    /// The action to be done for the syscalls.
+    action: LinuxSeccompAction,
 
-        #[serde(default, skip_serializing_if = "Option::is_none")]
-        #[cfg_attr(feature = "builder", getset(get_copy = "pub"))]
-        /// The error return value.
-        errno_ret: Option<u32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[getset(get_copy = "pub")]
+    /// The error return value.
+    errno_ret: Option<u32>,
 
-        #[serde(default, skip_serializing_if = "Option::is_none")]
-        #[cfg_attr(feature = "builder", getset(get = "pub"))]
-        /// The arguments for the syscalls.
-        args: Option<Vec<LinuxSeccompArg>>,
-    }
-);
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[getset(get = "pub")]
+    /// The arguments for the syscalls.
+    args: Option<Vec<LinuxSeccompArg>>,
+}
 
-make_pub!(
-    #[derive(Clone, Copy, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
-    #[serde(rename_all = "camelCase")]
-    #[cfg_attr(
-        feature = "builder",
-        derive(derive_builder::Builder, getset::CopyGetters, getset::Getters),
-        builder(
-            default,
-            pattern = "owned",
-            setter(into, strip_option),
-            build_fn(error = "crate::error::OciSpecError")
-        ),
-        getset(get_copy = "pub")
-    )]
-    /// LinuxSeccompArg used for matching specific syscall arguments in seccomp.
-    struct LinuxSeccompArg {
-        /// The index of the argument.
-        index: usize,
+#[derive(
+    Builder, Clone, Copy, CopyGetters, Debug, Default, Deserialize, Eq, PartialEq, Serialize,
+)]
+#[serde(rename_all = "camelCase")]
+#[builder(
+    default,
+    pattern = "owned",
+    setter(into, strip_option),
+    build_fn(error = "OciSpecError")
+)]
+#[getset(get_copy = "pub")]
+/// LinuxSeccompArg used for matching specific syscall arguments in seccomp.
+pub struct LinuxSeccompArg {
+    /// The index of the argument.
+    index: usize,
 
-        /// The value of the argument.
-        value: u64,
+    /// The value of the argument.
+    value: u64,
 
-        #[serde(default, skip_serializing_if = "Option::is_none")]
-        /// The second value of the argument.
-        value_two: Option<u64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    /// The second value of the argument.
+    value_two: Option<u64>,
 
-        /// The operator for the argument.
-        op: LinuxSeccompOperator,
-    }
-);
+    /// The operator for the argument.
+    op: LinuxSeccompOperator,
+}
 
 /// Default masks paths, cannot read these host files.
 pub fn get_default_maskedpaths() -> Vec<String> {
@@ -1115,66 +1037,56 @@ pub fn get_default_readonly_paths() -> Vec<String> {
     ]
 }
 
-make_pub!(
-    #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
-    #[serde(rename_all = "camelCase")]
-    #[cfg_attr(
-        feature = "builder",
-        derive(derive_builder::Builder, getset::Getters),
-        builder(
-            default,
-            pattern = "owned",
-            setter(into, strip_option),
-            build_fn(error = "crate::error::OciSpecError")
-        ),
-        getset(get = "pub")
-    )]
-    /// LinuxIntelRdt has container runtime resource constraints for Intel RDT
-    /// CAT and MBA features which introduced in Linux 4.10 and 4.12 kernel.
-    struct LinuxIntelRdt {
-        #[serde(default, skip_serializing_if = "Option::is_none")]
-        /// The identity for RDT Class of Service.
-        clos_id: Option<String>,
+#[derive(Builder, Clone, Debug, Default, Deserialize, Eq, Getters, PartialEq, Serialize)]
+#[serde(rename_all = "camelCase")]
+#[builder(
+    default,
+    pattern = "owned",
+    setter(into, strip_option),
+    build_fn(error = "OciSpecError")
+)]
+#[getset(get = "pub")]
+/// LinuxIntelRdt has container runtime resource constraints for Intel RDT
+/// CAT and MBA features which introduced in Linux 4.10 and 4.12 kernel.
+pub struct LinuxIntelRdt {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    /// The identity for RDT Class of Service.
+    clos_id: Option<String>,
 
-        #[serde(default, skip_serializing_if = "Option::is_none")]
-        /// The schema for L3 cache id and capacity bitmask (CBM).
-        /// Format: "L3:<cache_id0>=<cbm0>;<cache_id1>=<cbm1>;..."
-        l3_cache_schema: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    /// The schema for L3 cache id and capacity bitmask (CBM).
+    /// Format: "L3:<cache_id0>=<cbm0>;<cache_id1>=<cbm1>;..."
+    l3_cache_schema: Option<String>,
 
-        #[serde(default, skip_serializing_if = "Option::is_none")]
-        /// The schema of memory bandwidth per L3 cache id.
-        /// Format: "MB:<cache_id0>=bandwidth0;<cache_id1>=bandwidth1;..."
-        /// The unit of memory bandwidth is specified in "percentages" by
-        /// default, and in "MBps" if MBA Software Controller is
-        /// enabled.
-        mem_bw_schema: Option<String>,
-    }
-);
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    /// The schema of memory bandwidth per L3 cache id.
+    /// Format: "MB:<cache_id0>=bandwidth0;<cache_id1>=bandwidth1;..."
+    /// The unit of memory bandwidth is specified in "percentages" by
+    /// default, and in "MBps" if MBA Software Controller is
+    /// enabled.
+    mem_bw_schema: Option<String>,
+}
 
-make_pub!(
-    #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
-    #[cfg_attr(
-        feature = "builder",
-        derive(derive_builder::Builder, getset::CopyGetters, getset::Getters),
-        builder(
-            default,
-            pattern = "owned",
-            setter(into, strip_option),
-            build_fn(error = "crate::error::OciSpecError")
-        )
-    )]
-    /// LinuxPersonality represents the Linux personality syscall input.
-    struct LinuxPersonality {
-        #[cfg_attr(feature = "builder", getset(get_copy = "pub"))]
-        /// Domain for the personality.
-        domain: LinuxPersonalityDomain,
+#[derive(
+    Builder, Clone, CopyGetters, Debug, Default, Deserialize, Eq, Getters, PartialEq, Serialize,
+)]
+#[builder(
+    default,
+    pattern = "owned",
+    setter(into, strip_option),
+    build_fn(error = "OciSpecError")
+)]
+/// LinuxPersonality represents the Linux personality syscall input.
+pub struct LinuxPersonality {
+    #[getset(get_copy = "pub")]
+    /// Domain for the personality.
+    domain: LinuxPersonalityDomain,
 
-        #[serde(default, skip_serializing_if = "Option::is_none")]
-        #[cfg_attr(feature = "builder", getset(get = "pub"))]
-        /// Additional flags
-        flags: Option<Vec<String>>,
-    }
-);
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[getset(get = "pub")]
+    /// Additional flags
+    flags: Option<Vec<String>>,
+}
 
 #[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
 /// Define domain and flags for LinuxPersonality.

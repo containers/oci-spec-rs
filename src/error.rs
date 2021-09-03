@@ -29,7 +29,6 @@ pub enum OciSpecError {
     SerDe(#[from] serde_json::Error),
 
     /// Builder specific errors.
-    #[cfg(feature = "builder")]
     #[error("uninitialized field")]
     Builder(#[from] derive_builder::UninitializedFieldError),
 }

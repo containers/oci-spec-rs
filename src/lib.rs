@@ -1,9 +1,6 @@
 #![deny(missing_docs, warnings)]
 #![doc = include_str!("../README.md")]
 
-#[macro_use]
-mod macros;
-
 #[cfg(feature = "distribution")]
 pub mod distribution;
 mod error;

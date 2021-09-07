@@ -81,12 +81,7 @@ let image_manifest = ImageManifestBuilder::default()
     .layers(layers)
     .build()
     .expect("build image manifest");
-```
 
-- Write image manifest to file
-```rust no_run
-# use oci_spec::image::ImageManifest;
-# let image_manifest = ImageManifest::from_file("manifest.json").unwrap();
 image_manifest.to_file_pretty("my-manifest.json").unwrap();
 ```
 

@@ -25,7 +25,7 @@ oci-spec = "0.5.0"
 
 ## Image Format Spec Examples
 - Load image manifest from filesystem
-```no_run
+```rust no_run
 use oci_spec::image::ImageManifest;
 
 let image_manifest = ImageManifest::from_file("manifest.json").unwrap();
@@ -33,7 +33,7 @@ assert_eq!(image_manifest.layers().len(), 5);
 ```
 
 - Create new image manifest using builder
-```no_run
+```rust no_run
 use oci_spec::image::{
     Descriptor, 
     DescriptorBuilder, 
@@ -84,7 +84,7 @@ let image_manifest = ImageManifestBuilder::default()
 ```
 
 - Write image manifest to file
-```no_run
+```rust no_run
 # use oci_spec::image::ImageManifest;
 # let image_manifest = ImageManifest::from_file("manifest.json").unwrap();
 image_manifest.to_file_pretty("my-manifest.json").unwrap();
@@ -121,7 +121,7 @@ image_manifest.to_file_pretty("my-manifest.json").unwrap();
 
 ## Distribution Spec Examples
 - Create a list of repositories 
-```no_run
+```rust
 use oci_spec::distribution::RepositoryListBuilder;
 
 let list = RepositoryListBuilder::default()

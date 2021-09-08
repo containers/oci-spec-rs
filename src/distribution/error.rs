@@ -170,4 +170,43 @@ mod tests {
     fn error_info_failure() {
         assert!(ErrorInfoBuilder::default().build().is_err());
     }
+
+    #[test]
+    fn error_info_serialize_success() -> Result<()> {
+        let error_info = ErrorInfoBuilder::default()
+            .code(ErrorCode::Unauthorized)
+            .detail(String::from("{ \"key\": \"value\" }"))
+            .build()?;
+
+        assert!(serde_json::to_string(&error_info).is_ok());
+        Ok(())
+    }
+
+    #[test]
+    fn error_info_serialize_failure() -> Result<()> {
+        let error_info = ErrorInfoBuilder::default()
+            .code(ErrorCode::Unauthorized)
+            .detail(String::from("abcd"))
+            .build()?;
+
+        assert!(serde_json::to_string(&error_info).is_err());
+        Ok(())
+    }
+
+    #[test]
+    fn error_info_deserialize_success() -> Result<()> {
+        let error_info_str = r#"
+        {
+            "code": "MANIFEST_UNKNOWN",
+            "message": "manifest tagged by \"lates\" is not found",
+            "detail": {
+                "Tag": "lates"
+            }
+        }"#;
+
+        let error_info: ErrorInfo = serde_json::from_str(&error_info_str)?;
+        assert_eq!(error_info.detail().as_ref().unwrap(), "{\"Tag\":\"lates\"}");
+
+        Ok(())
+    }
 }

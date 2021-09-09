@@ -352,7 +352,9 @@ pub struct LinuxCpu {
     mems: Option<String>,
 }
 
-#[derive(Builder, Clone, Copy, Debug, Default, Deserialize, Eq, Getters, PartialEq, Serialize)]
+#[derive(
+    Builder, Clone, Copy, Debug, Default, Deserialize, Eq, CopyGetters, PartialEq, Serialize,
+)]
 #[builder(
     default,
     pattern = "owned",
@@ -363,7 +365,6 @@ pub struct LinuxCpu {
 /// LinuxPids for Linux cgroup 'pids' resource management (Linux 4.3).
 pub struct LinuxPids {
     #[serde(default)]
-    #[getset(get = "pub")]
     /// Maximum number of PIDs. Default is "no limit".
     limit: i64,
 }

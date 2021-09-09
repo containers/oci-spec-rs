@@ -352,7 +352,9 @@ pub struct LinuxCpu {
     mems: Option<String>,
 }
 
-#[derive(Builder, Clone, Copy, Debug, Default, Deserialize, Eq, Getters, PartialEq, Serialize)]
+#[derive(
+    Builder, Clone, Copy, Debug, Default, Deserialize, Eq, CopyGetters, PartialEq, Serialize,
+)]
 #[builder(
     default,
     pattern = "owned",

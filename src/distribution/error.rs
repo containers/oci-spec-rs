@@ -90,11 +90,51 @@ pub struct ErrorInfo {
     /// MAY be empty.
     message: Option<String>,
 
-    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde(default, skip_serializing_if = "Option::is_none", with = "json_string")]
     #[builder(default = "None")]
     /// The detail field is OPTIONAL and MAY contain arbitrary JSON data providing information
     /// the client can use to resolve the issue.
     detail: Option<String>,
+}
+
+mod json_string {
+    use std::str::FromStr;
+
+    use serde::{Deserialize, Deserializer, Serialize, Serializer};
+
+    pub fn deserialize<'de, D>(deserializer: D) -> Result<Option<String>, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        use serde::de::Error;
+
+        let opt = Option::<serde_json::Value>::deserialize(deserializer)?;
+
+        if let Some(data) = opt {
+            let data = serde_json::to_string(&data).map_err(Error::custom)?;
+            return Ok(Some(data));
+        }
+
+        Ok(None)
+    }
+
+    pub fn serialize<S>(target: &Option<String>, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        use serde::ser::Error;
+
+        match target {
+            Some(data) => {
+                if let Ok(json_value) = serde_json::Value::from_str(data) {
+                    json_value.serialize(serializer)
+                } else {
+                    Err(Error::custom("invalid JSON"))
+                }
+            }
+            _ => unreachable!(),
+        }
+    }
 }
 
 #[cfg(test)]
@@ -129,5 +169,44 @@ mod tests {
     #[test]
     fn error_info_failure() {
         assert!(ErrorInfoBuilder::default().build().is_err());
+    }
+
+    #[test]
+    fn error_info_serialize_success() -> Result<()> {
+        let error_info = ErrorInfoBuilder::default()
+            .code(ErrorCode::Unauthorized)
+            .detail(String::from("{ \"key\": \"value\" }"))
+            .build()?;
+
+        assert!(serde_json::to_string(&error_info).is_ok());
+        Ok(())
+    }
+
+    #[test]
+    fn error_info_serialize_failure() -> Result<()> {
+        let error_info = ErrorInfoBuilder::default()
+            .code(ErrorCode::Unauthorized)
+            .detail(String::from("abcd"))
+            .build()?;
+
+        assert!(serde_json::to_string(&error_info).is_err());
+        Ok(())
+    }
+
+    #[test]
+    fn error_info_deserialize_success() -> Result<()> {
+        let error_info_str = r#"
+        {
+            "code": "MANIFEST_UNKNOWN",
+            "message": "manifest tagged by \"lates\" is not found",
+            "detail": {
+                "Tag": "lates"
+            }
+        }"#;
+
+        let error_info: ErrorInfo = serde_json::from_str(&error_info_str)?;
+        assert_eq!(error_info.detail().as_ref().unwrap(), "{\"Tag\":\"lates\"}");
+
+        Ok(())
     }
 }

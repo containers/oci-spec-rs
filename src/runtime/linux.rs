@@ -567,7 +567,7 @@ pub struct LinuxResources {
     devices: Option<Vec<LinuxDeviceCgroup>>,
 
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    #[getset(get_copy = "pub")]
+    #[getset(get = "pub")]
     /// Memory restriction configuration.
     memory: Option<LinuxMemory>,
 
@@ -577,7 +577,7 @@ pub struct LinuxResources {
     cpu: Option<LinuxCpu>,
 
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    #[getset(get_copy = "pub")]
+    #[getset(get = "pub")]
     /// Task resource restrictions
     pids: Option<LinuxPids>,
 

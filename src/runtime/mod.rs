@@ -227,6 +227,55 @@ impl Spec {
     }
 }
 
+impl From<Spec> for SpecBuilder {
+    fn from(spec: Spec) -> Self {
+        let mut spec_builder = SpecBuilder::default().version(spec.version());
+
+        spec_builder = match spec.root() {
+            Some(root) => spec_builder.root(root.clone()),
+            None => spec_builder,
+        };
+        spec_builder = match spec.mounts() {
+            Some(mounts) => spec_builder.mounts(mounts.clone()),
+            None => spec_builder,
+        };
+        spec_builder = match spec.process() {
+            Some(process) => spec_builder.process(process.clone()),
+            None => spec_builder,
+        };
+        spec_builder = match spec.hostname() {
+            Some(hostname) => spec_builder.hostname(hostname.clone()),
+            None => spec_builder,
+        };
+        spec_builder = match spec.hooks() {
+            Some(hooks) => spec_builder.hooks(hooks.clone()),
+            None => spec_builder,
+        };
+        spec_builder = match spec.annotations() {
+            Some(annotations) => spec_builder.annotations(annotations.clone()),
+            None => spec_builder,
+        };
+        spec_builder = match spec.linux() {
+            Some(linux) => spec_builder.linux(linux.clone()),
+            None => spec_builder,
+        };
+        spec_builder = match spec.solaris() {
+            Some(solaris) => spec_builder.solaris(solaris.clone()),
+            None => spec_builder,
+        };
+        spec_builder = match spec.windows() {
+            Some(windows) => spec_builder.windows(windows.clone()),
+            None => spec_builder,
+        };
+        spec_builder = match spec.vm() {
+            Some(vm) => spec_builder.vm(vm.clone()),
+            None => spec_builder,
+        };
+
+        spec_builder
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -293,6 +342,30 @@ mod tests {
         assert_eq!(
             spec, loaded_spec,
             "The saved spec is not the same as the loaded spec"
+        );
+    }
+
+    #[test]
+    fn test_modify_spec() {
+        let spec = Spec {
+            ..Default::default()
+        };
+
+        // We abuse clone here because we want to keep a record for later
+        // asserts. In real use, the spec and the new_root will be consumed by
+        // builder, as expected.
+        let default_root = spec.root().clone().unwrap();
+        let new_root = RootBuilder::default()
+            .path(Path::new("/this/is/not/a/good/path"))
+            .build()
+            .unwrap();
+        let spec_builder: SpecBuilder = SpecBuilder::from(spec).root(new_root.clone());
+        let new_spec = spec_builder.build().unwrap();
+
+        assert_eq!(new_root.path(), new_spec.root().as_ref().unwrap().path());
+        assert_ne!(
+            default_root.path(),
+            new_spec.root().as_ref().unwrap().path()
         );
     }
 }

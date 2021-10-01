@@ -588,7 +588,7 @@ mod tests {
 
     #[test]
     fn deserialize() -> Result<()> {
-        for case in vec!["SYSLOG", "CAP_SYSLOG", "cap_SYSLOG", "sySloG"] {
+        for case in &["SYSLOG", "CAP_SYSLOG", "cap_SYSLOG", "sySloG"] {
             let res: Capability = serde_json::from_str(&format!("\"{}\"", case))?;
             assert_eq!(Capability::Syslog, res);
         }

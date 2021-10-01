@@ -1,33 +1,30 @@
+use crate::error::OciSpecError;
+use derive_builder::Builder;
+use getset::{CopyGetters, Getters, Setters};
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 
-make_pub!(
-    #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
-    #[cfg_attr(
-        feature = "builder",
-        derive(derive_builder::Builder, getset::CopyGetters, getset::Getters),
-        builder(
-            default,
-            pattern = "owned",
-            setter(into, strip_option),
-            build_fn(error = "crate::error::OciSpecError")
-        )
-    )]
-    /// Root contains information about the container's root filesystem on the
-    /// host.
-    struct Root {
-        /// Path is the absolute path to the container's root filesystem.
-        #[serde(default)]
-        #[cfg_attr(feature = "builder", getset(get = "pub"))]
-        path: PathBuf,
+#[derive(Builder, Clone, CopyGetters, Debug, Deserialize, Eq, Getters, PartialEq, Serialize)]
+#[builder(
+    default,
+    pattern = "owned",
+    setter(into, strip_option),
+    build_fn(error = "OciSpecError")
+)]
+/// Root contains information about the container's root filesystem on the
+/// host.
+pub struct Root {
+    /// Path is the absolute path to the container's root filesystem.
+    #[serde(default)]
+    #[getset(get = "pub")]
+    path: PathBuf,
 
-        /// Readonly makes the root filesystem for the container readonly before
-        /// the process is executed.
-        #[serde(default, skip_serializing_if = "Option::is_none")]
-        #[cfg_attr(feature = "builder", getset(get_copy = "pub"))]
-        readonly: Option<bool>,
-    }
-);
+    /// Readonly makes the root filesystem for the container readonly before
+    /// the process is executed.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[getset(get_copy = "pub")]
+    readonly: Option<bool>,
+}
 
 /// Default path for container root is "./rootfs" from config.json, with
 /// readonly true
@@ -40,38 +37,34 @@ impl Default for Root {
     }
 }
 
-make_pub!(
-    #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
-    #[cfg_attr(
-        feature = "builder",
-        derive(derive_builder::Builder, getset::Getters, getset::Setters),
-        builder(
-            default,
-            pattern = "owned",
-            setter(into, strip_option),
-            build_fn(error = "crate::error::OciSpecError")
-        ),
-        getset(get = "pub", set = "pub")
-    )]
-    /// Mount specifies a mount for a container.
-    struct Mount {
-        /// Destination is the absolute path where the mount will be placed in
-        /// the container.
-        destination: PathBuf,
+#[derive(
+    Builder, Clone, Debug, Default, Deserialize, Eq, Getters, Setters, PartialEq, Serialize,
+)]
+#[builder(
+    default,
+    pattern = "owned",
+    setter(into, strip_option),
+    build_fn(error = "OciSpecError")
+)]
+#[getset(get = "pub", set = "pub")]
+/// Mount specifies a mount for a container.
+pub struct Mount {
+    /// Destination is the absolute path where the mount will be placed in
+    /// the container.
+    destination: PathBuf,
 
-        #[serde(default, skip_serializing_if = "Option::is_none", rename = "type")]
-        /// Type specifies the mount kind.
-        typ: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none", rename = "type")]
+    /// Type specifies the mount kind.
+    typ: Option<String>,
 
-        #[serde(default, skip_serializing_if = "Option::is_none")]
-        /// Source specifies the source path of the mount.
-        source: Option<PathBuf>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    /// Source specifies the source path of the mount.
+    source: Option<PathBuf>,
 
-        #[serde(default, skip_serializing_if = "Option::is_none")]
-        /// Options are fstab style mount options.
-        options: Option<Vec<String>>,
-    }
-);
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    /// Options are fstab style mount options.
+    options: Option<Vec<String>>,
+}
 
 /// utility function to generate default config for mounts.
 pub fn get_default_mounts() -> Vec<Mount> {

@@ -1,28 +1,24 @@
 //! Repository types of the distribution spec.
 
+use crate::error::OciSpecError;
+use derive_builder::Builder;
+use getset::Getters;
 use serde::{Deserialize, Serialize};
 
-make_pub!(
-    #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
-    #[cfg_attr(
-        feature = "builder",
-        derive(derive_builder::Builder, getset::Getters),
-        builder(
-            pattern = "owned",
-            setter(into, strip_option),
-            build_fn(error = "crate::error::OciSpecError")
-        ),
-        getset(get = "pub")
-    )]
-    /// RepositoryList returns a catalog of repositories maintained on the registry.
-    struct RepositoryList {
-        /// The items of the RepositoryList.
-        repositories: Vec<String>,
-    }
-);
+#[derive(Builder, Clone, Debug, Deserialize, Eq, Getters, PartialEq, Serialize)]
+#[builder(
+    pattern = "owned",
+    setter(into, strip_option),
+    build_fn(error = "OciSpecError")
+)]
+#[getset(get = "pub")]
+/// RepositoryList returns a catalog of repositories maintained on the registry.
+pub struct RepositoryList {
+    /// The items of the RepositoryList.
+    repositories: Vec<String>,
+}
 
 #[cfg(test)]
-#[cfg(feature = "builder")]
 mod tests {
     use super::*;
     use crate::error::Result;

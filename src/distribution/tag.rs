@@ -1,31 +1,27 @@
 //! Tag types of the distribution spec.
 
+use crate::error::OciSpecError;
+use derive_builder::Builder;
+use getset::Getters;
 use serde::{Deserialize, Serialize};
 
-make_pub!(
-    #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
-    #[cfg_attr(
-        feature = "builder",
-        derive(derive_builder::Builder, getset::Getters),
-        builder(
-            pattern = "owned",
-            setter(into, strip_option),
-            build_fn(error = "crate::error::OciSpecError")
-        ),
-        getset(get = "pub")
-    )]
-    /// A list of tags for a given repository.
-    struct TagList {
-        /// The namespace of the repository.
-        name: String,
+#[derive(Builder, Clone, Debug, Deserialize, Eq, Getters, PartialEq, Serialize)]
+#[builder(
+    pattern = "owned",
+    setter(into, strip_option),
+    build_fn(error = "OciSpecError")
+)]
+#[getset(get = "pub")]
+/// A list of tags for a given repository.
+pub struct TagList {
+    /// The namespace of the repository.
+    name: String,
 
-        /// Each tags on the repository.
-        tags: Vec<String>,
-    }
-);
+    /// Each tags on the repository.
+    tags: Vec<String>,
+}
 
 #[cfg(test)]
-#[cfg(feature = "builder")]
 mod tests {
     use super::*;
     use crate::error::Result;

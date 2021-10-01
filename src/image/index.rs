@@ -1,5 +1,10 @@
 use super::{Descriptor, MediaType};
-use crate::{error::Result, from_file, from_reader, to_file, to_writer};
+use crate::{
+    error::{OciSpecError, Result},
+    from_file, from_reader, to_file, to_writer,
+};
+use derive_builder::Builder;
+use getset::{CopyGetters, Getters};
 use serde::{Deserialize, Serialize};
 use std::{
     collections::HashMap,
@@ -7,48 +12,47 @@ use std::{
     path::Path,
 };
 
-make_pub!(
-    #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
-    #[serde(rename_all = "camelCase")]
-    #[cfg_attr(
-        feature = "builder",
-        derive(derive_builder::Builder, getset::CopyGetters, getset::Getters),
-        builder(
-            pattern = "owned",
-            setter(into, strip_option),
-            build_fn(error = "crate::error::OciSpecError")
-        )
-    )]
-    /// The image index is a higher-level manifest which points to specific
-    /// image manifests, ideal for one or more platforms. While the use of
-    /// an image index is OPTIONAL for image providers, image consumers
-    /// SHOULD be prepared to process them.
-    struct ImageIndex {
-        /// This REQUIRED property specifies the image manifest schema version.
-        /// For this version of the specification, this MUST be 2 to ensure
-        /// backward compatibility with older versions of Docker. The
-        /// value of this field will not change. This field MAY be
-        /// removed in a future version of the specification.
-        #[cfg_attr(feature = "builder", getset(get_copy = "pub"))]
-        schema_version: u32,
-        /// This property is reserved for use, to maintain compatibility. When
-        /// used, this field contains the media type of this document,
-        /// which differs from the descriptor use of mediaType.
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[cfg_attr(feature = "builder", getset(get = "pub"), builder(default))]
-        media_type: Option<MediaType>,
-        /// This REQUIRED property contains a list of manifests for specific
-        /// platforms. While this property MUST be present, the size of
-        /// the array MAY be zero.
-        #[cfg_attr(feature = "builder", getset(get = "pub"))]
-        manifests: Vec<Descriptor>,
-        /// This OPTIONAL property contains arbitrary metadata for the image
-        /// index. This OPTIONAL property MUST use the annotation rules.
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[cfg_attr(feature = "builder", getset(get = "pub"), builder(default))]
-        annotations: Option<HashMap<String, String>>,
-    }
-);
+/// The expected schema version; equals 2 for compatibility with older versions of Docker.
+pub const SCHEMA_VERSION: u32 = 2;
+
+#[derive(Builder, Clone, CopyGetters, Debug, Deserialize, Eq, Getters, PartialEq, Serialize)]
+#[serde(rename_all = "camelCase")]
+#[builder(
+    pattern = "owned",
+    setter(into, strip_option),
+    build_fn(error = "OciSpecError")
+)]
+/// The image index is a higher-level manifest which points to specific
+/// image manifests, ideal for one or more platforms. While the use of
+/// an image index is OPTIONAL for image providers, image consumers
+/// SHOULD be prepared to process them.
+pub struct ImageIndex {
+    /// This REQUIRED property specifies the image manifest schema version.
+    /// For this version of the specification, this MUST be 2 to ensure
+    /// backward compatibility with older versions of Docker. The
+    /// value of this field will not change. This field MAY be
+    /// removed in a future version of the specification.
+    #[getset(get_copy = "pub")]
+    schema_version: u32,
+    /// This property is reserved for use, to maintain compatibility. When
+    /// used, this field contains the media type of this document,
+    /// which differs from the descriptor use of mediaType.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[getset(get = "pub")]
+    #[builder(default)]
+    media_type: Option<MediaType>,
+    /// This REQUIRED property contains a list of manifests for specific
+    /// platforms. While this property MUST be present, the size of
+    /// the array MAY be zero.
+    #[getset(get = "pub")]
+    manifests: Vec<Descriptor>,
+    /// This OPTIONAL property contains arbitrary metadata for the image
+    /// index. This OPTIONAL property MUST use the annotation rules.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[getset(get = "pub")]
+    #[builder(default)]
+    annotations: Option<HashMap<String, String>>,
+}
 
 impl ImageIndex {
     /// Attempts to load an image index from a file.
@@ -151,7 +155,7 @@ impl ImageIndex {
 impl Default for ImageIndex {
     fn default() -> Self {
         Self {
-            schema_version: 2,
+            schema_version: SCHEMA_VERSION,
             media_type: Default::default(),
             manifests: Default::default(),
             annotations: Default::default(),
@@ -164,12 +168,9 @@ mod tests {
     use std::{fs, path::PathBuf};
 
     use super::*;
-    #[cfg(not(feature = "builder"))]
-    use crate::image::{Descriptor, Platform};
-    #[cfg(feature = "builder")]
+    use crate::image::{Arch, Os};
     use crate::image::{DescriptorBuilder, PlatformBuilder};
 
-    #[cfg(feature = "builder")]
     fn create_index() -> ImageIndex {
         let ppc_manifest = DescriptorBuilder::default()
             .media_type(MediaType::ImageManifest)
@@ -177,8 +178,8 @@ mod tests {
             .size(7143)
             .platform(
                 PlatformBuilder::default()
-                    .architecture("ppc64le")
-                    .os("linux")
+                    .architecture(Arch::PowerPC64le)
+                    .os(Os::Linux)
                     .build()
                     .expect("build ppc64le platform"),
             )
@@ -191,8 +192,8 @@ mod tests {
             .size(7682)
             .platform(
                 PlatformBuilder::default()
-                    .architecture("amd64")
-                    .os("linux")
+                    .architecture(Arch::Amd64)
+                    .os(Os::Linux)
                     .build()
                     .expect("build amd64 platform"),
             )
@@ -200,54 +201,10 @@ mod tests {
             .expect("build amd64 manifest descriptor");
 
         let index = ImageIndexBuilder::default()
-            .schema_version(2 as u32)
+            .schema_version(SCHEMA_VERSION)
             .manifests(vec![ppc_manifest, amd64_manifest])
             .build()
             .expect("build image index");
-
-        index
-    }
-
-    #[cfg(not(feature = "builder"))]
-    fn create_index() -> ImageIndex {
-        let ppc_manifest = Descriptor {
-            media_type: MediaType::ImageManifest,
-            digest: "sha256:e692418e4cbaf90ca69d05a66403747baa33ee08806650b51fab815ad7fc331f"
-                .to_owned(),
-            size: 7143,
-            urls: None,
-            annotations: None,
-            platform: Some(Platform {
-                architecture: "ppc64le".to_owned(),
-                os: "linux".to_owned(),
-                os_version: None,
-                os_features: None,
-                variant: None,
-            }),
-        };
-
-        let amd64_manifest = Descriptor {
-            media_type: MediaType::ImageManifest,
-            digest: "sha256:5b0bcabd1ed22e9fb1310cf6c2dec7cdef19f0ad69efa1f392e94a4333501270"
-                .to_owned(),
-            size: 7682,
-            urls: None,
-            annotations: None,
-            platform: Some(Platform {
-                architecture: "amd64".to_owned(),
-                os: "linux".to_owned(),
-                os_version: None,
-                os_features: None,
-                variant: None,
-            }),
-        };
-
-        let index = ImageIndex {
-            schema_version: 2,
-            media_type: None,
-            manifests: vec![ppc_manifest, amd64_manifest],
-            annotations: None,
-        };
 
         index
     }

@@ -1,72 +1,70 @@
+use super::{Descriptor, MediaType};
+use crate::{
+    error::{OciSpecError, Result},
+    from_file, from_reader, to_file, to_writer,
+};
+use derive_builder::Builder;
+use getset::{CopyGetters, Getters};
+use serde::{Deserialize, Serialize};
 use std::{
     collections::HashMap,
     io::{Read, Write},
     path::Path,
 };
 
-use crate::{error::Result, from_file, from_reader, to_file, to_writer};
-
-use super::{Descriptor, MediaType};
-
-use serde::{Deserialize, Serialize};
-
-make_pub!(
-    #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
-    #[serde(rename_all = "camelCase")]
-    #[cfg_attr(
-        feature = "builder",
-        derive(derive_builder::Builder, getset::CopyGetters, getset::Getters),
-        builder(
-            pattern = "owned",
-            setter(into, strip_option),
-            build_fn(error = "crate::error::OciSpecError")
-        )
-    )]
-    /// Unlike the image index, which contains information about a set of images
-    /// that can span a variety of architectures and operating systems, an image
-    /// manifest provides a configuration and set of layers for a single
-    /// container image for a specific architecture and operating system.
-    struct ImageManifest {
-        /// This REQUIRED property specifies the image manifest schema version.
-        /// For this version of the specification, this MUST be 2 to ensure
-        /// backward compatibility with older versions of Docker. The
-        /// value of this field will not change. This field MAY be
-        /// removed in a future version of the specification.
-        #[cfg_attr(feature = "builder", getset(get_copy = "pub"))]
-        schema_version: u32,
-        /// This property is reserved for use, to maintain compatibility. When
-        /// used, this field contains the media type of this document,
-        /// which differs from the descriptor use of mediaType.
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[cfg_attr(feature = "builder", getset(get = "pub"), builder(default))]
-        media_type: Option<MediaType>,
-        /// This REQUIRED property references a configuration object for a
-        /// container, by digest. Beyond the descriptor requirements,
-        /// the value has the following additional restrictions:
-        /// The media type descriptor property has additional restrictions for
-        /// config. Implementations MUST support at least the following
-        /// media types:
-        /// - application/vnd.oci.image.config.v1+json
-        /// Manifests concerned with portability SHOULD use one of the above
-        /// media types.
-        #[cfg_attr(feature = "builder", getset(get = "pub"))]
-        config: Descriptor,
-        /// Each item in the array MUST be a descriptor. The array MUST have the
-        /// base layer at index 0. Subsequent layers MUST then follow in
-        /// stack order (i.e. from `layers[0]` to `layers[len(layers)-1]`).
-        /// The final filesystem layout MUST match the result of applying
-        /// the layers to an empty directory. The ownership, mode, and other
-        /// attributes of the initial empty directory are unspecified.
-        #[cfg_attr(feature = "builder", getset(get = "pub"))]
-        layers: Vec<Descriptor>,
-        /// This OPTIONAL property contains arbitrary metadata for the image
-        /// manifest. This OPTIONAL property MUST use the annotation
-        /// rules.
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[cfg_attr(feature = "builder", getset(get = "pub"), builder(default))]
-        annotations: Option<HashMap<String, String>>,
-    }
-);
+#[derive(Builder, Clone, CopyGetters, Debug, Deserialize, Eq, Getters, PartialEq, Serialize)]
+#[serde(rename_all = "camelCase")]
+#[builder(
+    pattern = "owned",
+    setter(into, strip_option),
+    build_fn(error = "OciSpecError")
+)]
+/// Unlike the image index, which contains information about a set of images
+/// that can span a variety of architectures and operating systems, an image
+/// manifest provides a configuration and set of layers for a single
+/// container image for a specific architecture and operating system.
+pub struct ImageManifest {
+    /// This REQUIRED property specifies the image manifest schema version.
+    /// For this version of the specification, this MUST be 2 to ensure
+    /// backward compatibility with older versions of Docker. The
+    /// value of this field will not change. This field MAY be
+    /// removed in a future version of the specification.
+    #[getset(get_copy = "pub")]
+    schema_version: u32,
+    /// This property is reserved for use, to maintain compatibility. When
+    /// used, this field contains the media type of this document,
+    /// which differs from the descriptor use of mediaType.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[getset(get = "pub")]
+    #[builder(default)]
+    media_type: Option<MediaType>,
+    /// This REQUIRED property references a configuration object for a
+    /// container, by digest. Beyond the descriptor requirements,
+    /// the value has the following additional restrictions:
+    /// The media type descriptor property has additional restrictions for
+    /// config. Implementations MUST support at least the following
+    /// media types:
+    /// - application/vnd.oci.image.config.v1+json
+    /// Manifests concerned with portability SHOULD use one of the above
+    /// media types.
+    #[getset(get = "pub")]
+    config: Descriptor,
+    /// Each item in the array MUST be a descriptor. The array MUST have the
+    /// base layer at index 0. Subsequent layers MUST then follow in
+    /// stack order (i.e. from `layers[0]` to `layers[len(layers)-1]`).
+    /// The final filesystem layout MUST match the result of applying
+    /// the layers to an empty directory. The ownership, mode, and other
+    /// attributes of the initial empty directory are unspecified.
+    #[getset(get = "pub")]
+    layers: Vec<Descriptor>,
+    /// This OPTIONAL property contains arbitrary metadata for the image
+    /// manifest. This OPTIONAL property MUST use the annotation
+    /// rules.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[getset(get = "pub")]
+    #[builder(default)]
+    annotations: Option<HashMap<String, String>>,
+}
 
 impl ImageManifest {
     /// Attempts to load an image manifest from a file.
@@ -171,13 +169,11 @@ mod tests {
     use std::{fs, path::PathBuf};
 
     use super::*;
-    #[cfg(not(feature = "builder"))]
-    use crate::image::Descriptor;
-    #[cfg(feature = "builder")]
     use crate::image::{Descriptor, DescriptorBuilder};
 
-    #[cfg(feature = "builder")]
     fn create_manifest() -> ImageManifest {
+        use crate::image::SCHEMA_VERSION;
+
         let config = DescriptorBuilder::default()
             .media_type(MediaType::ImageConfig)
             .size(7023)
@@ -211,64 +207,11 @@ mod tests {
         .collect();
 
         let manifest = ImageManifestBuilder::default()
-            .schema_version(2 as u32)
+            .schema_version(SCHEMA_VERSION)
             .config(config)
             .layers(layers)
             .build()
             .expect("build image manifest");
-
-        manifest
-    }
-
-    #[cfg(not(feature = "builder"))]
-    fn create_manifest() -> ImageManifest {
-        let config = Descriptor {
-            media_type: MediaType::ImageConfig,
-            size: 7023,
-            digest: "sha256:b5b2b2c507a0944348e0303114d8d93aaaa081732b86451d9bce1f432a537bc7"
-                .to_owned(),
-            urls: None,
-            annotations: None,
-            platform: None,
-        };
-
-        let layers = vec![
-            Descriptor {
-                media_type: MediaType::ImageLayerGzip,
-                size: 32654,
-                digest: "sha256:9834876dcfb05cb167a5c24953eba58c4ac89b1adf57f28f2f9d09af107ee8f0"
-                    .to_owned(),
-                urls: None,
-                annotations: None,
-                platform: None,
-            },
-            Descriptor {
-                media_type: MediaType::ImageLayerGzip,
-                size: 16724,
-                digest: "sha256:3c3a4604a545cdc127456d94e421cd355bca5b528f4a9c1905b15da2eb4a4c6b"
-                    .to_owned(),
-                urls: None,
-                annotations: None,
-                platform: None,
-            },
-            Descriptor {
-                media_type: MediaType::ImageLayerGzip,
-                size: 73109,
-                digest: "sha256:ec4b8955958665577945c89419d1af06b5f7636b4ac3da7f12184802ad867736"
-                    .to_owned(),
-                urls: None,
-                annotations: None,
-                platform: None,
-            },
-        ];
-
-        let manifest = ImageManifest {
-            schema_version: 2,
-            media_type: None,
-            config,
-            layers,
-            annotations: None,
-        };
 
         manifest
     }

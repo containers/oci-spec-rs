@@ -244,7 +244,7 @@ impl From<Spec> for SpecBuilder {
             None => spec_builder,
         };
         spec_builder = match spec.hostname() {
-            Some(hostname) => spec_builder.hostname(hostname.clone()),
+            Some(hostname) => spec_builder.hostname(hostname),
             None => spec_builder,
         };
         spec_builder = match spec.hooks() {
@@ -347,9 +347,7 @@ mod tests {
 
     #[test]
     fn test_modify_spec() {
-        let spec = Spec {
-            ..Default::default()
-        };
+        let spec = Spec::default();
 
         // We abuse clone here because we want to keep a record for later
         // asserts. In real use, the spec and the new_root will be consumed by

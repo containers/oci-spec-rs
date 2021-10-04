@@ -1,7 +1,7 @@
 //! [OCI runtime spec](https://github.com/opencontainers/runtime-spec) types and definitions.
 
 use derive_builder::Builder;
-use getset::Getters;
+use getset::{Getters, Setters};
 use serde::{Deserialize, Serialize};
 use std::{
     collections::HashMap,
@@ -34,14 +34,14 @@ pub use vm::*;
 pub use windows::*;
 
 /// Base configuration for the container.
-#[derive(Builder, Clone, Debug, Deserialize, Getters, PartialEq, Serialize)]
+#[derive(Builder, Clone, Debug, Deserialize, Getters, Setters, PartialEq, Serialize)]
 #[builder(
     default,
     pattern = "owned",
     setter(into, strip_option),
     build_fn(error = "OciSpecError")
 )]
-#[getset(get = "pub")]
+#[getset(get = "pub", set = "pub")]
 pub struct Spec {
     #[serde(default, rename = "ociVersion")]
     ///  MUST be in SemVer v2.0.0 format and specifies the version of the

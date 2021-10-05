@@ -29,3 +29,10 @@ fn test_linux_device_cgroup_to_string() {
         .expect("build device cgroup");
     assert_eq!(ldc.to_string(), "a 1:9 rwm");
 }
+
+#[test]
+fn test_load_sample_spec() {
+    let fixture_path = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("src/runtime/test/fixture/sample.json");
+    Spec::load(fixture_path).unwrap();
+}

@@ -3,7 +3,6 @@ use derive_builder::Builder;
 use getset::{CopyGetters, Getters};
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
-use std::time::Duration;
 
 #[derive(Builder, Clone, Debug, Default, Deserialize, Eq, Getters, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -99,6 +98,7 @@ pub struct Hook {
 
     #[serde(default, skip_serializing_if = "Option::is_none")]
     #[getset(get_copy = "pub")]
-    /// Timeout is the duration before aborting the hook.
-    timeout: Option<Duration>,
+    /// Timeout is the number of seconds before aborting the hook. If set,
+    /// timeout MUST be greater than zero.
+    timeout: Option<i64>,
 }

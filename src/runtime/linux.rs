@@ -813,6 +813,11 @@ pub struct LinuxSeccomp {
 
     #[serde(default, skip_serializing_if = "Option::is_none")]
     #[getset(get = "pub")]
+    /// The default error return code to use when the default action is SCMP_ACT_ERRNO.
+    default_errno_ret: Option<u32>,
+
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[getset(get = "pub")]
     /// Available architectures for the restriction.
     architectures: Option<Vec<Arch>>,
 
@@ -820,6 +825,16 @@ pub struct LinuxSeccomp {
     #[getset(get = "pub")]
     /// Flags added to the seccomp restriction.
     flags: Option<Vec<String>>,
+
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[getset(get = "pub")]
+    /// The unix domain socket path over which runtime will use for `SCMP_ACT_NOTIFY`.
+    listener_path: Option<PathBuf>,
+
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[getset(get = "pub")]
+    /// An opaque data to pass to the seccomp agent.
+    listener_metadata: Option<String>,
 
     #[serde(default, skip_serializing_if = "Option::is_none")]
     #[getset(get = "pub")]

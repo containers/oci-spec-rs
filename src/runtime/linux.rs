@@ -829,7 +829,7 @@ pub struct LinuxSeccomp {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     #[getset(get = "pub")]
     /// The unix domain socket path over which runtime will use for `SCMP_ACT_NOTIFY`.
-    listener_path: Option<String>,
+    listener_path: Option<PathBuf>,
 
     #[serde(default, skip_serializing_if = "Option::is_none")]
     #[getset(get = "pub")]

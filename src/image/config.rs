@@ -4,7 +4,7 @@ use crate::{
     from_file, from_reader, to_file, to_writer,
 };
 use derive_builder::Builder;
-use getset::Getters;
+use getset::{Getters, Setters};
 use serde::{ser::SerializeMap, Deserialize, Deserializer, Serialize, Serializer};
 #[cfg(test)]
 use std::collections::BTreeMap;
@@ -14,14 +14,14 @@ use std::{
     path::Path,
 };
 
-#[derive(Builder, Clone, Debug, Deserialize, Eq, Getters, PartialEq, Serialize)]
+#[derive(Builder, Clone, Debug, Deserialize, Eq, Getters, Setters, PartialEq, Serialize)]
 #[builder(
     default,
     pattern = "owned",
     setter(into, strip_option),
     build_fn(error = "OciSpecError")
 )]
-#[getset(get = "pub")]
+#[getset(get = "pub", set = "pub")]
 /// The image configuration is associated with an image and describes some
 /// basic information about the image such as date created, author, as
 /// well as execution/runtime configuration like its entrypoint, default
@@ -194,7 +194,9 @@ impl Default for ImageConfiguration {
     }
 }
 
-#[derive(Builder, Clone, Debug, Default, Deserialize, Eq, Getters, PartialEq, Serialize)]
+#[derive(
+    Builder, Clone, Debug, Default, Deserialize, Eq, Getters, Setters, PartialEq, Serialize,
+)]
 #[serde(rename_all = "PascalCase")]
 #[builder(
     default,
@@ -202,7 +204,7 @@ impl Default for ImageConfiguration {
     setter(into, strip_option),
     build_fn(error = "OciSpecError")
 )]
-#[getset(get = "pub")]
+#[getset(get = "pub", set = "pub")]
 /// The execution parameters which SHOULD be used as a base when
 /// running a container using the image.
 pub struct Config {
@@ -329,14 +331,14 @@ where
     }
 }
 
-#[derive(Builder, Clone, Debug, Deserialize, Eq, Getters, PartialEq, Serialize)]
+#[derive(Builder, Clone, Debug, Deserialize, Eq, Getters, Setters, PartialEq, Serialize)]
 #[builder(
     default,
     pattern = "owned",
     setter(into, strip_option),
     build_fn(error = "OciSpecError")
 )]
-#[getset(get = "pub")]
+#[getset(get = "pub", set = "pub")]
 /// RootFs references the layer content addresses used by the image.
 pub struct RootFs {
     /// MUST be set to layers.
@@ -356,7 +358,9 @@ impl Default for RootFs {
     }
 }
 
-#[derive(Builder, Clone, Debug, Default, Deserialize, Eq, Getters, PartialEq, Serialize)]
+#[derive(
+    Builder, Clone, Debug, Default, Deserialize, Eq, Getters, Setters, PartialEq, Serialize,
+)]
 #[builder(
     default,
     pattern = "owned",
@@ -368,25 +372,25 @@ pub struct History {
     /// A combined date and time at which the layer was created,
     /// formatted as defined by [RFC 3339, section 5.6.](https://tools.ietf.org/html/rfc3339#section-5.6).
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[getset(get = "pub")]
+    #[getset(get = "pub", set = "pub")]
     created: Option<String>,
     /// The author of the build point.
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[getset(get = "pub")]
+    #[getset(get = "pub", set = "pub")]
     author: Option<String>,
     /// The command which created the layer.
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[getset(get = "pub")]
+    #[getset(get = "pub", set = "pub")]
     created_by: Option<String>,
     /// A custom message set when creating the layer.
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[getset(get = "pub")]
+    #[getset(get = "pub", set = "pub")]
     comment: Option<String>,
     /// This field is used to mark if the history item created
     /// a filesystem diff. It is set to true if this history item
     /// doesn't correspond to an actual layer in the rootfs section
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[getset(get_copy = "pub")]
+    #[getset(get_copy = "pub", set = "pub")]
     empty_layer: Option<bool>,
 }
 

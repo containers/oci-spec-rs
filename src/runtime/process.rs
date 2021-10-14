@@ -3,11 +3,13 @@ use crate::{
     runtime::{Capabilities, Capability},
 };
 use derive_builder::Builder;
-use getset::{CopyGetters, Getters};
+use getset::{CopyGetters, Getters, Setters};
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 
-#[derive(Builder, Clone, CopyGetters, Debug, Deserialize, Getters, Eq, PartialEq, Serialize)]
+#[derive(
+    Builder, Clone, CopyGetters, Debug, Deserialize, Getters, Setters, Eq, PartialEq, Serialize,
+)]
 #[serde(rename_all = "camelCase")]
 #[builder(
     default,
@@ -19,69 +21,69 @@ use std::path::PathBuf;
 /// container.
 pub struct Process {
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    #[getset(get_copy = "pub")]
+    #[getset(get_copy = "pub", set = "pub")]
     /// Terminal creates an interactive terminal for the container.
     terminal: Option<bool>,
 
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    #[getset(get_copy = "pub")]
+    #[getset(get_copy = "pub", set = "pub")]
     /// ConsoleSize specifies the size of the console.
     console_size: Option<Box>,
 
-    #[getset(get = "pub")]
+    #[getset(get = "pub", set = "pub")]
     /// User specifies user information for the process.
     user: User,
 
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    #[getset(get = "pub")]
+    #[getset(get = "pub", set = "pub")]
     /// Args specifies the binary and arguments for the application to
     /// execute.
     args: Option<Vec<String>>,
 
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    #[getset(get = "pub")]
+    #[getset(get = "pub", set = "pub")]
     /// CommandLine specifies the full command line for the application to
     /// execute on Windows.
     command_line: Option<String>,
 
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    #[getset(get = "pub")]
+    #[getset(get = "pub", set = "pub")]
     /// Env populates the process environment for the process.
     env: Option<Vec<String>>,
 
-    #[getset(get = "pub")]
+    #[getset(get = "pub", set = "pub")]
     /// Cwd is the current working directory for the process and must be
     /// relative to the container's root.
     cwd: PathBuf,
 
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    #[getset(get = "pub")]
+    #[getset(get = "pub", set = "pub")]
     /// Capabilities are Linux capabilities that are kept for the process.
     capabilities: Option<LinuxCapabilities>,
 
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    #[getset(get = "pub")]
+    #[getset(get = "pub", set = "pub")]
     /// Rlimits specifies rlimit options to apply to the process.
     rlimits: Option<Vec<LinuxRlimit>>,
 
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    #[getset(get_copy = "pub")]
+    #[getset(get_copy = "pub", set = "pub")]
     /// NoNewPrivileges controls whether additional privileges could be
     /// gained by processes in the container.
     no_new_privileges: Option<bool>,
 
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    #[getset(get = "pub")]
+    #[getset(get = "pub", set = "pub")]
     /// ApparmorProfile specifies the apparmor profile for the container.
     apparmor_profile: Option<String>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[getset(get_copy = "pub")]
+    #[getset(get_copy = "pub", set = "pub")]
     /// Specify an oom_score_adj for the container.
     oom_score_adj: Option<i32>,
 
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    #[getset(get = "pub")]
+    #[getset(get = "pub", set = "pub")]
     /// SelinuxLabel specifies the selinux context that the container
     /// process is run as.
     selinux_label: Option<String>,
@@ -138,7 +140,7 @@ impl Default for Process {
     setter(into, strip_option),
     build_fn(error = "OciSpecError")
 )]
-#[getset(get_copy = "pub")]
+#[getset(get_copy = "pub", set = "pub")]
 /// Box specifies dimensions of a rectangle. Used for specifying the size of
 /// a console.
 pub struct Box {
@@ -225,7 +227,7 @@ impl Default for LinuxRlimitType {
     setter(into, strip_option),
     build_fn(error = "OciSpecError")
 )]
-#[getset(get_copy = "pub")]
+#[getset(get_copy = "pub", set = "pub")]
 /// RLimit types and restrictions.
 pub struct LinuxRlimit {
     #[serde(rename = "type")]
@@ -242,7 +244,17 @@ pub struct LinuxRlimit {
 }
 
 #[derive(
-    Builder, Clone, CopyGetters, Debug, Default, Deserialize, Getters, Eq, PartialEq, Serialize,
+    Builder,
+    Clone,
+    CopyGetters,
+    Debug,
+    Default,
+    Deserialize,
+    Getters,
+    Setters,
+    Eq,
+    PartialEq,
+    Serialize,
 )]
 #[serde(rename_all = "camelCase")]
 #[builder(
@@ -254,40 +266,40 @@ pub struct LinuxRlimit {
 /// User id (uid) and group id (gid) tracks file permssions.
 pub struct User {
     #[serde(default)]
-    #[getset(get_copy = "pub")]
+    #[getset(get_copy = "pub", set = "pub")]
     /// UID is the user id.
     uid: u32,
 
     #[serde(default)]
-    #[getset(get_copy = "pub")]
+    #[getset(get_copy = "pub", set = "pub")]
     /// GID is the group id.
     gid: u32,
 
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    #[getset(get_copy = "pub")]
+    #[getset(get_copy = "pub", set = "pub")]
     /// Specifies the umask of the user.
     umask: Option<u32>,
 
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    #[getset(get = "pub")]
+    #[getset(get = "pub", set = "pub")]
     /// AdditionalGids are additional group ids set for the container's
     /// process.
     additional_gids: Option<Vec<u32>>,
 
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    #[getset(get = "pub")]
+    #[getset(get = "pub", set = "pub")]
     /// Username is the user name.
     username: Option<String>,
 }
 
-#[derive(Builder, Clone, Debug, Deserialize, Getters, Eq, PartialEq, Serialize)]
+#[derive(Builder, Clone, Debug, Deserialize, Getters, Setters, Eq, PartialEq, Serialize)]
 #[builder(
     default,
     pattern = "owned",
     setter(into, strip_option),
     build_fn(error = "OciSpecError")
 )]
-#[getset(get = "pub")]
+#[getset(get = "pub", set = "pub")]
 /// LinuxCapabilities specifies the list of allowed capabilities that are
 /// kept for a process. <http://man7.org/linux/man-pages/man7/capabilities.7.html>
 pub struct LinuxCapabilities {

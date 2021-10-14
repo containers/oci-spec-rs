@@ -4,7 +4,7 @@ use crate::{
     from_file, from_reader, to_file, to_writer,
 };
 use derive_builder::Builder;
-use getset::{CopyGetters, Getters};
+use getset::{CopyGetters, Getters, Setters};
 use serde::{Deserialize, Serialize};
 use std::{
     collections::HashMap,
@@ -12,7 +12,9 @@ use std::{
     path::Path,
 };
 
-#[derive(Builder, Clone, CopyGetters, Debug, Deserialize, Eq, Getters, PartialEq, Serialize)]
+#[derive(
+    Builder, Clone, CopyGetters, Debug, Deserialize, Eq, Getters, Setters, PartialEq, Serialize,
+)]
 #[serde(rename_all = "camelCase")]
 #[builder(
     pattern = "owned",
@@ -29,13 +31,13 @@ pub struct ImageManifest {
     /// backward compatibility with older versions of Docker. The
     /// value of this field will not change. This field MAY be
     /// removed in a future version of the specification.
-    #[getset(get_copy = "pub")]
+    #[getset(get_copy = "pub", set = "pub")]
     schema_version: u32,
     /// This property is reserved for use, to maintain compatibility. When
     /// used, this field contains the media type of this document,
     /// which differs from the descriptor use of mediaType.
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[getset(get = "pub")]
+    #[getset(get = "pub", set = "pub")]
     #[builder(default)]
     media_type: Option<MediaType>,
     /// This REQUIRED property references a configuration object for a
@@ -47,7 +49,7 @@ pub struct ImageManifest {
     /// - application/vnd.oci.image.config.v1+json
     /// Manifests concerned with portability SHOULD use one of the above
     /// media types.
-    #[getset(get = "pub")]
+    #[getset(get = "pub", set = "pub")]
     config: Descriptor,
     /// Each item in the array MUST be a descriptor. The array MUST have the
     /// base layer at index 0. Subsequent layers MUST then follow in
@@ -55,13 +57,13 @@ pub struct ImageManifest {
     /// The final filesystem layout MUST match the result of applying
     /// the layers to an empty directory. The ownership, mode, and other
     /// attributes of the initial empty directory are unspecified.
-    #[getset(get = "pub")]
+    #[getset(get = "pub", set = "pub")]
     layers: Vec<Descriptor>,
     /// This OPTIONAL property contains arbitrary metadata for the image
     /// manifest. This OPTIONAL property MUST use the annotation
     /// rules.
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[getset(get = "pub")]
+    #[getset(get = "pub", set = "pub")]
     #[builder(default)]
     annotations: Option<HashMap<String, String>>,
 }

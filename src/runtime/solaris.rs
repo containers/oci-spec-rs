@@ -1,9 +1,11 @@
 use crate::error::OciSpecError;
 use derive_builder::Builder;
-use getset::Getters;
+use getset::{Getters, Setters};
 use serde::{Deserialize, Serialize};
 
-#[derive(Builder, Clone, Debug, Default, Deserialize, Getters, Eq, PartialEq, Serialize)]
+#[derive(
+    Builder, Clone, Debug, Default, Deserialize, Getters, Setters, Eq, PartialEq, Serialize,
+)]
 #[serde(rename_all = "camelCase")]
 #[builder(
     default,
@@ -11,7 +13,7 @@ use serde::{Deserialize, Serialize};
     setter(into, strip_option),
     build_fn(error = "OciSpecError")
 )]
-#[getset(get = "pub")]
+#[getset(get = "pub", set = "pub")]
 /// Solaris contains platform-specific configuration for Solaris application
 /// containers.
 pub struct Solaris {
@@ -43,7 +45,9 @@ pub struct Solaris {
     capped_memory: Option<SolarisCappedMemory>,
 }
 
-#[derive(Builder, Clone, Debug, Default, Deserialize, Getters, Eq, PartialEq, Serialize)]
+#[derive(
+    Builder, Clone, Debug, Default, Deserialize, Getters, Setters, Eq, PartialEq, Serialize,
+)]
 #[serde(rename_all = "camelCase")]
 #[builder(
     default,
@@ -51,7 +55,7 @@ pub struct Solaris {
     setter(into, strip_option),
     build_fn(error = "OciSpecError")
 )]
-#[getset(get = "pub")]
+#[getset(get = "pub", set = "pub")]
 /// SolarisAnet provides the specification for automatic creation of network
 /// resources for this container.
 pub struct SolarisAnet {
@@ -85,14 +89,16 @@ pub struct SolarisAnet {
     mac_address: Option<String>,
 }
 
-#[derive(Builder, Clone, Debug, Default, Deserialize, Getters, Eq, PartialEq, Serialize)]
+#[derive(
+    Builder, Clone, Debug, Default, Deserialize, Getters, Setters, Eq, PartialEq, Serialize,
+)]
 #[builder(
     default,
     pattern = "owned",
     setter(into, strip_option),
     build_fn(error = "OciSpecError")
 )]
-#[getset(get = "pub")]
+#[getset(get = "pub", set = "pub")]
 /// SolarisCappedCPU allows users to set limit on the amount of CPU time
 /// that can be used by container.
 pub struct SolarisCappedCPU {
@@ -101,14 +107,16 @@ pub struct SolarisCappedCPU {
     ncpus: Option<String>,
 }
 
-#[derive(Builder, Clone, Debug, Default, Deserialize, Getters, Eq, PartialEq, Serialize)]
+#[derive(
+    Builder, Clone, Debug, Default, Deserialize, Getters, Setters, Eq, PartialEq, Serialize,
+)]
 #[builder(
     default,
     pattern = "owned",
     setter(into, strip_option),
     build_fn(error = "OciSpecError")
 )]
-#[getset(get = "pub")]
+#[getset(get = "pub", set = "pub")]
 /// SolarisCappedMemory allows users to set the physical and swap caps on
 /// the memory that can be used by this container.
 pub struct SolarisCappedMemory {

@@ -4,7 +4,9 @@ use getset::{CopyGetters, Getters, Setters};
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 
-#[derive(Builder, Clone, CopyGetters, Debug, Deserialize, Eq, Getters, PartialEq, Serialize)]
+#[derive(
+    Builder, Clone, CopyGetters, Debug, Deserialize, Eq, Getters, Setters, PartialEq, Serialize,
+)]
 #[builder(
     default,
     pattern = "owned",
@@ -16,13 +18,13 @@ use std::path::PathBuf;
 pub struct Root {
     /// Path is the absolute path to the container's root filesystem.
     #[serde(default)]
-    #[getset(get = "pub")]
+    #[getset(get = "pub", set = "pub")]
     path: PathBuf,
 
     /// Readonly makes the root filesystem for the container readonly before
     /// the process is executed.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    #[getset(get_copy = "pub")]
+    #[getset(get_copy = "pub", set = "pub")]
     readonly: Option<bool>,
 }
 

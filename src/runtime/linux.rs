@@ -1,11 +1,11 @@
 use crate::error::{oci_error, OciSpecError};
 
 use derive_builder::Builder;
-use getset::{CopyGetters, Getters};
+use getset::{CopyGetters, Getters, Setters};
 use serde::{Deserialize, Serialize};
 use std::{collections::HashMap, convert::TryFrom, path::PathBuf};
 
-#[derive(Builder, Clone, Debug, Deserialize, Eq, Getters, PartialEq, Serialize)]
+#[derive(Builder, Clone, Debug, Deserialize, Eq, Getters, Setters, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
 #[builder(
     default,
@@ -13,7 +13,7 @@ use std::{collections::HashMap, convert::TryFrom, path::PathBuf};
     setter(into, strip_option),
     build_fn(error = "OciSpecError")
 )]
-#[getset(get = "pub")]
+#[getset(get = "pub", set = "pub")]
 /// Linux contains platform-specific configuration for Linux based
 /// containers.
 pub struct Linux {
@@ -142,7 +142,7 @@ impl Default for Linux {
     setter(into, strip_option),
     build_fn(error = "OciSpecError")
 )]
-#[getset(get_copy = "pub")]
+#[getset(get_copy = "pub", set = "pub")]
 /// LinuxIDMapping specifies UID/GID mappings.
 pub struct LinuxIdMapping {
     #[serde(default, rename = "hostID")]
@@ -199,7 +199,17 @@ impl LinuxDeviceType {
 }
 
 #[derive(
-    Builder, Clone, CopyGetters, Debug, Default, Deserialize, Eq, Getters, PartialEq, Serialize,
+    Builder,
+    Clone,
+    CopyGetters,
+    Debug,
+    Default,
+    Deserialize,
+    Eq,
+    Getters,
+    Setters,
+    PartialEq,
+    Serialize,
 )]
 #[builder(
     default,
@@ -211,26 +221,26 @@ impl LinuxDeviceType {
 /// controller
 pub struct LinuxDeviceCgroup {
     #[serde(default)]
-    #[getset(get_copy = "pub")]
+    #[getset(get_copy = "pub", set = "pub")]
     /// Allow or deny
     allow: bool,
 
     #[serde(default, rename = "type")]
-    #[getset(get_copy = "pub")]
+    #[getset(get_copy = "pub", set = "pub")]
     /// Device type, block, char, etc.
     typ: Option<LinuxDeviceType>,
 
-    #[getset(get_copy = "pub")]
+    #[getset(get_copy = "pub", set = "pub")]
     /// Device's major number
     major: Option<i64>,
 
-    #[getset(get_copy = "pub")]
+    #[getset(get_copy = "pub", set = "pub")]
     /// Device's minor number
     minor: Option<i64>,
 
     /// Cgroup access premissions format, rwm.
     #[serde(default)]
-    #[getset(get = "pub")]
+    #[getset(get = "pub", set = "pub")]
     access: Option<String>,
 }
 
@@ -265,7 +275,7 @@ impl ToString for LinuxDeviceCgroup {
     setter(into, strip_option),
     build_fn(error = "OciSpecError")
 )]
-#[getset(get_copy = "pub")]
+#[getset(get_copy = "pub", set = "pub")]
 /// LinuxMemory for Linux cgroup 'memory' resource management.
 pub struct LinuxMemory {
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -303,7 +313,17 @@ pub struct LinuxMemory {
 }
 
 #[derive(
-    Builder, Clone, CopyGetters, Debug, Default, Deserialize, Eq, Getters, PartialEq, Serialize,
+    Builder,
+    Clone,
+    CopyGetters,
+    Debug,
+    Default,
+    Deserialize,
+    Eq,
+    Getters,
+    Setters,
+    PartialEq,
+    Serialize,
 )]
 #[serde(rename_all = "camelCase")]
 #[builder(
@@ -315,38 +335,38 @@ pub struct LinuxMemory {
 /// LinuxCPU for Linux cgroup 'cpu' resource management.
 pub struct LinuxCpu {
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[getset(get_copy = "pub")]
+    #[getset(get_copy = "pub", set = "pub")]
     /// CPU shares (relative weight (ratio) vs. other cgroups with cpu
     /// shares).
     shares: Option<u64>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[getset(get_copy = "pub")]
+    #[getset(get_copy = "pub", set = "pub")]
     /// CPU hardcap limit (in usecs). Allowed cpu time in a given period.
     quota: Option<i64>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[getset(get_copy = "pub")]
+    #[getset(get_copy = "pub", set = "pub")]
     /// CPU period to be used for hardcapping (in usecs).
     period: Option<u64>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[getset(get_copy = "pub")]
+    #[getset(get_copy = "pub", set = "pub")]
     /// How much time realtime scheduling may use (in usecs).
     realtime_runtime: Option<i64>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[getset(get_copy = "pub")]
+    #[getset(get_copy = "pub", set = "pub")]
     /// CPU period to be used for realtime scheduling (in usecs).
     realtime_period: Option<u64>,
 
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    #[getset(get = "pub")]
+    #[getset(get = "pub", set = "pub")]
     /// CPUs to use within the cpuset. Default is to use any CPU available.
     cpus: Option<String>,
 
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    #[getset(get = "pub")]
+    #[getset(get = "pub", set = "pub")]
     /// List of memory nodes in the cpuset. Default is to use any available
     /// memory node.
     mems: Option<String>,
@@ -361,7 +381,7 @@ pub struct LinuxCpu {
     setter(into, strip_option),
     build_fn(error = "OciSpecError")
 )]
-#[getset(get_copy = "pub")]
+#[getset(get_copy = "pub", set = "pub")]
 /// LinuxPids for Linux cgroup 'pids' resource management (Linux 4.3).
 pub struct LinuxPids {
     #[serde(default)]
@@ -379,7 +399,7 @@ pub struct LinuxPids {
     setter(into, strip_option),
     build_fn(error = "OciSpecError")
 )]
-#[getset(get_copy = "pub")]
+#[getset(get_copy = "pub", set = "pub")]
 /// LinuxWeightDevice struct holds a `major:minor weight` pair for
 /// weightDevice.
 pub struct LinuxWeightDevice {
@@ -410,7 +430,7 @@ pub struct LinuxWeightDevice {
     setter(into, strip_option),
     build_fn(error = "OciSpecError")
 )]
-#[getset(get_copy = "pub")]
+#[getset(get_copy = "pub", set = "pub")]
 /// LinuxThrottleDevice struct holds a `major:minor rate_per_second` pair.
 pub struct LinuxThrottleDevice {
     #[serde(default)]
@@ -427,7 +447,17 @@ pub struct LinuxThrottleDevice {
 }
 
 #[derive(
-    Builder, Clone, CopyGetters, Debug, Default, Deserialize, Eq, Getters, PartialEq, Serialize,
+    Builder,
+    Clone,
+    CopyGetters,
+    Debug,
+    Default,
+    Deserialize,
+    Eq,
+    Getters,
+    Setters,
+    PartialEq,
+    Serialize,
 )]
 #[serde(rename_all = "camelCase")]
 #[builder(
@@ -439,44 +469,54 @@ pub struct LinuxThrottleDevice {
 /// LinuxBlockIO for Linux cgroup 'blkio' resource management.
 pub struct LinuxBlockIo {
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[getset(get_copy = "pub")]
+    #[getset(get_copy = "pub", set = "pub")]
     /// Specifies per cgroup weight.
     weight: Option<u16>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[getset(get_copy = "pub")]
+    #[getset(get_copy = "pub", set = "pub")]
     /// Specifies tasks' weight in the given cgroup while competing with the
     /// cgroup's child cgroups, CFQ scheduler only.
     leaf_weight: Option<u16>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[getset(get = "pub")]
+    #[getset(get = "pub", set = "pub")]
     /// Weight per cgroup per device, can override BlkioWeight.
     weight_device: Option<Vec<LinuxWeightDevice>>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[getset(get = "pub")]
+    #[getset(get = "pub", set = "pub")]
     /// IO read rate limit per cgroup per device, bytes per second.
     throttle_read_bps_device: Option<Vec<LinuxThrottleDevice>>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[getset(get = "pub")]
+    #[getset(get = "pub", set = "pub")]
     /// IO write rate limit per cgroup per device, bytes per second.
     throttle_write_bps_device: Option<Vec<LinuxThrottleDevice>>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[getset(get = "pub")]
+    #[getset(get = "pub", set = "pub")]
     /// IO read rate limit per cgroup per device, IO per second.
     throttle_read_iops_device: Option<Vec<LinuxThrottleDevice>>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[getset(get = "pub")]
+    #[getset(get = "pub", set = "pub")]
     /// IO write rate limit per cgroup per device, IO per second.
     throttle_write_iops_device: Option<Vec<LinuxThrottleDevice>>,
 }
 
 #[derive(
-    Builder, Clone, CopyGetters, Debug, Default, Deserialize, Eq, Getters, PartialEq, Serialize,
+    Builder,
+    Clone,
+    CopyGetters,
+    Debug,
+    Default,
+    Deserialize,
+    Eq,
+    Getters,
+    Setters,
+    PartialEq,
+    Serialize,
 )]
 #[serde(rename_all = "camelCase")]
 #[builder(
@@ -488,19 +528,29 @@ pub struct LinuxBlockIo {
 /// LinuxHugepageLimit structure corresponds to limiting kernel hugepages.
 pub struct LinuxHugepageLimit {
     #[serde(default)]
-    #[getset(get = "pub")]
+    #[getset(get = "pub", set = "pub")]
     /// Pagesize is the hugepage size.
     /// Format: "<size><unit-prefix>B' (e.g. 64KB, 2MB, 1GB, etc.)
     page_size: String,
 
     #[serde(default)]
-    #[getset(get_copy = "pub")]
+    #[getset(get_copy = "pub", set = "pub")]
     /// Limit is the limit of "hugepagesize" hugetlb usage.
     limit: i64,
 }
 
 #[derive(
-    Builder, Clone, CopyGetters, Debug, Default, Deserialize, Eq, Getters, PartialEq, Serialize,
+    Builder,
+    Clone,
+    CopyGetters,
+    Debug,
+    Default,
+    Deserialize,
+    Eq,
+    Getters,
+    Setters,
+    PartialEq,
+    Serialize,
 )]
 #[builder(
     default,
@@ -511,12 +561,12 @@ pub struct LinuxHugepageLimit {
 /// LinuxInterfacePriority for network interfaces.
 pub struct LinuxInterfacePriority {
     #[serde(default)]
-    #[getset(get = "pub")]
+    #[getset(get = "pub", set = "pub")]
     /// Name is the name of the network interface.
     name: String,
 
     #[serde(default)]
-    #[getset(get_copy = "pub")]
+    #[getset(get_copy = "pub", set = "pub")]
     /// Priority for the interface.
     priority: u32,
 }
@@ -528,7 +578,17 @@ impl ToString for LinuxInterfacePriority {
 }
 
 #[derive(
-    Builder, Clone, CopyGetters, Debug, Default, Deserialize, Eq, Getters, PartialEq, Serialize,
+    Builder,
+    Clone,
+    CopyGetters,
+    Debug,
+    Default,
+    Deserialize,
+    Eq,
+    Getters,
+    Setters,
+    PartialEq,
+    Serialize,
 )]
 #[builder(
     default,
@@ -539,18 +599,28 @@ impl ToString for LinuxInterfacePriority {
 /// LinuxNetwork identification and priority configuration.
 pub struct LinuxNetwork {
     #[serde(skip_serializing_if = "Option::is_none", rename = "classID")]
-    #[getset(get_copy = "pub")]
+    #[getset(get_copy = "pub", set = "pub")]
     /// Set class identifier for container's network packets
     class_id: Option<u32>,
 
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    #[getset(get = "pub")]
+    #[getset(get = "pub", set = "pub")]
     /// Set priority of network traffic for container.
     priorities: Option<Vec<LinuxInterfacePriority>>,
 }
 
 #[derive(
-    Builder, Clone, CopyGetters, Debug, Default, Deserialize, Eq, Getters, PartialEq, Serialize,
+    Builder,
+    Clone,
+    CopyGetters,
+    Debug,
+    Default,
+    Deserialize,
+    Eq,
+    Getters,
+    Setters,
+    PartialEq,
+    Serialize,
 )]
 #[serde(rename_all = "camelCase")]
 #[builder(
@@ -562,49 +632,49 @@ pub struct LinuxNetwork {
 /// Resource constraints for container
 pub struct LinuxResources {
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    #[getset(get = "pub")]
+    #[getset(get = "pub", set = "pub")]
     /// Devices configures the device allowlist.
     devices: Option<Vec<LinuxDeviceCgroup>>,
 
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    #[getset(get = "pub")]
+    #[getset(get = "pub", set = "pub")]
     /// Memory restriction configuration.
     memory: Option<LinuxMemory>,
 
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    #[getset(get = "pub")]
+    #[getset(get = "pub", set = "pub")]
     /// CPU resource restriction configuration.
     cpu: Option<LinuxCpu>,
 
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    #[getset(get = "pub")]
+    #[getset(get = "pub", set = "pub")]
     /// Task resource restrictions
     pids: Option<LinuxPids>,
 
     #[serde(default, skip_serializing_if = "Option::is_none", rename = "blockIO")]
-    #[getset(get = "pub")]
+    #[getset(get = "pub", set = "pub")]
     /// BlockIO restriction configuration.
     block_io: Option<LinuxBlockIo>,
 
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    #[getset(get = "pub")]
+    #[getset(get = "pub", set = "pub")]
     /// Hugetlb limit (in bytes).
     hugepage_limits: Option<Vec<LinuxHugepageLimit>>,
 
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    #[getset(get = "pub")]
+    #[getset(get = "pub", set = "pub")]
     /// Network restriction configuration.
     network: Option<LinuxNetwork>,
 
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    #[getset(get = "pub")]
+    #[getset(get = "pub", set = "pub")]
     /// Rdma resource restriction configuration. Limits are a set of key
     /// value pairs that define RDMA resource limits, where the key
     /// is device name and value is resource limits.
     rdma: Option<HashMap<String, LinuxRdma>>,
 
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    #[getset(get = "pub")]
+    #[getset(get = "pub", set = "pub")]
     /// Unified resources.
     unified: Option<HashMap<String, String>>,
 }
@@ -619,7 +689,7 @@ pub struct LinuxResources {
     setter(into, strip_option),
     build_fn(error = "OciSpecError")
 )]
-#[getset(get_copy = "pub")]
+#[getset(get_copy = "pub", set = "pub")]
 /// LinuxRdma for Linux cgroup 'rdma' resource management (Linux 4.11).
 pub struct LinuxRdma {
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -686,7 +756,17 @@ impl Default for LinuxNamespaceType {
 }
 
 #[derive(
-    Builder, Clone, CopyGetters, Debug, Default, Deserialize, Eq, Getters, PartialEq, Serialize,
+    Builder,
+    Clone,
+    CopyGetters,
+    Debug,
+    Default,
+    Deserialize,
+    Eq,
+    Getters,
+    Setters,
+    PartialEq,
+    Serialize,
 )]
 #[builder(
     default,
@@ -697,12 +777,12 @@ impl Default for LinuxNamespaceType {
 /// LinuxNamespace is the configuration for a Linux namespace.
 pub struct LinuxNamespace {
     #[serde(rename = "type")]
-    #[getset(get_copy = "pub")]
+    #[getset(get_copy = "pub", set = "pub")]
     /// Type is the type of namespace.
     typ: LinuxNamespaceType,
 
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    #[getset(get = "pub")]
+    #[getset(get = "pub", set = "pub")]
     /// Path is a path to an existing namespace persisted on disk that can
     /// be joined and is of the same type
     path: Option<PathBuf>,
@@ -735,7 +815,17 @@ pub fn get_default_namespaces() -> Vec<LinuxNamespace> {
 }
 
 #[derive(
-    Builder, Clone, CopyGetters, Debug, Default, Deserialize, Eq, Getters, PartialEq, Serialize,
+    Builder,
+    Clone,
+    CopyGetters,
+    Debug,
+    Default,
+    Deserialize,
+    Eq,
+    Getters,
+    Setters,
+    PartialEq,
+    Serialize,
 )]
 #[serde(rename_all = "camelCase")]
 #[builder(
@@ -748,37 +838,37 @@ pub fn get_default_namespaces() -> Vec<LinuxNamespace> {
 /// file.
 pub struct LinuxDevice {
     #[serde(default)]
-    #[getset(get = "pub")]
+    #[getset(get = "pub", set = "pub")]
     /// Path to the device.
     path: PathBuf,
 
     #[serde(rename = "type")]
-    #[getset(get_copy = "pub")]
+    #[getset(get_copy = "pub", set = "pub")]
     /// Device type, block, char, etc..
     typ: LinuxDeviceType,
 
     #[serde(default)]
-    #[getset(get_copy = "pub")]
+    #[getset(get_copy = "pub", set = "pub")]
     /// Major is the device's major number.
     major: i64,
 
     #[serde(default)]
-    #[getset(get_copy = "pub")]
+    #[getset(get_copy = "pub", set = "pub")]
     /// Minor is the device's minor number.
     minor: i64,
 
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    #[getset(get_copy = "pub")]
+    #[getset(get_copy = "pub", set = "pub")]
     /// FileMode permission bits for the device.
     file_mode: Option<u32>,
 
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    #[getset(get_copy = "pub")]
+    #[getset(get_copy = "pub", set = "pub")]
     /// UID of the device.
     uid: Option<u32>,
 
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    #[getset(get_copy = "pub")]
+    #[getset(get_copy = "pub", set = "pub")]
     /// Gid of the device.
     gid: Option<u32>,
 }
@@ -796,7 +886,17 @@ impl From<&LinuxDevice> for LinuxDeviceCgroup {
 }
 
 #[derive(
-    Builder, Clone, CopyGetters, Debug, Default, Deserialize, Eq, Getters, PartialEq, Serialize,
+    Builder,
+    Clone,
+    CopyGetters,
+    Debug,
+    Default,
+    Deserialize,
+    Eq,
+    Getters,
+    Setters,
+    PartialEq,
+    Serialize,
 )]
 #[serde(rename_all = "camelCase")]
 #[builder(
@@ -807,37 +907,37 @@ impl From<&LinuxDevice> for LinuxDeviceCgroup {
 )]
 /// LinuxSeccomp represents syscall restrictions.
 pub struct LinuxSeccomp {
-    #[getset(get_copy = "pub")]
+    #[getset(get_copy = "pub", set = "pub")]
     /// The default action to be done.
     default_action: LinuxSeccompAction,
 
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    #[getset(get = "pub")]
+    #[getset(get = "pub", set = "pub")]
     /// The default error return code to use when the default action is SCMP_ACT_ERRNO.
     default_errno_ret: Option<u32>,
 
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    #[getset(get = "pub")]
+    #[getset(get = "pub", set = "pub")]
     /// Available architectures for the restriction.
     architectures: Option<Vec<Arch>>,
 
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    #[getset(get = "pub")]
+    #[getset(get = "pub", set = "pub")]
     /// Flags added to the seccomp restriction.
     flags: Option<Vec<String>>,
 
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    #[getset(get = "pub")]
+    #[getset(get = "pub", set = "pub")]
     /// The unix domain socket path over which runtime will use for `SCMP_ACT_NOTIFY`.
     listener_path: Option<PathBuf>,
 
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    #[getset(get = "pub")]
+    #[getset(get = "pub", set = "pub")]
     /// An opaque data to pass to the seccomp agent.
     listener_metadata: Option<String>,
 
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    #[getset(get = "pub")]
+    #[getset(get = "pub", set = "pub")]
     /// The syscalls for the restriction.
     syscalls: Option<Vec<LinuxSyscall>>,
 }
@@ -972,7 +1072,17 @@ impl Default for LinuxSeccompOperator {
 }
 
 #[derive(
-    Builder, Clone, CopyGetters, Debug, Default, Deserialize, Eq, Getters, PartialEq, Serialize,
+    Builder,
+    Clone,
+    CopyGetters,
+    Debug,
+    Default,
+    Deserialize,
+    Eq,
+    Getters,
+    Setters,
+    PartialEq,
+    Serialize,
 )]
 #[builder(
     default,
@@ -982,21 +1092,21 @@ impl Default for LinuxSeccompOperator {
 )]
 /// LinuxSyscall is used to match a syscall in seccomp.
 pub struct LinuxSyscall {
-    #[getset(get = "pub")]
+    #[getset(get = "pub", set = "pub")]
     /// The names of the syscalls.
     names: Vec<String>,
 
-    #[getset(get_copy = "pub")]
+    #[getset(get_copy = "pub", set = "pub")]
     /// The action to be done for the syscalls.
     action: LinuxSeccompAction,
 
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    #[getset(get_copy = "pub")]
+    #[getset(get_copy = "pub", set = "pub")]
     /// The error return value.
     errno_ret: Option<u32>,
 
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    #[getset(get = "pub")]
+    #[getset(get = "pub", set = "pub")]
     /// The arguments for the syscalls.
     args: Option<Vec<LinuxSeccompArg>>,
 }
@@ -1011,7 +1121,7 @@ pub struct LinuxSyscall {
     setter(into, strip_option),
     build_fn(error = "OciSpecError")
 )]
-#[getset(get_copy = "pub")]
+#[getset(get_copy = "pub", set = "pub")]
 /// LinuxSeccompArg used for matching specific syscall arguments in seccomp.
 pub struct LinuxSeccompArg {
     /// The index of the argument.
@@ -1058,7 +1168,9 @@ pub fn get_default_readonly_paths() -> Vec<String> {
     ]
 }
 
-#[derive(Builder, Clone, Debug, Default, Deserialize, Eq, Getters, PartialEq, Serialize)]
+#[derive(
+    Builder, Clone, Debug, Default, Deserialize, Eq, Getters, Setters, PartialEq, Serialize,
+)]
 #[serde(rename_all = "camelCase")]
 #[builder(
     default,
@@ -1066,7 +1178,7 @@ pub fn get_default_readonly_paths() -> Vec<String> {
     setter(into, strip_option),
     build_fn(error = "OciSpecError")
 )]
-#[getset(get = "pub")]
+#[getset(get = "pub", set = "pub")]
 /// LinuxIntelRdt has container runtime resource constraints for Intel RDT
 /// CAT and MBA features which introduced in Linux 4.10 and 4.12 kernel.
 pub struct LinuxIntelRdt {
@@ -1089,7 +1201,17 @@ pub struct LinuxIntelRdt {
 }
 
 #[derive(
-    Builder, Clone, CopyGetters, Debug, Default, Deserialize, Eq, Getters, PartialEq, Serialize,
+    Builder,
+    Clone,
+    CopyGetters,
+    Debug,
+    Default,
+    Deserialize,
+    Eq,
+    Getters,
+    Setters,
+    PartialEq,
+    Serialize,
 )]
 #[builder(
     default,
@@ -1099,12 +1221,12 @@ pub struct LinuxIntelRdt {
 )]
 /// LinuxPersonality represents the Linux personality syscall input.
 pub struct LinuxPersonality {
-    #[getset(get_copy = "pub")]
+    #[getset(get_copy = "pub", set = "pub")]
     /// Domain for the personality.
     domain: LinuxPersonalityDomain,
 
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    #[getset(get = "pub")]
+    #[getset(get = "pub", set = "pub")]
     /// Additional flags
     flags: Option<Vec<String>>,
 }

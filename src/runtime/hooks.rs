@@ -1,10 +1,12 @@
 use crate::error::OciSpecError;
 use derive_builder::Builder;
-use getset::{CopyGetters, Getters};
+use getset::{CopyGetters, Getters, Setters};
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 
-#[derive(Builder, Clone, Debug, Default, Deserialize, Eq, Getters, PartialEq, Serialize)]
+#[derive(
+    Builder, Clone, Debug, Default, Deserialize, Eq, Getters, Setters, PartialEq, Serialize,
+)]
 #[serde(rename_all = "camelCase")]
 #[builder(
     default,
@@ -12,7 +14,7 @@ use std::path::PathBuf;
     setter(into, strip_option),
     build_fn(error = "OciSpecError")
 )]
-#[getset(get = "pub")]
+#[getset(get = "pub", set = "pub")]
 /// Hooks specifies a command that is run in the container at a particular
 /// event in the lifecycle (setup and teardown) of a container.
 pub struct Hooks {
@@ -65,7 +67,17 @@ pub struct Hooks {
 }
 
 #[derive(
-    Builder, Clone, CopyGetters, Debug, Default, Deserialize, Eq, Getters, PartialEq, Serialize,
+    Builder,
+    Clone,
+    CopyGetters,
+    Debug,
+    Default,
+    Deserialize,
+    Eq,
+    Getters,
+    Setters,
+    PartialEq,
+    Serialize,
 )]
 #[builder(
     default,
@@ -76,7 +88,7 @@ pub struct Hooks {
 /// Hook specifies a command that is run at a particular event in the
 /// lifecycle of a container.
 pub struct Hook {
-    #[getset(get = "pub")]
+    #[getset(get = "pub", set = "pub")]
     /// Path to the binary to be executed. Following similar semantics to
     /// [IEEE Std 1003.1-2008 `execv`'s path](https://pubs.opengroup.org/onlinepubs/9699919799/functions/exec.html). This
     /// specification extends the IEEE standard in that path MUST be
@@ -84,20 +96,20 @@ pub struct Hook {
     path: PathBuf,
 
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    #[getset(get = "pub")]
+    #[getset(get = "pub", set = "pub")]
     /// Arguments used for the binary, including the binary name itself.
     /// Following the same semantics as [IEEE Std 1003.1-2008
     /// `execv`'s argv](https://pubs.opengroup.org/onlinepubs/9699919799/functions/exec.html).
     args: Option<Vec<String>>,
 
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    #[getset(get = "pub")]
+    #[getset(get = "pub", set = "pub")]
     /// Additional `key=value` environment variables. Following the same
     /// semantics as [IEEE Std 1003.1-2008's `environ`](https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap08.html#tag_08_01).
     env: Option<Vec<String>>,
 
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    #[getset(get_copy = "pub")]
+    #[getset(get_copy = "pub", set = "pub")]
     /// Timeout is the number of seconds before aborting the hook. If set,
     /// timeout MUST be greater than zero.
     timeout: Option<i64>,

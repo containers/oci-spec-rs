@@ -1,17 +1,19 @@
 use crate::error::OciSpecError;
 use derive_builder::Builder;
-use getset::Getters;
+use getset::{Getters, Setters};
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 
-#[derive(Builder, Clone, Debug, Default, Deserialize, Getters, Eq, PartialEq, Serialize)]
+#[derive(
+    Builder, Clone, Debug, Default, Deserialize, Getters, Setters, Eq, PartialEq, Serialize,
+)]
 #[builder(
     default,
     pattern = "owned",
     setter(into, strip_option),
     build_fn(error = "OciSpecError")
 )]
-#[getset(get = "pub")]
+#[getset(get = "pub", set = "pub")]
 /// VM contains information for virtual-machine-based containers.
 pub struct VM {
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -29,14 +31,16 @@ pub struct VM {
     image: Option<VMImage>,
 }
 
-#[derive(Builder, Clone, Debug, Default, Deserialize, Getters, Eq, PartialEq, Serialize)]
+#[derive(
+    Builder, Clone, Debug, Default, Deserialize, Getters, Setters, Eq, PartialEq, Serialize,
+)]
 #[builder(
     default,
     pattern = "owned",
     setter(into, strip_option),
     build_fn(error = "OciSpecError")
 )]
-#[getset(get = "pub")]
+#[getset(get = "pub", set = "pub")]
 /// VMHypervisor contains information about the hypervisor to use for a
 /// virtual machine.
 pub struct VMHypervisor {
@@ -49,14 +53,16 @@ pub struct VMHypervisor {
     parameters: Option<Vec<String>>,
 }
 
-#[derive(Builder, Clone, Debug, Default, Deserialize, Getters, Eq, PartialEq, Serialize)]
+#[derive(
+    Builder, Clone, Debug, Default, Deserialize, Getters, Setters, Eq, PartialEq, Serialize,
+)]
 #[builder(
     default,
     pattern = "owned",
     setter(into, strip_option),
     build_fn(error = "OciSpecError")
 )]
-#[getset(get = "pub")]
+#[getset(get = "pub", set = "pub")]
 /// VMKernel contains information about the kernel to use for a virtual
 /// machine.
 pub struct VMKernel {
@@ -74,14 +80,16 @@ pub struct VMKernel {
     initrd: Option<String>,
 }
 
-#[derive(Builder, Clone, Debug, Default, Deserialize, Getters, Eq, PartialEq, Serialize)]
+#[derive(
+    Builder, Clone, Debug, Default, Deserialize, Getters, Setters, Eq, PartialEq, Serialize,
+)]
 #[builder(
     default,
     pattern = "owned",
     setter(into, strip_option),
     build_fn(error = "OciSpecError")
 )]
-#[getset(get = "pub")]
+#[getset(get = "pub", set = "pub")]
 /// VMImage contains information about the virtual machine root image.
 pub struct VMImage {
     /// Path is the host path to the root image that the VM kernel would

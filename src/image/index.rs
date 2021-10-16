@@ -4,7 +4,7 @@ use crate::{
     from_file, from_reader, to_file, to_writer,
 };
 use derive_builder::Builder;
-use getset::{CopyGetters, Getters};
+use getset::{CopyGetters, Getters, Setters};
 use serde::{Deserialize, Serialize};
 use std::{
     collections::HashMap,
@@ -15,7 +15,9 @@ use std::{
 /// The expected schema version; equals 2 for compatibility with older versions of Docker.
 pub const SCHEMA_VERSION: u32 = 2;
 
-#[derive(Builder, Clone, CopyGetters, Debug, Deserialize, Eq, Getters, PartialEq, Serialize)]
+#[derive(
+    Builder, Clone, CopyGetters, Debug, Deserialize, Eq, Getters, Setters, PartialEq, Serialize,
+)]
 #[serde(rename_all = "camelCase")]
 #[builder(
     pattern = "owned",
@@ -32,24 +34,24 @@ pub struct ImageIndex {
     /// backward compatibility with older versions of Docker. The
     /// value of this field will not change. This field MAY be
     /// removed in a future version of the specification.
-    #[getset(get_copy = "pub")]
+    #[getset(get_copy = "pub", set = "pub")]
     schema_version: u32,
     /// This property is reserved for use, to maintain compatibility. When
     /// used, this field contains the media type of this document,
     /// which differs from the descriptor use of mediaType.
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[getset(get = "pub")]
+    #[getset(get = "pub", set = "pub")]
     #[builder(default)]
     media_type: Option<MediaType>,
     /// This REQUIRED property contains a list of manifests for specific
     /// platforms. While this property MUST be present, the size of
     /// the array MAY be zero.
-    #[getset(get = "pub")]
+    #[getset(get = "pub", set = "pub")]
     manifests: Vec<Descriptor>,
     /// This OPTIONAL property contains arbitrary metadata for the image
     /// index. This OPTIONAL property MUST use the annotation rules.
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[getset(get = "pub")]
+    #[getset(get = "pub", set = "pub")]
     #[builder(default)]
     annotations: Option<HashMap<String, String>>,
 }

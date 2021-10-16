@@ -1,11 +1,13 @@
 use super::{Arch, MediaType, Os};
 use crate::error::OciSpecError;
 use derive_builder::Builder;
-use getset::{CopyGetters, Getters};
+use getset::{CopyGetters, Getters, Setters};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
-#[derive(Builder, Clone, CopyGetters, Debug, Deserialize, Eq, Getters, PartialEq, Serialize)]
+#[derive(
+    Builder, Clone, CopyGetters, Debug, Deserialize, Eq, Getters, Setters, PartialEq, Serialize,
+)]
 #[builder(
     pattern = "owned",
     setter(into, strip_option),
@@ -21,52 +23,52 @@ pub struct Descriptor {
     /// content. Values MUST comply with RFC 6838, including the naming
     /// requirements in its section 4.2.
     #[serde(rename = "mediaType")]
-    #[getset(get = "pub")]
+    #[getset(get = "pub", set = "pub")]
     media_type: MediaType,
     /// This REQUIRED property is the digest of the targeted content,
     /// conforming to the requirements outlined in Digests. Retrieved
     /// content SHOULD be verified against this digest when consumed via
     /// untrusted sources.
-    #[getset(get = "pub")]
+    #[getset(get = "pub", set = "pub")]
     digest: String,
     /// This REQUIRED property specifies the size, in bytes, of the raw
     /// content. This property exists so that a client will have an
     /// expected size for the content before processing. If the
     /// length of the retrieved content does not match the specified
     /// length, the content SHOULD NOT be trusted.
-    #[getset(get_copy = "pub")]
+    #[getset(get_copy = "pub", set = "pub")]
     size: i64,
     /// This OPTIONAL property specifies a list of URIs from which this
     /// object MAY be downloaded. Each entry MUST conform to [RFC 3986](https://tools.ietf.org/html/rfc3986).
     /// Entries SHOULD use the http and https schemes, as defined
     /// in [RFC 7230](https://tools.ietf.org/html/rfc7230#section-2.7).
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[getset(get = "pub")]
+    #[getset(get = "pub", set = "pub")]
     #[builder(default)]
     urls: Option<Vec<String>>,
     /// This OPTIONAL property contains arbitrary metadata for this
     /// descriptor. This OPTIONAL property MUST use the annotation
     /// rules.
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[getset(get = "pub")]
+    #[getset(get = "pub", set = "pub")]
     #[builder(default)]
     annotations: Option<HashMap<String, String>>,
     /// This OPTIONAL property describes the minimum runtime requirements of
     /// the image. This property SHOULD be present if its target is
     /// platform-specific.
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[getset(get = "pub")]
+    #[getset(get = "pub", set = "pub")]
     #[builder(default)]
     platform: Option<Platform>,
 }
 
-#[derive(Builder, Clone, Debug, Deserialize, Eq, Getters, PartialEq, Serialize)]
+#[derive(Builder, Clone, Debug, Deserialize, Eq, Getters, Setters, PartialEq, Serialize)]
 #[builder(
     pattern = "owned",
     setter(into, strip_option),
     build_fn(error = "OciSpecError")
 )]
-#[getset(get = "pub")]
+#[getset(get = "pub", set = "pub")]
 /// Describes the minimum runtime requirements of the image.
 pub struct Platform {
     /// This REQUIRED property specifies the CPU architecture.

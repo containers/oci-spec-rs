@@ -81,6 +81,26 @@ pub struct Reference {
 }
 
 impl Reference {
+    /// Create a Reference with a registry, repository and tag.
+    pub fn with_tag(registry: String, repository: String, tag: String) -> Self {
+        Self {
+            registry,
+            repository,
+            tag: Some(tag),
+            digest: None,
+        }
+    }
+
+    /// Create a Reference with a registry, repository and digest.
+    pub fn with_digest(registry: String, repository: String, digest: String) -> Self {
+        Self {
+            registry,
+            repository,
+            tag: None,
+            digest: Some(digest),
+        }
+    }
+
     /// Resolve the registry address of a given `Reference`.
     ///
     /// Some registries, such as docker.io, uses a different address for the actual

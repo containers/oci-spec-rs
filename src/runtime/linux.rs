@@ -912,7 +912,7 @@ pub struct LinuxSeccomp {
     default_action: LinuxSeccompAction,
 
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    #[getset(get = "pub", set = "pub")]
+    #[getset(get_copy = "pub", set = "pub")]
     /// The default error return code to use when the default action is SCMP_ACT_ERRNO.
     default_errno_ret: Option<u32>,
 

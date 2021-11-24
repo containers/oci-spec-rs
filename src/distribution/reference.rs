@@ -8,6 +8,11 @@ use crate::regexp;
 /// NAME_TOTAL_LENGTH_MAX is the maximum total number of characters in a repository name.
 const NAME_TOTAL_LENGTH_MAX: usize = 255;
 
+const DOCKER_HUB_DOMAIN_LEGACY: &str = "index.docker.io";
+const DOCKER_HUB_DOMAIN: &str = "docker.io";
+const DOCKER_HUB_OFFICIAL_REPO_NAME: &str = "library";
+const DEFAULT_TAG: &str = "latest";
+
 /// Reasons that parsing a string as a Reference can fail.
 #[derive(Debug, PartialEq, Eq)]
 pub enum ParseError {
@@ -67,7 +72,7 @@ impl Error for ParseError {}
 /// assert_eq!(Some("latest"), reference.tag());
 /// assert_eq!(None, reference.digest());
 /// ```
-#[derive(Clone, Hash, PartialEq, Eq)]
+#[derive(Clone, Hash, PartialEq, Eq, Debug)]
 pub struct Reference {
     registry: String,
     repository: String,
@@ -136,12 +141,6 @@ impl Reference {
     }
 }
 
-impl std::fmt::Debug for Reference {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.whole())
-    }
-}
-
 impl fmt::Display for Reference {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", self.whole())
@@ -174,8 +173,11 @@ impl TryFrom<String> for Reference {
             }
         }
         let name = &captures[1];
-        let tag = captures.get(2).map(|m| m.as_str().to_owned());
+        let mut tag = captures.get(2).map(|m| m.as_str().to_owned());
         let digest = captures.get(3).map(|m| m.as_str().to_owned());
+        if tag.is_none() && digest.is_none() {
+            tag = Some(DEFAULT_TAG.into());
+        }
         let (registry, repository) = split_domain(name);
         let reference = Reference {
             registry,
@@ -234,24 +236,39 @@ impl From<Reference> for String {
     }
 }
 
+/// Splits a repository name to domain and remotename string.
+/// If no valid domain is found, the default domain is used. Repository name
+/// needs to be already validated before.
+///
+/// This function is a Rust rewrite of the official Go code used by Docker:
+/// https://github.com/distribution/distribution/blob/41a0452eea12416aaf01bceb02a924871e964c67/reference/normalize.go#L87-L104
 fn split_domain(name: &str) -> (String, String) {
-    lazy_static! {
-        static ref RE: regex::Regex = regexp::must_compile(regexp::ANCHORED_NAME_REGEXP);
-    };
-    let captures;
-    match RE.captures(name) {
-        Some(caps) => captures = caps,
+    let mut domain: String;
+    let mut remainder: String;
+
+    match name.split_once("/") {
         None => {
-            return ("".to_owned(), name.to_owned());
+            domain = DOCKER_HUB_DOMAIN.into();
+            remainder = name.into();
+        }
+        Some((left, right)) => {
+            if !(left.contains(".") || left.contains(":")) && left != "localhost" {
+                domain = DOCKER_HUB_DOMAIN.into();
+                remainder = name.into();
+            } else {
+                domain = left.into();
+                remainder = right.into();
+            }
         }
     }
-    if let Some(repository) = captures.get(2).map(|m| m.as_str().to_owned()) {
-        let registry = captures
-            .get(1)
-            .map_or("".to_owned(), |m| m.as_str().to_owned());
-        return (registry, repository);
+    if domain == DOCKER_HUB_DOMAIN_LEGACY {
+        domain = DOCKER_HUB_DOMAIN.into();
     }
-    ("".to_owned(), name.to_owned())
+    if domain == DOCKER_HUB_DOMAIN && !remainder.contains("/") {
+        remainder = format!("{}/{}", DOCKER_HUB_OFFICIAL_REPO_NAME, remainder);
+    }
+
+    (domain, remainder)
 }
 
 #[cfg(test)]
@@ -262,25 +279,26 @@ mod test {
         use super::*;
         use rstest::rstest;
 
-        #[rstest(input, registry, repository, tag, digest,
-            case("test_com", "", "test_com", None, None),
-            case("test.com:tag", "", "test.com", Some("tag"), None),
-            case("test.com:5000", "", "test.com", Some("5000"), None),
-            case("test.com/repo:tag", "test.com", "repo", Some("tag"), None),
-            case("test:5000/repo", "test:5000", "repo", None, None),
-            case("test:5000/repo:tag", "test:5000", "repo", Some("tag"), None),
-            case("test:5000/repo@sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", "test:5000", "repo", None, Some("sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff")),
-            case("test:5000/repo:tag@sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", "test:5000", "repo", Some("tag"), Some("sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff")),
-            case("lowercase:Uppercase", "", "lowercase", Some("Uppercase"), None),
-            case("sub-dom1.foo.com/bar/baz/quux", "sub-dom1.foo.com", "bar/baz/quux", None, None),
-            case("sub-dom1.foo.com/bar/baz/quux:some-long-tag", "sub-dom1.foo.com", "bar/baz/quux", Some("some-long-tag"), None),
-            case("b.gcr.io/test.example.com/my-app:test.example.com", "b.gcr.io", "test.example.com/my-app", Some("test.example.com"), None),
+        #[rstest(input, registry, repository, tag, digest, whole,
+            case("busybox", "docker.io", "library/busybox", Some("latest"), None, "docker.io/library/busybox:latest"),
+            case("test.com:tag", "docker.io", "library/test.com", Some("tag"), None, "docker.io/library/test.com:tag"),
+            case("test.com:5000", "docker.io", "library/test.com", Some("5000"), None, "docker.io/library/test.com:5000"),
+            case("test.com/repo:tag", "test.com", "repo", Some("tag"), None, "test.com/repo:tag"),
+            case("test:5000/repo", "test:5000", "repo", Some("latest"), None, "test:5000/repo:latest"),
+            case("test:5000/repo:tag", "test:5000", "repo", Some("tag"), None, "test:5000/repo:tag"),
+            case("test:5000/repo@sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", "test:5000", "repo", None, Some("sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"), "test:5000/repo@sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"),
+            case("test:5000/repo:tag@sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", "test:5000", "repo", Some("tag"), Some("sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"), "test:5000/repo:tag@sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"),
+            case("lowercase:Uppercase", "docker.io", "library/lowercase", Some("Uppercase"), None, "docker.io/library/lowercase:Uppercase"),
+            case("sub-dom1.foo.com/bar/baz/quux", "sub-dom1.foo.com", "bar/baz/quux", Some("latest"), None, "sub-dom1.foo.com/bar/baz/quux:latest"),
+            case("sub-dom1.foo.com/bar/baz/quux:some-long-tag", "sub-dom1.foo.com", "bar/baz/quux", Some("some-long-tag"), None, "sub-dom1.foo.com/bar/baz/quux:some-long-tag"),
+            case("b.gcr.io/test.example.com/my-app:test.example.com", "b.gcr.io", "test.example.com/my-app", Some("test.example.com"), None, "b.gcr.io/test.example.com/my-app:test.example.com"),
             // ☃.com in punycode
-            case("xn--n3h.com/myimage:xn--n3h.com", "xn--n3h.com", "myimage", Some("xn--n3h.com"), None),
+            case("xn--n3h.com/myimage:xn--n3h.com", "xn--n3h.com", "myimage", Some("xn--n3h.com"), None, "xn--n3h.com/myimage:xn--n3h.com"),
             // 🐳.com in punycode
-            case("xn--7o8h.com/myimage:xn--7o8h.com@sha512:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", "xn--7o8h.com", "myimage", Some("xn--7o8h.com"), Some("sha512:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff")),
-            case("foo_bar.com:8080", "", "foo_bar.com", Some("8080"), None),
-            case("foo/foo_bar.com:8080", "foo", "foo_bar.com", Some("8080"), None),
+            case("xn--7o8h.com/myimage:xn--7o8h.com@sha512:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", "xn--7o8h.com", "myimage", Some("xn--7o8h.com"), Some("sha512:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"), "xn--7o8h.com/myimage:xn--7o8h.com@sha512:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"),
+            case("foo_bar.com:8080", "docker.io", "library/foo_bar.com", Some("8080"), None, "docker.io/library/foo_bar.com:8080" ),
+            case("foo/foo_bar.com:8080", "docker.io", "foo/foo_bar.com", Some("8080"), None, "docker.io/foo/foo_bar.com:8080"),
+            case("opensuse/leap:15.3", "docker.io", "opensuse/leap", Some("15.3"), None, "docker.io/opensuse/leap:15.3"),
         )]
         fn parse_good_reference(
             input: &str,
@@ -288,13 +306,16 @@ mod test {
             repository: &str,
             tag: Option<&str>,
             digest: Option<&str>,
+            whole: &str,
         ) {
+            println!("input: {}", input);
             let reference = Reference::try_from(input).expect("could not parse reference");
+            println!("{} -> {:?}", input, reference);
             assert_eq!(registry, reference.registry());
             assert_eq!(repository, reference.repository());
             assert_eq!(tag, reference.tag());
             assert_eq!(digest, reference.digest());
-            assert_eq!(input, reference.whole());
+            assert_eq!(whole, reference.whole());
         }
 
         #[rstest(input, err,

@@ -373,7 +373,17 @@ pub struct LinuxCpu {
 }
 
 #[derive(
-    Builder, Clone, Copy, Debug, Default, Deserialize, Eq, CopyGetters, Setters, PartialEq, Serialize,
+    Builder,
+    Clone,
+    Copy,
+    Debug,
+    Default,
+    Deserialize,
+    Eq,
+    CopyGetters,
+    Setters,
+    PartialEq,
+    Serialize,
 )]
 #[builder(
     default,

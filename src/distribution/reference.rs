@@ -252,7 +252,7 @@ fn split_domain(name: &str) -> (String, String) {
             remainder = name.into();
         }
         Some((left, right)) => {
-            if !(left.contains(".") || left.contains(":")) && left != "localhost" {
+            if !(left.contains('.') || left.contains(':')) && left != "localhost" {
                 domain = DOCKER_HUB_DOMAIN.into();
                 remainder = name.into();
             } else {
@@ -264,7 +264,7 @@ fn split_domain(name: &str) -> (String, String) {
     if domain == DOCKER_HUB_DOMAIN_LEGACY {
         domain = DOCKER_HUB_DOMAIN.into();
     }
-    if domain == DOCKER_HUB_DOMAIN && !remainder.contains("/") {
+    if domain == DOCKER_HUB_DOMAIN && !remainder.contains('/') {
         remainder = format!("{}/{}", DOCKER_HUB_OFFICIAL_REPO_NAME, remainder);
     }
 

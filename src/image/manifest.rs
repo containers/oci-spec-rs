@@ -4,7 +4,7 @@ use crate::{
     from_file, from_reader, to_file, to_writer,
 };
 use derive_builder::Builder;
-use getset::{CopyGetters, Getters, Setters};
+use getset::{CopyGetters, Getters, MutGetters, Setters};
 use serde::{Deserialize, Serialize};
 use std::{
     collections::HashMap,
@@ -13,7 +13,17 @@ use std::{
 };
 
 #[derive(
-    Builder, Clone, CopyGetters, Debug, Deserialize, Eq, Getters, Setters, PartialEq, Serialize,
+    Builder,
+    Clone,
+    CopyGetters,
+    Debug,
+    Deserialize,
+    Eq,
+    Getters,
+    MutGetters,
+    Setters,
+    PartialEq,
+    Serialize,
 )]
 #[serde(rename_all = "camelCase")]
 #[builder(
@@ -57,13 +67,13 @@ pub struct ImageManifest {
     /// The final filesystem layout MUST match the result of applying
     /// the layers to an empty directory. The ownership, mode, and other
     /// attributes of the initial empty directory are unspecified.
-    #[getset(get = "pub", set = "pub")]
+    #[getset(get_mut = "pub", get = "pub", set = "pub")]
     layers: Vec<Descriptor>,
     /// This OPTIONAL property contains arbitrary metadata for the image
     /// manifest. This OPTIONAL property MUST use the annotation
     /// rules.
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[getset(get = "pub", set = "pub")]
+    #[getset(get_mut = "pub", get = "pub", set = "pub")]
     #[builder(default)]
     annotations: Option<HashMap<String, String>>,
 }
@@ -233,6 +243,15 @@ mod tests {
 
         // assert
         assert_eq!(actual, expected);
+    }
+
+    #[test]
+    fn getset() {
+        let mut manifest = create_manifest();
+        assert_eq!(manifest.layers().len(), 3);
+        let layer_copy = manifest.layers()[0].clone();
+        manifest.layers_mut().push(layer_copy);
+        assert_eq!(manifest.layers().len(), 4);
     }
 
     #[test]

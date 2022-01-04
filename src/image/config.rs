@@ -4,7 +4,7 @@ use crate::{
     from_file, from_reader, to_file, to_writer,
 };
 use derive_builder::Builder;
-use getset::{Getters, Setters};
+use getset::{Getters, MutGetters, Setters};
 use serde::{ser::SerializeMap, Deserialize, Deserializer, Serialize, Serializer};
 #[cfg(test)]
 use std::collections::BTreeMap;
@@ -14,7 +14,9 @@ use std::{
     path::Path,
 };
 
-#[derive(Builder, Clone, Debug, Deserialize, Eq, Getters, Setters, PartialEq, Serialize)]
+#[derive(
+    Builder, Clone, Debug, Deserialize, Eq, Getters, MutGetters, Setters, PartialEq, Serialize,
+)]
 #[builder(
     default,
     pattern = "owned",
@@ -73,9 +75,11 @@ pub struct ImageConfiguration {
     /// The rootfs key references the layer content addresses used by the
     /// image. This makes the image config hash depend on the
     /// filesystem hash.
+    #[getset(get_mut = "pub", get = "pub", set = "pub")]
     rootfs: RootFs,
     /// Describes the history of each layer. The array is ordered from first
     /// to last.
+    #[getset(get_mut = "pub", get = "pub", set = "pub")]
     history: Vec<History>,
 }
 
@@ -195,7 +199,17 @@ impl Default for ImageConfiguration {
 }
 
 #[derive(
-    Builder, Clone, Debug, Default, Deserialize, Eq, Getters, Setters, PartialEq, Serialize,
+    Builder,
+    Clone,
+    Debug,
+    Default,
+    Deserialize,
+    Eq,
+    Getters,
+    MutGetters,
+    Setters,
+    PartialEq,
+    Serialize,
 )]
 #[serde(rename_all = "PascalCase")]
 #[builder(
@@ -268,6 +282,7 @@ pub struct Config {
     /// The field contains arbitrary metadata for the container.
     /// This property MUST use the annotation rules.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[getset(get_mut = "pub", get = "pub", set = "pub")]
     labels: Option<HashMap<String, String>>,
     /// The field contains the system call signal that will be
     /// sent to the container to exit. The signal can be a signal
@@ -331,7 +346,9 @@ where
     }
 }
 
-#[derive(Builder, Clone, Debug, Deserialize, Eq, Getters, Setters, PartialEq, Serialize)]
+#[derive(
+    Builder, Clone, Debug, Deserialize, Eq, Getters, MutGetters, Setters, PartialEq, Serialize,
+)]
 #[builder(
     default,
     pattern = "owned",
@@ -346,6 +363,7 @@ pub struct RootFs {
     typ: String,
     /// An array of layer content hashes (DiffIDs), in order
     /// from first to last.
+    #[getset(get_mut = "pub", get = "pub", set = "pub")]
     diff_ids: Vec<String>,
 }
 

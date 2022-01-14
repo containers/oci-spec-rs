@@ -186,8 +186,8 @@ impl Default for ImageConfiguration {
         Self {
             created: Default::default(),
             author: Default::default(),
-            architecture: Arch::Amd64,
-            os: Os::Linux,
+            architecture: Default::default(),
+            os: Default::default(),
             os_version: Default::default(),
             os_features: Default::default(),
             variant: Default::default(),

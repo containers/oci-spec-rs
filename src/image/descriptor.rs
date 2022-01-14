@@ -112,8 +112,8 @@ pub struct Platform {
 impl Default for Platform {
     fn default() -> Self {
         Self {
-            architecture: Arch::Amd64,
-            os: Os::Linux,
+            architecture: Default::default(),
+            os: Default::default(),
             os_version: Default::default(),
             os_features: Default::default(),
             variant: Default::default(),

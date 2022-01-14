@@ -21,8 +21,8 @@ pub use error::*;
 
 fn from_file<P: AsRef<Path>, T: DeserializeOwned>(path: P) -> Result<T> {
     let path = path.as_ref();
-    let manifest_file = fs::File::open(path)?;
-    let manifest = serde_json::from_reader(&manifest_file)?;
+    let manifest_file = std::io::BufReader::new(fs::File::open(path)?);
+    let manifest = serde_json::from_reader(manifest_file)?;
     Ok(manifest)
 }
 
@@ -38,6 +38,7 @@ fn to_file<P: AsRef<Path>, T: Serialize>(item: &T, path: P, pretty: bool) -> Res
         .create(true)
         .truncate(true)
         .open(path)?;
+    let file = std::io::BufWriter::new(file);
 
     match pretty {
         true => serde_json::to_writer_pretty(file, item)?,

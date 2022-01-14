@@ -380,12 +380,31 @@ impl<'de> Deserialize<'de> for Arch {
 impl Default for Arch {
     fn default() -> Self {
         // Translate from the Rust architecture names to the Go versions.
-        // I think the Rust ones are the same as the Linux kernel ones.
+        // It seems like the Rust ones are the same GNU/Linux...except for `powerpc64` and not `ppc64le`?
+        // This list just contains exceptions, everything else is passed through literally.
+        // See also https://github.com/containerd/containerd/blob/140ecc9247386d3be21616fe285021c081f4ea08/platforms/database.go
         let goarch = match std::env::consts::ARCH {
             "x86_64" => "amd64",
             "aarch64" => "arm64",
+            "powerpc64" if cfg!(target_endian = "big") => "ppc64",
+            "powerpc64" if cfg!(target_endian = "little") => "ppc64le",
             o => o,
         };
         Arch::from(goarch)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_arch_translation() {
+        let a = Arch::default();
+        match a {
+            // If you hit this, please update the mapping above.
+            Arch::Other(o) => panic!("Architecture {} not mapped between Rust and OCI", o),
+            _ => {}
+        }
     }
 }

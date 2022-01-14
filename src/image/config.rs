@@ -15,7 +15,17 @@ use std::{
 };
 
 #[derive(
-    Builder, Clone, Debug, Deserialize, Eq, Getters, MutGetters, Setters, PartialEq, Serialize,
+    Builder,
+    Clone,
+    Debug,
+    Default,
+    Deserialize,
+    Eq,
+    Getters,
+    MutGetters,
+    Setters,
+    PartialEq,
+    Serialize,
 )]
 #[builder(
     default,
@@ -178,23 +188,6 @@ impl ImageConfiguration {
     /// ```
     pub fn to_writer_pretty<W: Write>(&self, writer: &mut W) -> Result<()> {
         to_writer(&self, writer, true)
-    }
-}
-
-impl Default for ImageConfiguration {
-    fn default() -> Self {
-        Self {
-            created: Default::default(),
-            author: Default::default(),
-            architecture: Default::default(),
-            os: Default::default(),
-            os_version: Default::default(),
-            os_features: Default::default(),
-            variant: Default::default(),
-            config: Default::default(),
-            rootfs: Default::default(),
-            history: Default::default(),
-        }
     }
 }
 

@@ -62,7 +62,9 @@ pub struct Descriptor {
     platform: Option<Platform>,
 }
 
-#[derive(Builder, Clone, Debug, Deserialize, Eq, Getters, Setters, PartialEq, Serialize)]
+#[derive(
+    Builder, Clone, Debug, Default, Deserialize, Eq, Getters, Setters, PartialEq, Serialize,
+)]
 #[builder(
     pattern = "owned",
     setter(into, strip_option),
@@ -107,18 +109,6 @@ pub struct Platform {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default)]
     variant: Option<String>,
-}
-
-impl Default for Platform {
-    fn default() -> Self {
-        Self {
-            architecture: Arch::Amd64,
-            os: Os::Linux,
-            os_version: Default::default(),
-            os_features: Default::default(),
-            variant: Default::default(),
-        }
-    }
 }
 
 impl Descriptor {

@@ -227,6 +227,12 @@ impl<'de> Deserialize<'de> for Os {
     }
 }
 
+impl Default for Os {
+    fn default() -> Self {
+        Os::from(std::env::consts::OS)
+    }
+}
+
 /// Name of the CPU target architecture.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Arch {
@@ -368,5 +374,18 @@ impl<'de> Deserialize<'de> for Arch {
     {
         let arch = String::deserialize(deserializer)?;
         Ok(arch.as_str().into())
+    }
+}
+
+impl Default for Arch {
+    fn default() -> Self {
+        // Translate from the Rust architecture names to the Go versions.
+        // I think the Rust ones are the same as the Linux kernel ones.
+        let goarch = match std::env::consts::ARCH {
+            "x86_64" => "amd64",
+            "aarch64" => "arm64",
+            o => o,
+        };
+        Arch::from(goarch)
     }
 }

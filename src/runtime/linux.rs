@@ -934,7 +934,7 @@ pub struct LinuxSeccomp {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     #[getset(get = "pub", set = "pub")]
     /// Flags added to the seccomp restriction.
-    flags: Option<Vec<String>>,
+    flags: Option<Vec<LinuxSeccompFilterFlag>>,
 
     #[serde(default, skip_serializing_if = "Option::is_none")]
     #[getset(get = "pub", set = "pub")]
@@ -1046,6 +1046,30 @@ pub enum Arch {
 
     /// The S390x architecture.
     ScmpArchS390x = 0x80000016,
+}
+
+#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+/// Available seccomp filter flags.
+pub enum LinuxSeccompFilterFlag {
+    /// All filter return actions except SECCOMP_RET_ALLOW should be logged. An administrator may
+    /// override this filter flag by preventing specific actions from being logged via the
+    /// /proc/sys/kernel/seccomp/actions_logged file. (since Linux 4.14)
+    SeccompFilterFlagLog,
+
+    /// When adding a new filter, synchronize all other threads of the calling process to the same
+    /// seccomp filter tree. A "filter tree" is the ordered list of filters attached to a thread.
+    /// (Attaching identical filters in separate seccomp() calls results in different filters from this
+    /// perspective.)
+    ///
+    /// If any thread cannot synchronize to the same filter tree, the call will not attach the new
+    /// seccomp filter, and will fail, returning the first thread ID found that cannot synchronize.
+    /// Synchronization will fail if another thread in the same process is in SECCOMP_MODE_STRICT or if
+    /// it has attached new seccomp filters to itself, diverging from the calling thread's filter tree.
+    SeccompFilterFlagTsync,
+
+    /// Disable Speculative Store Bypass mitigation. (since Linux 4.17)
+    SeccompFilterFlagSpecAllow,
 }
 
 #[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]

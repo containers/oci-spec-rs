@@ -23,6 +23,9 @@ oci-spec = "0.5.5"
 ```
 *Compiler support: requires rustc 1.54+*
 
+If you want to propose or cut a new release, then please follow our 
+[release process documentation](./release.md).
+
 ## Image Format Spec Examples
 - Load image manifest from filesystem
 ```rust no_run
@@ -123,8 +126,7 @@ let list = RepositoryListBuilder::default()
             .repositories(vec!["busybox".to_owned()])
             .build().unwrap();
 ```
+
 # Contributing
 This project welcomes your PRs and issues. Should you wish to work on an issue, please claim it first by commenting on the 
 issue that you want to work on it. This is to prevent duplicated efforts from contributers on the same issue.
-
-

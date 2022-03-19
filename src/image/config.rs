@@ -4,7 +4,7 @@ use crate::{
     from_file, from_reader, to_file, to_writer,
 };
 use derive_builder::Builder;
-use getset::{Getters, MutGetters, Setters};
+use getset::{CopyGetters, Getters, MutGetters, Setters};
 use serde::{ser::SerializeMap, Deserialize, Deserializer, Serialize, Serializer};
 #[cfg(test)]
 use std::collections::BTreeMap;
@@ -370,7 +370,17 @@ impl Default for RootFs {
 }
 
 #[derive(
-    Builder, Clone, Debug, Default, Deserialize, Eq, Getters, Setters, PartialEq, Serialize,
+    Builder,
+    Clone,
+    Debug,
+    Default,
+    Deserialize,
+    Eq,
+    CopyGetters,
+    Getters,
+    Setters,
+    PartialEq,
+    Serialize,
 )]
 #[builder(
     default,

@@ -1,11 +1,21 @@
 use crate::error::OciSpecError;
 use derive_builder::Builder;
-use getset::{Getters, Setters};
+use getset::{CopyGetters, Getters, Setters};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
 #[derive(
-    Builder, Clone, Debug, Default, Deserialize, Eq, Getters, Setters, PartialEq, Serialize,
+    Builder,
+    Clone,
+    Debug,
+    Default,
+    Deserialize,
+    Eq,
+    CopyGetters,
+    Getters,
+    Setters,
+    PartialEq,
+    Serialize,
 )]
 #[serde(rename_all = "camelCase")]
 #[builder(

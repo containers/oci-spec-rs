@@ -347,6 +347,12 @@ pub struct LinuxCpu {
 
     #[serde(skip_serializing_if = "Option::is_none")]
     #[getset(get_copy = "pub", set = "pub")]
+    /// Maximum amount of accumulated time in microseconds for which tasks
+    /// in a cgroup can run additionally for burst during one period
+    burst: Option<u64>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[getset(get_copy = "pub", set = "pub")]
     /// CPU period to be used for hardcapping (in usecs).
     period: Option<u64>,
 

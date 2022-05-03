@@ -185,13 +185,12 @@ impl TryFrom<String> for Reference {
         lazy_static! {
             static ref RE: regex::Regex = regexp::must_compile(regexp::REFERENCE_REGEXP);
         };
-        let captures;
-        match RE.captures(&s) {
-            Some(caps) => captures = caps,
+        let captures = match RE.captures(&s) {
+            Some(caps) => caps,
             None => {
                 return Err(ParseError::ReferenceInvalidFormat);
             }
-        }
+        };
         let name = &captures[1];
         let mut tag = captures.get(2).map(|m| m.as_str().to_owned());
         let digest = captures.get(3).map(|m| m.as_str().to_owned());
@@ -266,7 +265,7 @@ fn split_domain(name: &str) -> (String, String) {
     let mut domain: String;
     let mut remainder: String;
 
-    match name.split_once("/") {
+    match name.split_once('/') {
         None => {
             domain = DOCKER_HUB_DOMAIN.into();
             remainder = name.into();

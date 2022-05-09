@@ -347,6 +347,11 @@ pub struct LinuxCpu {
 
     #[serde(skip_serializing_if = "Option::is_none")]
     #[getset(get_copy = "pub", set = "pub")]
+    /// Cgroups are configured with minimum weight, 0: default behavior, 1: SCHED_IDLE.
+    idle: Option<i64>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[getset(get_copy = "pub", set = "pub")]
     /// Maximum amount of accumulated time in microseconds for which tasks
     /// in a cgroup can run additionally for burst during one period
     burst: Option<u64>,

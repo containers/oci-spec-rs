@@ -109,6 +109,31 @@ impl From<&str> for MediaType {
     }
 }
 
+/// Trait to get the Docker Image Manifest V2 Schema 2 media type for an OCI media type
+///
+/// This may be necessary for compatibility with tools that do not recognize the OCI media types.
+/// Where a [`MediaType`] is expected you can use `MediaType::ImageManifest.to_docker_v2s2()?` instead and
+/// `impl From<&str> for MediaType` will create a [`MediaType::Other`] for it.
+///
+/// Not all OCI Media Types have an equivalent Docker V2S2 Media Type. In those cases, `to_docker_v2s2` will error.
+pub trait ToDockerV2S2 {
+    /// Get the [Docker Image Manifest V2 Schema 2](https://docs.docker.com/registry/spec/manifest-v2-2/)
+    /// media type equivalent for an OCI media type
+    fn to_docker_v2s2(&self) -> Result<&str, std::fmt::Error>;
+}
+
+impl ToDockerV2S2 for MediaType {
+    fn to_docker_v2s2(&self) -> Result<&str, std::fmt::Error> {
+        Ok(match self {
+            Self::ImageIndex => "application/vnd.docker.distribution.manifest.list.v2+json",
+            Self::ImageManifest => "application/vnd.docker.distribution.manifest.v2+json",
+            Self::ImageConfig => "application/vnd.docker.container.image.v1+json",
+            Self::ImageLayerGzip => "application/vnd.docker.image.rootfs.diff.tar.gzip",
+            _ => return Err(std::fmt::Error),
+        })
+    }
+}
+
 impl Serialize for MediaType {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where

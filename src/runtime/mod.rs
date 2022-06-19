@@ -35,6 +35,7 @@ pub use windows::*;
 
 /// Base configuration for the container.
 #[derive(Builder, Clone, Debug, Deserialize, Getters, Setters, PartialEq, Serialize)]
+#[serde(rename_all = "camelCase")]
 #[builder(
     default,
     pattern = "owned",
@@ -130,6 +131,16 @@ pub struct Spec {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     /// VM specifies configuration for Virtual Machine based containers.
     vm: Option<VM>,
+
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    /// UID mappings used for changing file owners w/o calling chown, fs should support it.
+    /// Every mount point could have its own mapping.
+    uid_mappings: Option<Vec<LinuxIdMapping>>,
+
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    /// GID mappings used for changing file owners w/o calling chown, fs should support it.
+    /// Every mount point could have its own mapping.
+    gid_mappings: Option<Vec<LinuxIdMapping>>,
 }
 
 // This gives a basic boilerplate for Spec that can be used calling
@@ -153,6 +164,8 @@ impl Default for Spec {
             solaris: None,
             windows: None,
             vm: None,
+            uid_mappings: None,
+            gid_mappings: None,
         }
     }
 }

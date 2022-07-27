@@ -1,7 +1,7 @@
 use super::{Descriptor, MediaType};
 use crate::{
     error::{OciSpecError, Result},
-    from_file, from_reader, to_file, to_writer,
+    from_file, from_reader, to_file, to_string, to_writer,
 };
 use derive_builder::Builder;
 use getset::{CopyGetters, Getters, Setters};
@@ -152,6 +152,36 @@ impl ImageIndex {
     pub fn to_writer_pretty<W: Write>(&self, writer: &mut W) -> Result<()> {
         to_writer(&self, writer, true)
     }
+
+    /// Attempts to write an image index to a string as JSON.
+    /// # Errors
+    /// This function will return an [OciSpecError::SerDe](crate::OciSpecError::SerDe) if
+    /// the image configuration cannot be serialized.
+    /// # Example
+    /// ``` no_run
+    /// use oci_spec::image::ImageIndex;
+    ///
+    /// let image_index = ImageIndex::from_file("index.json").unwrap();
+    /// let json_str = image_index.to_string().unwrap();
+    /// ```
+    pub fn to_string(&self) -> Result<String> {
+        to_string(&self, false)
+    }
+
+    /// Attempts to write an image index to a string as pretty printed JSON.
+    /// # Errors
+    /// This function will return an [OciSpecError::SerDe](crate::OciSpecError::SerDe) if
+    /// the image configuration cannot be serialized.
+    /// # Example
+    /// ``` no_run
+    /// use oci_spec::image::ImageIndex;
+    ///
+    /// let image_index = ImageIndex::from_file("index.json").unwrap();
+    /// let json_str = image_index.to_string_pretty().unwrap();
+    /// ```
+    pub fn to_string_pretty(&self) -> Result<String> {
+        to_string(&self, true)
+    }
 }
 
 impl Default for ImageIndex {
@@ -271,6 +301,19 @@ mod tests {
 
         // assert
         let expected = fs::read(get_index_path()).expect("read expected");
+        assert_eq!(actual, expected);
+    }
+
+    #[test]
+    fn save_index_to_string() {
+        // arrange
+        let index = create_index();
+
+        // act
+        let actual = index.to_string_pretty().expect("to string");
+
+        // assert
+        let expected = fs::read_to_string(get_index_path()).expect("read expected");
         assert_eq!(actual, expected);
     }
 }

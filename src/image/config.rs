@@ -1,7 +1,7 @@
 use super::{Arch, Os};
 use crate::{
     error::{OciSpecError, Result},
-    from_file, from_reader, to_file, to_writer,
+    from_file, from_reader, to_file, to_string, to_writer,
 };
 use derive_builder::Builder;
 use getset::{CopyGetters, Getters, MutGetters, Setters};
@@ -188,6 +188,36 @@ impl ImageConfiguration {
     /// ```
     pub fn to_writer_pretty<W: Write>(&self, writer: &mut W) -> Result<()> {
         to_writer(&self, writer, true)
+    }
+
+    /// Attempts to write an image configuration to a string as JSON.
+    /// # Errors
+    /// This function will return an [OciSpecError::SerDe](crate::OciSpecError::SerDe) if
+    /// the image configuration cannot be serialized.
+    /// # Example
+    /// ``` no_run
+    /// use oci_spec::image::ImageConfiguration;
+    ///
+    /// let image_configuration = ImageConfiguration::from_file("config.json").unwrap();
+    /// let json_str = image_configuration.to_string().unwrap();
+    /// ```
+    pub fn to_string(&self) -> Result<String> {
+        to_string(&self, false)
+    }
+
+    /// Attempts to write an image configuration to a string as pretty printed JSON.
+    /// # Errors
+    /// This function will return an [OciSpecError::SerDe](crate::OciSpecError::SerDe) if
+    /// the image configuration cannot be serialized.
+    /// # Example
+    /// ``` no_run
+    /// use oci_spec::image::ImageConfiguration;
+    ///
+    /// let image_configuration = ImageConfiguration::from_file("config.json").unwrap();
+    /// let json_str = image_configuration.to_string_pretty().unwrap();
+    /// ```
+    pub fn to_string_pretty(&self) -> Result<String> {
+        to_string(&self, true)
     }
 }
 
@@ -539,6 +569,19 @@ mod tests {
 
         // assert
         let expected = fs::read(get_config_path()).expect("read expected");
+        assert_eq!(actual, expected);
+    }
+
+    #[test]
+    fn save_config_to_string() {
+        // arrange
+        let config = create_config();
+
+        // act
+        let actual = config.to_string_pretty().expect("to string");
+
+        // assert
+        let expected = fs::read_to_string(get_config_path()).expect("read expected");
         assert_eq!(actual, expected);
     }
 }

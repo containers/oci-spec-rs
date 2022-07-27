@@ -195,6 +195,17 @@ impl Default for ImageIndex {
     }
 }
 
+/// Implement `ToString` directly since we cannot avoid twice memory allocation
+/// when using auto-implementaion through `Display`.
+impl ToString for ImageIndex {
+    fn to_string(&self) -> String {
+        // Serde seralization never fails since this is
+        // a combination of String and enums.
+        self.to_string_pretty()
+            .expect("ImageIndex to JSON convertion failed")
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use std::{fs, path::PathBuf};

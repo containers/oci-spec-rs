@@ -56,3 +56,10 @@ fn to_writer<W: Write, T: Serialize>(item: &T, writer: &mut W, pretty: bool) -> 
 
     Ok(())
 }
+
+fn to_string<T: Serialize>(item: &T, pretty: bool) -> Result<String> {
+    Ok(match pretty {
+        true => serde_json::to_string_pretty(item)?,
+        false => serde_json::to_string(item)?,
+    })
+}

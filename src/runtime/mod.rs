@@ -34,7 +34,7 @@ pub use vm::*;
 pub use windows::*;
 
 /// Base configuration for the container.
-#[derive(Builder, Clone, Debug, Deserialize, Getters, Setters, PartialEq, Serialize)]
+#[derive(Builder, Clone, Debug, Deserialize, Getters, Setters, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "camelCase")]
 #[builder(
     default,

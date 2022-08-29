@@ -34,7 +34,7 @@ pub use vm::*;
 pub use windows::*;
 
 /// Base configuration for the container.
-#[derive(Builder, Clone, Debug, Deserialize, Getters, Setters, PartialEq, Serialize)]
+#[derive(Builder, Clone, Debug, Deserialize, Getters, Setters, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "camelCase")]
 #[builder(
     default,
@@ -89,6 +89,15 @@ pub struct Spec {
     /// configuration](https://github.com/opencontainers/runtime-spec/blob/master/config-linux.md#namespaces),
     /// the container UTS namespace may be the runtime UTS namespace.
     hostname: Option<String>,
+
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    /// Specifies the container's domainame as seen by processes running
+    /// inside the container. On Linux, for example, this will
+    /// change the domainame in the container [UTS namespace](http://man7.org/linux/man-pages/man7/namespaces.7.html). Depending on your
+    /// [namespace
+    /// configuration](https://github.com/opencontainers/runtime-spec/blob/master/config-linux.md#namespaces),
+    /// the container UTS namespace may be the runtime UTS namespace.
+    domainname: Option<String>,
 
     #[serde(default, skip_serializing_if = "Option::is_none")]
     /// Hooks allow users to specify programs to run before or after various
@@ -154,8 +163,8 @@ impl Default for Spec {
             version: String::from("1.0.2-dev"),
             process: Some(Default::default()),
             root: Some(Default::default()),
-            // Defaults hostname as youki
             hostname: "youki".to_string().into(),
+            domainname: None,
             mounts: get_default_mounts().into(),
             // Defaults to empty metadata
             annotations: Some(Default::default()),

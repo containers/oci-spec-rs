@@ -310,6 +310,10 @@ pub struct LinuxMemory {
     #[serde(skip_serializing_if = "Option::is_none")]
     /// Enables hierarchical memory accounting
     use_hierarchy: Option<bool>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    /// Enables checking if a new memory limit is lower
+    check_before_update: Option<bool>,
 }
 
 #[derive(
@@ -1345,6 +1349,7 @@ impl Arbitrary for LinuxMemory {
             swappiness: some_none_generator_util::<u64>(g),
             disable_oom_killer: some_none_generator_util::<bool>(g),
             use_hierarchy: some_none_generator_util::<bool>(g),
+            check_before_update: some_none_generator_util::<bool>(g),
         }
     }
 }

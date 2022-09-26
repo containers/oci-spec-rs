@@ -76,8 +76,8 @@ pub struct Linux {
 
     #[serde(default, skip_serializing_if = "Option::is_none")]
     /// IntelRdt contains Intel Resource Director Technology (RDT)
-    /// information for handling resource constraints (e.g., L3
-    /// cache, memory bandwidth) for the container.
+    /// information for handling resource constraints and monitoring metrics
+    /// (e.g., L3 cache, memory bandwidth) for the container.
     intel_rdt: Option<LinuxIntelRdt>,
 
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -1228,8 +1228,9 @@ pub fn get_default_readonly_paths() -> Vec<String> {
     build_fn(error = "OciSpecError")
 )]
 #[getset(get = "pub", set = "pub")]
-/// LinuxIntelRdt has container runtime resource constraints for Intel RDT
-/// CAT and MBA features which introduced in Linux 4.10 and 4.12 kernel.
+/// LinuxIntelRdt has container runtime resource constraints for Intel RDT CAT and MBA
+/// features and flags enabling Intel RDT CMT and MBM features.
+/// Intel RDT features are available in Linux 4.14 and newer kernel versions.
 pub struct LinuxIntelRdt {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     /// The identity for RDT Class of Service.
@@ -1247,6 +1248,16 @@ pub struct LinuxIntelRdt {
     /// default, and in "MBps" if MBA Software Controller is
     /// enabled.
     mem_bw_schema: Option<String>,
+
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    /// EnableCMT is the flag to indicate if the Intel RDT CMT is enabled. CMT (Cache Monitoring Technology) supports monitoring of
+    /// the last-level cache (LLC) occupancy for the container.
+    enable_cmt: Option<bool>,
+
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    /// EnableMBM is the flag to indicate if the Intel RDT MBM is enabled. MBM (Memory Bandwidth Monitoring) supports monitoring of
+    /// total and local memory bandwidth for the container.
+    enable_mbm: Option<bool>,
 }
 
 #[derive(

@@ -1,6 +1,7 @@
 //! [OCI image spec](https://github.com/opencontainers/image-spec) types and definitions.
 
 mod annotations;
+mod artifact;
 mod config;
 mod descriptor;
 mod index;
@@ -12,6 +13,7 @@ use std::fmt::Display;
 use serde::{Deserialize, Serialize};
 
 pub use annotations::*;
+pub use artifact::*;
 pub use config::*;
 pub use descriptor::*;
 pub use index::*;

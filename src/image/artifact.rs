@@ -213,3 +213,63 @@ impl ArtifactManifest {
     }
 }
 
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::image::DescriptorBuilder;
+    use std::path::PathBuf;
+
+    fn get_manifest_path() -> PathBuf {
+        PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("test/data/artifact_manifest.json")
+    }
+
+    fn create_manifest() -> ArtifactManifest {
+        let blob = DescriptorBuilder::default()
+            .media_type(MediaType::Other("application/gzip".to_string()))
+            .size(123)
+            .digest(
+                "sha256:87923725d74f4bfb94c9e86d64170f7521aad8221a5de834851470ca142da630"
+                    .to_string(),
+            )
+            .build()
+            .unwrap();
+        let subject = DescriptorBuilder::default()
+            .media_type(MediaType::ImageManifest)
+            .size(1234)
+            .digest(
+                "sha256:cc06a2839488b8bd2a2b99dcdc03d5cfd818eed72ad08ef3cc197aac64c0d0a0"
+                    .to_string(),
+            )
+            .build()
+            .unwrap();
+        let annotations = HashMap::from([
+            (
+                "org.opencontainers.artifact.created".to_string(),
+                "2022-01-01T14:42:55Z".to_string(),
+            ),
+            ("org.example.sbom.format".to_string(), "json".to_string()),
+        ]);
+        ArtifactManifestBuilder::default()
+            .artifact_type(MediaType::Other(
+                "application/vnd.example.sbom.v1".to_string(),
+            ))
+            .blobs(vec![blob])
+            .subject(subject)
+            .annotations(annotations)
+            .build()
+            .unwrap()
+    }
+
+    #[test]
+    fn load_manifest_from_file() {
+        // arrange
+        let manifest_path = get_manifest_path();
+        let expected = create_manifest();
+
+        // act
+        let actual = ArtifactManifest::from_file(manifest_path).expect("from file");
+
+        // assert
+        assert_eq!(actual, expected);
+    }
+}

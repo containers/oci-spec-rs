@@ -53,6 +53,9 @@ pub enum MediaType {
     /// MediaType ImageConfig specifies the media type for the image
     /// configuration.
     ImageConfig,
+    /// MediaType ArtifactManifest specifies the media type used for content addressable
+    /// artifacts to store them along side container images in a registry.
+    ArtifactManifest,
     /// MediaType not specified by OCI image format.
     Other(String),
 }
@@ -79,6 +82,7 @@ impl Display for MediaType {
                 "application/vnd.oci.image.layer.nondistributable.v1.tar+zstd"
             ),
             Self::ImageConfig => write!(f, "application/vnd.oci.image.config.v1+json"),
+            Self::ArtifactManifest => write!(f, "application/vnd.oci.artifact.manifest.v1+json"),
             Self::Other(media_type) => write!(f, "{}", media_type),
         }
     }
@@ -104,6 +108,7 @@ impl From<&str> for MediaType {
                 MediaType::ImageLayerNonDistributableZstd
             }
             "application/vnd.oci.image.config.v1+json" => MediaType::ImageConfig,
+            "application/vnd.oci.artifact.manifest.v1+json" => MediaType::ArtifactManifest,
             media => MediaType::Other(media.to_owned()),
         }
     }

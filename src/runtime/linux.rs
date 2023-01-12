@@ -903,8 +903,8 @@ impl From<&LinuxDevice> for LinuxDeviceCgroup {
         LinuxDeviceCgroup {
             allow: true,
             typ: linux_device.typ.into(),
-            major: Some(linux_device.major as i64),
-            minor: Some(linux_device.minor as i64),
+            major: Some(linux_device.major),
+            minor: Some(linux_device.minor),
             access: "rwm".to_string().into(),
         }
     }

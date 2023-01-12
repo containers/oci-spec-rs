@@ -14,6 +14,10 @@ use std::{
     path::Path,
 };
 
+/// In theory, this key is not standard.  In practice, it's used by at least the
+/// RHEL UBI images for a long time.
+pub const LABEL_VERSION: &str = "version";
+
 #[derive(
     Builder,
     Clone,
@@ -218,6 +222,20 @@ impl ImageConfiguration {
     /// ```
     pub fn to_string_pretty(&self) -> Result<String> {
         to_string(&self, true)
+    }
+
+    /// Retrieve the version number associated with this configuration.  This will try
+    /// to use several well-known label keys.
+    pub fn version(&self) -> Option<&str> {
+        let labels = self.config().as_ref().and_then(|c| c.labels().as_ref());
+        if let Some(labels) = labels {
+            for k in [super::ANNOTATION_VERSION, LABEL_VERSION] {
+                if let Some(v) = labels.get(k) {
+                    return Some(v.as_str());
+                }
+            }
+        }
+        None
     }
 }
 

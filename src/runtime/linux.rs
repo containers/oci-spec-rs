@@ -555,7 +555,7 @@ pub struct LinuxHugepageLimit {
     #[serde(default)]
     #[getset(get = "pub", set = "pub")]
     /// Pagesize is the hugepage size.
-    /// Format: "<size><unit-prefix>B' (e.g. 64KB, 2MB, 1GB, etc.)
+    /// Format: "&lt;size&gt;&lt;unit-prefix&gt;B' (e.g. 64KB, 2MB, 1GB, etc.)
     page_size: String,
 
     #[serde(default)]
@@ -903,8 +903,8 @@ impl From<&LinuxDevice> for LinuxDeviceCgroup {
         LinuxDeviceCgroup {
             allow: true,
             typ: linux_device.typ.into(),
-            major: Some(linux_device.major as i64),
-            minor: Some(linux_device.minor as i64),
+            major: Some(linux_device.major),
+            minor: Some(linux_device.minor),
             access: "rwm".to_string().into(),
         }
     }
@@ -1238,12 +1238,12 @@ pub struct LinuxIntelRdt {
 
     #[serde(default, skip_serializing_if = "Option::is_none")]
     /// The schema for L3 cache id and capacity bitmask (CBM).
-    /// Format: "L3:<cache_id0>=<cbm0>;<cache_id1>=<cbm1>;..."
+    /// Format: "L3:&lt;cache_id0&gt;=&lt;cbm0&gt;;&lt;cache_id1&gt;=&lt;cbm1&gt;;..."
     l3_cache_schema: Option<String>,
 
     #[serde(default, skip_serializing_if = "Option::is_none")]
     /// The schema of memory bandwidth per L3 cache id.
-    /// Format: "MB:<cache_id0>=bandwidth0;<cache_id1>=bandwidth1;..."
+    /// Format: "MB:&lt;cache_id0&gt;=bandwidth0;&lt;cache_id1&gt;=bandwidth1;..."
     /// The unit of memory bandwidth is specified in "percentages" by
     /// default, and in "MBps" if MBA Software Controller is
     /// enabled.

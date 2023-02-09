@@ -85,7 +85,7 @@ impl Display for MediaType {
             ),
             Self::ImageConfig => write!(f, "application/vnd.oci.image.config.v1+json"),
             Self::ArtifactManifest => write!(f, "application/vnd.oci.artifact.manifest.v1+json"),
-            Self::Other(media_type) => write!(f, "{}", media_type),
+            Self::Other(media_type) => write!(f, "{media_type}"),
         }
     }
 }
@@ -146,7 +146,7 @@ impl Serialize for MediaType {
     where
         S: serde::Serializer,
     {
-        let media_type = format!("{}", self);
+        let media_type = format!("{self}");
         media_type.serialize(serializer)
     }
 }
@@ -235,7 +235,7 @@ impl Display for Os {
             Os::Other(name) => name,
         };
 
-        write!(f, "{}", print)
+        write!(f, "{print}")
     }
 }
 
@@ -244,7 +244,7 @@ impl Serialize for Os {
     where
         S: serde::Serializer,
     {
-        let os = format!("{}", self);
+        let os = format!("{self}");
         os.serialize(serializer)
     }
 }
@@ -353,7 +353,7 @@ impl Display for Arch {
             Arch::Other(arch) => arch,
         };
 
-        write!(f, "{}", print)
+        write!(f, "{print}")
     }
 }
 
@@ -394,7 +394,7 @@ impl Serialize for Arch {
     where
         S: serde::Serializer,
     {
-        let arch = format!("{}", self);
+        let arch = format!("{self}");
         arch.serialize(serializer)
     }
 }
@@ -433,10 +433,9 @@ mod tests {
     #[test]
     fn test_arch_translation() {
         let a = Arch::default();
-        match a {
-            // If you hit this, please update the mapping above.
-            Arch::Other(o) => panic!("Architecture {} not mapped between Rust and OCI", o),
-            _ => {}
+        // If you hit this, please update the mapping above.
+        if let Arch::Other(o) = a {
+            panic!("Architecture {o} not mapped between Rust and OCI")
         }
     }
 }

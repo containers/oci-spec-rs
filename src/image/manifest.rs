@@ -259,14 +259,12 @@ mod tests {
         })
         .collect();
 
-        let manifest = ImageManifestBuilder::default()
+        ImageManifestBuilder::default()
             .schema_version(SCHEMA_VERSION)
             .config(config)
             .layers(layers)
             .build()
-            .expect("build image manifest");
-
-        manifest
+            .expect("build image manifest")
     }
 
     fn get_manifest_path() -> PathBuf {

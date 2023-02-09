@@ -243,13 +243,11 @@ mod tests {
             .build()
             .expect("build amd64 manifest descriptor");
 
-        let index = ImageIndexBuilder::default()
+        ImageIndexBuilder::default()
             .schema_version(SCHEMA_VERSION)
             .manifests(vec![ppc_manifest, amd64_manifest])
             .build()
-            .expect("build image index");
-
-        index
+            .expect("build image index")
     }
 
     fn get_index_path() -> PathBuf {

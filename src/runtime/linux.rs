@@ -767,8 +767,7 @@ impl TryFrom<&str> for LinuxNamespaceType {
             "pid" => Ok(LinuxNamespaceType::Pid),
             "net" => Ok(LinuxNamespaceType::Network),
             _ => Err(oci_error(format!(
-                "unknown namespace {}, could not convert",
-                namespace
+                "unknown namespace {namespace}, could not convert"
             ))),
         }
     }

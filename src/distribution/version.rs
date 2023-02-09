@@ -12,10 +12,7 @@ pub const VERSION_DEV: &str = "-dev";
 
 /// Retrieve the version as string representation.
 pub fn version() -> String {
-    format!(
-        "{}.{}.{}{}",
-        VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH, VERSION_DEV
-    )
+    format!("{VERSION_MAJOR}.{VERSION_MINOR}.{VERSION_PATCH}{VERSION_DEV}")
 }
 
 #[cfg(test)]

@@ -567,8 +567,7 @@ impl<'de> Deserialize<'de> for Capability {
             "SYSLOG" => Ok(Self::Syslog),
             "WAKE_ALARM" => Ok(Self::WakeAlarm),
             other => Err(Error::custom(format!(
-                "no variant for {} (converted to {})",
-                input, other,
+                "no variant for {input} (converted to {other})",
             ))),
         }
     }
@@ -589,7 +588,7 @@ mod tests {
     #[test]
     fn deserialize() -> Result<()> {
         for case in &["SYSLOG", "CAP_SYSLOG", "cap_SYSLOG", "sySloG"] {
-            let res: Capability = serde_json::from_str(&format!("\"{}\"", case))?;
+            let res: Capability = serde_json::from_str(&format!("\"{case}\""))?;
             assert_eq!(Capability::Syslog, res);
         }
         Ok(())

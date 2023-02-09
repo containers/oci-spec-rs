@@ -60,7 +60,7 @@ pub struct ErrorResponse {
 
 impl Display for ErrorResponse {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
-        write!(f, "{}", ERR_REGISTRY)
+        write!(f, "{ERR_REGISTRY}")
     }
 }
 
@@ -204,7 +204,7 @@ mod tests {
             }
         }"#;
 
-        let error_info: ErrorInfo = serde_json::from_str(&error_info_str)?;
+        let error_info: ErrorInfo = serde_json::from_str(error_info_str)?;
         assert_eq!(error_info.detail().as_ref().unwrap(), "{\"Tag\":\"lates\"}");
 
         Ok(())

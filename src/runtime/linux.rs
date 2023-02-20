@@ -84,6 +84,10 @@ pub struct Linux {
     /// Personality contains configuration for the Linux personality
     /// syscall.
     personality: Option<LinuxPersonality>,
+
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    /// TimeOffsets specifies the offset for supporting time namespaces.
+    time_offsets: Option<HashMap<String, String>>,
 }
 
 // Default impl for Linux (see funtions for more info)
@@ -128,6 +132,7 @@ impl Default for Linux {
             seccomp: None,
             intel_rdt: None,
             personality: None,
+            time_offsets: None,
         }
     }
 }
@@ -752,6 +757,9 @@ pub enum LinuxNamespaceType {
 
     /// Network Namespace for isolating network devices, ports, stacks etc.
     Network = 0x40000000,
+
+    /// Time Namespace for isolating the clocks
+    Time = 0x00000080,
 }
 
 impl TryFrom<&str> for LinuxNamespaceType {
@@ -766,6 +774,7 @@ impl TryFrom<&str> for LinuxNamespaceType {
             "user" => Ok(LinuxNamespaceType::User),
             "pid" => Ok(LinuxNamespaceType::Pid),
             "net" => Ok(LinuxNamespaceType::Network),
+            "time" => Ok(LinuxNamespaceType::Time),
             _ => Err(oci_error(format!(
                 "unknown namespace {namespace}, could not convert"
             ))),

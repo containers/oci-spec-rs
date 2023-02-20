@@ -6,6 +6,7 @@ use serde::{Deserialize, Serialize};
 use std::{
     collections::HashMap,
     fs,
+    io::{BufReader, BufWriter, Write},
     path::{Path, PathBuf},
 };
 
@@ -194,7 +195,8 @@ impl Spec {
     pub fn load<P: AsRef<Path>>(path: P) -> Result<Self> {
         let path = path.as_ref();
         let file = fs::File::open(path)?;
-        let s = serde_json::from_reader(&file)?;
+        let reader = BufReader::new(file);
+        let s = serde_json::from_reader(reader)?;
         Ok(s)
     }
 
@@ -214,7 +216,9 @@ impl Spec {
     pub fn save<P: AsRef<Path>>(&self, path: P) -> Result<()> {
         let path = path.as_ref();
         let file = fs::File::create(path)?;
-        serde_json::to_writer(&file, self)?;
+        let mut writer = BufWriter::new(file);
+        serde_json::to_writer(&mut writer, self)?;
+        writer.flush()?;
         Ok(())
     }
 

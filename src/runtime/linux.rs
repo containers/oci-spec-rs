@@ -1141,6 +1141,7 @@ impl Default for LinuxSeccompOperator {
     PartialEq,
     Serialize,
 )]
+#[serde(rename_all = "camelCase")]
 #[builder(
     default,
     pattern = "owned",

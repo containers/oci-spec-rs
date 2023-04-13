@@ -37,3 +37,11 @@ fn test_load_sample_spec() {
     let err = Spec::load(fixture_path);
     assert!(err.is_ok(), "failed to load spec: {err:?}");
 }
+
+#[test]
+fn test_load_sample_windows_spec() {
+    let fixture_path = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("src/runtime/test/fixture/sample_windows.json");
+    let err = Spec::load(fixture_path);
+    assert!(err.is_ok(), "failed to load spec: {err:?}");
+}

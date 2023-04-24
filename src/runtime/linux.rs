@@ -184,6 +184,7 @@ pub enum LinuxDeviceType {
     P,
 }
 
+#[allow(clippy::derivable_impls)] // because making it clear that All is the default
 impl Default for LinuxDeviceType {
     fn default() -> LinuxDeviceType {
         LinuxDeviceType::A

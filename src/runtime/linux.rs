@@ -1242,7 +1242,7 @@ pub fn get_default_readonly_paths() -> Vec<String> {
 /// features and flags enabling Intel RDT CMT and MBM features.
 /// Intel RDT features are available in Linux 4.14 and newer kernel versions.
 pub struct LinuxIntelRdt {
-    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde(default, skip_serializing_if = "Option::is_none", rename = "closID")]
     /// The identity for RDT Class of Service.
     clos_id: Option<String>,
 

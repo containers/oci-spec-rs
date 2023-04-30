@@ -27,10 +27,11 @@ use std::collections::HashMap;
 /// Windows defines the runtime configuration for Windows based containers,
 /// including Hyper-V containers.
 pub struct Windows {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     #[getset(get = "pub", set = "pub")]
     /// LayerFolders contains a list of absolute paths to directories
     /// containing image layers.
-    layer_folders: Vec<String>,
+    layer_folders: Option<Vec<String>>,
 
     #[serde(default, skip_serializing_if = "Option::is_none")]
     #[getset(get = "pub", set = "pub")]

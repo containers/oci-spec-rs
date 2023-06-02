@@ -155,7 +155,7 @@ pub fn get_rootless_mounts() -> Vec<Mount> {
     let mut mounts = get_default_mounts();
     mounts
         .iter_mut()
-        .find(|m| m.destination.to_string_lossy().to_string() == "/dev/pts")
+        .find(|m| m.destination.to_string_lossy() == "/dev/pts")
         .map(|m| {
             if let Some(opts) = &mut m.options {
                 opts.retain(|o| o != "gid=5")
@@ -164,11 +164,13 @@ pub fn get_rootless_mounts() -> Vec<Mount> {
         });
     mounts
         .iter_mut()
-        .find(|m| m.destination.to_string_lossy().to_string() == "/sys")
+        .find(|m| m.destination.to_string_lossy() == "/sys")
         .map(|m| {
             m.typ = Some("none".to_string());
             m.source = Some("/sys".into());
-            m.options.as_mut().map(|o| o.push("rbind".to_string()));
+            if let Some(o) = m.options.as_mut() {
+                o.push("rbind".to_string())
+            }
             m
         });
     mounts

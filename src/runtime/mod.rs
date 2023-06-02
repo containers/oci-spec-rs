@@ -239,6 +239,21 @@ impl Spec {
         Ok(())
     }
 
+    /// Return default rootless spec.
+    /// # Example
+    /// ``` no_run
+    /// use oci_spec::runtime::Spec;
+    ///
+    /// let spec = Spec::rootless();
+    /// ```
+    pub fn rootless() -> Self {
+        Self {
+            mounts: get_rootless_mounts().into(),
+            linux: Some(Linux::rootless()),
+            ..Default::default()
+        }
+    }
+
     fn canonicalize_path<B, P>(bundle: B, path: P) -> Result<PathBuf>
     where
         B: AsRef<Path>,

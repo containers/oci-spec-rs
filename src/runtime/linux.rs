@@ -139,7 +139,7 @@ impl Default for Linux {
 
 impl Linux {
     /// Return rootless Linux configuration.
-    pub fn rootless() -> Self {
+    pub fn rootless(uid: u32, gid: u32) -> Self {
         let mut namespaces = get_default_namespaces();
         namespaces.retain(|ns| ns.typ != LinuxNamespaceType::Network);
         namespaces.push(LinuxNamespace {
@@ -150,12 +150,12 @@ impl Linux {
             resources: None,
             uid_mappings: Some(vec![LinuxIdMapping {
                 container_id: 0,
-                host_id: 1000,
+                host_id: uid,
                 size: 1,
             }]),
             gid_mappings: Some(vec![LinuxIdMapping {
                 container_id: 0,
-                host_id: 1000,
+                host_id: gid,
                 size: 1,
             }]),
             namespaces: Some(namespaces),

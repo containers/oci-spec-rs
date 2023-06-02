@@ -244,12 +244,12 @@ impl Spec {
     /// ``` no_run
     /// use oci_spec::runtime::Spec;
     ///
-    /// let spec = Spec::rootless();
+    /// let spec = Spec::rootless(1000, 1000);
     /// ```
-    pub fn rootless() -> Self {
+    pub fn rootless(uid: u32, gid: u32) -> Self {
         Self {
             mounts: get_rootless_mounts().into(),
-            linux: Some(Linux::rootless()),
+            linux: Some(Linux::rootless(uid, gid)),
             ..Default::default()
         }
     }

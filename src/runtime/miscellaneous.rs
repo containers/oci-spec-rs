@@ -149,3 +149,29 @@ pub fn get_default_mounts() -> Vec<Mount> {
         },
     ]
 }
+
+/// utility function to generate default rootless config for mounts.
+pub fn get_rootless_mounts() -> Vec<Mount> {
+    let mut mounts = get_default_mounts();
+    mounts
+        .iter_mut()
+        .find(|m| m.destination.to_string_lossy() == "/dev/pts")
+        .map(|m| {
+            if let Some(opts) = &mut m.options {
+                opts.retain(|o| o != "gid=5")
+            }
+            m
+        });
+    mounts
+        .iter_mut()
+        .find(|m| m.destination.to_string_lossy() == "/sys")
+        .map(|m| {
+            m.typ = Some("none".to_string());
+            m.source = Some("/sys".into());
+            if let Some(o) = m.options.as_mut() {
+                o.push("rbind".to_string())
+            }
+            m
+        });
+    mounts
+}

@@ -3,7 +3,7 @@ use crate::error::{oci_error, OciSpecError};
 use derive_builder::Builder;
 use getset::{CopyGetters, Getters, Setters};
 use serde::{Deserialize, Serialize};
-use std::{collections::HashMap, convert::TryFrom, path::PathBuf};
+use std::{collections::HashMap, convert::TryFrom, path::PathBuf, vec};
 
 #[derive(Builder, Clone, Debug, Deserialize, Eq, Getters, Setters, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -137,6 +137,33 @@ impl Default for Linux {
     }
 }
 
+impl Linux {
+    /// Return rootless Linux configuration.
+    pub fn rootless(uid: u32, gid: u32) -> Self {
+        let mut namespaces = get_default_namespaces();
+        namespaces.retain(|ns| ns.typ != LinuxNamespaceType::Network);
+        namespaces.push(LinuxNamespace {
+            typ: LinuxNamespaceType::User,
+            ..Default::default()
+        });
+        Self {
+            resources: None,
+            uid_mappings: Some(vec![LinuxIdMapping {
+                container_id: 0,
+                host_id: uid,
+                size: 1,
+            }]),
+            gid_mappings: Some(vec![LinuxIdMapping {
+                container_id: 0,
+                host_id: gid,
+                size: 1,
+            }]),
+            namespaces: Some(namespaces),
+            ..Default::default()
+        }
+    }
+}
+
 #[derive(
     Builder, Clone, Copy, CopyGetters, Debug, Default, Deserialize, Eq, PartialEq, Serialize,
 )]
@@ -231,15 +258,17 @@ pub struct LinuxDeviceCgroup {
     /// Allow or deny
     allow: bool,
 
-    #[serde(default, rename = "type")]
+    #[serde(default, rename = "type", skip_serializing_if = "Option::is_none")]
     #[getset(get_copy = "pub", set = "pub")]
     /// Device type, block, char, etc.
     typ: Option<LinuxDeviceType>,
 
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     #[getset(get_copy = "pub", set = "pub")]
     /// Device's major number
     major: Option<i64>,
 
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     #[getset(get_copy = "pub", set = "pub")]
     /// Device's minor number
     minor: Option<i64>,
@@ -843,6 +872,10 @@ pub fn get_default_namespaces() -> Vec<LinuxNamespace> {
         },
         LinuxNamespace {
             typ: LinuxNamespaceType::Mount,
+            path: Default::default(),
+        },
+        LinuxNamespace {
+            typ: LinuxNamespaceType::Cgroup,
             path: Default::default(),
         },
     ]

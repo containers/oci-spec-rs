@@ -239,6 +239,21 @@ impl Spec {
         Ok(())
     }
 
+    /// Return default rootless spec.
+    /// # Example
+    /// ``` no_run
+    /// use oci_spec::runtime::Spec;
+    ///
+    /// let spec = Spec::rootless(1000, 1000);
+    /// ```
+    pub fn rootless(uid: u32, gid: u32) -> Self {
+        Self {
+            mounts: get_rootless_mounts().into(),
+            linux: Some(Linux::rootless(uid, gid)),
+            ..Default::default()
+        }
+    }
+
     fn canonicalize_path<B, P>(bundle: B, path: P) -> Result<PathBuf>
     where
         B: AsRef<Path>,
@@ -320,5 +335,115 @@ mod tests {
             spec, loaded_spec,
             "The saved spec is not the same as the loaded spec"
         );
+    }
+
+    #[test]
+    fn test_rootless() {
+        const UID: u32 = 1000;
+        const GID: u32 = 1000;
+
+        let spec = Spec::default();
+        let spec_rootless = Spec::rootless(UID, GID);
+        assert!(
+            spec != spec_rootless,
+            "default spec and rootless spec should be different"
+        );
+
+        // Check rootless linux object.
+        let linux = spec_rootless
+            .linux
+            .expect("linux object should not be empty");
+        let uid_mappings = linux
+            .uid_mappings()
+            .clone()
+            .expect("uid mappings should not be empty");
+        let gid_mappings = linux
+            .gid_mappings()
+            .clone()
+            .expect("gid mappings should not be empty");
+        let namespaces = linux
+            .namespaces()
+            .clone()
+            .expect("namespaces should not be empty");
+        assert_eq!(uid_mappings.len(), 1, "uid mappings length should be 1");
+        assert_eq!(
+            uid_mappings[0].host_id(),
+            UID,
+            "uid mapping host id should be as defined"
+        );
+        assert_eq!(gid_mappings.len(), 1, "gid mappings length should be 1");
+        assert_eq!(
+            gid_mappings[0].host_id(),
+            GID,
+            "gid mapping host id should be as defined"
+        );
+        assert!(
+            !namespaces
+                .iter()
+                .any(|ns| ns.typ() == LinuxNamespaceType::Network),
+            "rootless spec should not contain network namespace type"
+        );
+        assert!(
+            namespaces
+                .iter()
+                .any(|ns| ns.typ() == LinuxNamespaceType::User),
+            "rootless spec should contain user namespace type"
+        );
+        assert!(
+            linux.resources().is_none(),
+            "resources in rootless spec should be empty"
+        );
+
+        // Check rootless mounts.
+        let mounts = spec_rootless.mounts.expect("mounts should not be empty");
+        assert!(
+            !mounts.iter().any(|m| {
+                if m.destination().to_string_lossy() == "/dev/pts" {
+                    return m
+                        .options()
+                        .clone()
+                        .expect("options should not be empty")
+                        .iter()
+                        .any(|o| o == "gid=5");
+                } else {
+                    false
+                }
+            }),
+            "gid=5 in rootless should not be present"
+        );
+        let sys_mount = mounts
+            .iter()
+            .find(|m| m.destination().to_string_lossy() == "/sys")
+            .expect("sys mount should be present");
+        assert_eq!(
+            sys_mount.typ(),
+            &Some("none".to_string()),
+            "type should be changed in sys mount"
+        );
+        assert_eq!(
+            sys_mount
+                .source()
+                .clone()
+                .expect("source should not be empty in sys mount")
+                .to_string_lossy(),
+            "/sys",
+            "source should be changed in sys mount"
+        );
+        assert!(
+            sys_mount
+                .options()
+                .clone()
+                .expect("options should not be empty in sys mount")
+                .iter()
+                .any(|o| o == "rbind"),
+            "rbind option should be present in sys mount"
+        );
+
+        // Check that some other objects have same values.
+        assert!(spec.process == spec_rootless.process);
+        assert!(spec.root == spec_rootless.root);
+        assert!(spec.hooks == spec_rootless.hooks);
+        assert!(spec.uid_mappings == spec_rootless.uid_mappings);
+        assert!(spec.gid_mappings == spec_rootless.gid_mappings);
     }
 }

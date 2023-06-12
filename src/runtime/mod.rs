@@ -260,6 +260,7 @@ impl Spec {
         P: AsRef<Path>,
     {
         Ok(if path.as_ref().is_absolute() {
+            println!("Other: {}", path.as_ref().display());
             fs::canonicalize(path.as_ref())?
         } else {
             let canonical_bundle_path = fs::canonicalize(&bundle)?;
@@ -298,7 +299,7 @@ mod tests {
                 .expect("failed to canonicalize rootfs");
 
             assert_eq!(
-                &rootfs_absolute_path,
+                &rootfs_absolute_path.canonicalize().unwrap(),
                 spec.root.expect("no root in spec").path()
             );
         }
@@ -313,7 +314,7 @@ mod tests {
                 .expect("failed to canonicalize rootfs");
 
             assert_eq!(
-                &rootfs_absolute_path,
+                &rootfs_absolute_path.canonicalize().unwrap(),
                 spec.root.expect("no root in spec").path()
             );
         }

@@ -92,6 +92,11 @@ pub struct Process {
     #[getset(get = "pub", set = "pub")]
     /// IOPriority contains the I/O priority settings for the cgroup.
     io_priority: Option<LinuxIOPriority>,
+
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[getset(get = "pub", set = "pub")]
+    /// Scheduler specifies the scheduling attributes for a process
+    scheduler: Option<Scheduler>,
 }
 
 // Default impl for processes in the container
@@ -120,6 +125,8 @@ impl Default for Process {
             apparmor_profile: Default::default(),
             // Empty String, no default selinux
             selinux_label: Default::default(),
+            // Empty String, no default scheduler
+            scheduler: Default::default(),
             // See impl Default for LinuxCapabilities
             capabilities: Some(Default::default()),
             // Sets the default maximum of 1024 files the process can open
@@ -403,5 +410,115 @@ pub enum IOPriorityClass {
 impl Default for IOPriorityClass {
     fn default() -> Self {
         Self::IoprioClassBe
+    }
+}
+
+#[derive(Builder, Clone, Debug, Deserialize, Getters, Setters, Eq, PartialEq, Serialize)]
+#[builder(
+    default,
+    pattern = "owned",
+    setter(into, strip_option),
+    build_fn(error = "OciSpecError")
+)]
+#[getset(get = "pub", set = "pub")]
+/// Scheduler represents the scheduling attributes for a process. It is based on
+/// the Linux sched_setattr(2) syscall.
+pub struct Scheduler {
+    /// Policy represents the scheduling policy (e.g., SCHED_FIFO, SCHED_RR, SCHED_OTHER).
+    policy: LinuxSchedulerPolicy,
+
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    /// Nice is the nice value for the process, which affects its priority.
+    nice: Option<i32>,
+
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    /// Priority represents the static priority of the process.
+    priority: Option<i32>,
+
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    /// Flags is an array of scheduling flags.
+    flags: Option<Vec<LinuxSchedulerFlag>>,
+
+    // The following ones are used by the DEADLINE scheduler.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    /// Runtime is the amount of time in nanoseconds during which the process
+    /// is allowed to run in a given period.
+    runtime: Option<u64>,
+
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    /// Deadline is the absolute deadline for the process to complete its execution.
+    deadline: Option<u64>,
+
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    /// Period is the length of the period in nanoseconds used for determining the process runtime.
+    period: Option<u64>,
+}
+
+/// Default scheduler is SCHED_OTHER with no priority.
+impl Default for Scheduler {
+    fn default() -> Self {
+        Self {
+            policy: LinuxSchedulerPolicy::default(),
+            nice: None,
+            priority: None,
+            flags: None,
+            runtime: None,
+            deadline: None,
+            period: None,
+        }
+    }
+}
+
+#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+///  LinuxSchedulerPolicy represents different scheduling policies used with the Linux Scheduler
+pub enum LinuxSchedulerPolicy {
+    /// SchedOther is the default scheduling policy
+    SchedOther,
+    /// SchedFIFO is the First-In-First-Out scheduling policy
+    SchedFifo,
+    /// SchedRR is the Round-Robin scheduling policy
+    SchedRr,
+    /// SchedBatch is the Batch scheduling policy
+    SchedBatch,
+    /// SchedISO is the Isolation scheduling policy
+    SchedIso,
+    /// SchedIdle is the Idle scheduling policy
+    SchedIdle,
+    /// SchedDeadline is the Deadline scheduling policy
+    SchedDeadline,
+}
+
+/// Default LinuxSchedulerPolicy is SchedOther
+impl Default for LinuxSchedulerPolicy {
+    fn default() -> Self {
+        LinuxSchedulerPolicy::SchedOther
+    }
+}
+
+#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+///  LinuxSchedulerFlag represents the flags used by the Linux Scheduler.
+pub enum LinuxSchedulerFlag {
+    /// SchedFlagResetOnFork represents the reset on fork scheduling flag
+    SchedResetOnFork,
+    /// SchedFlagReclaim represents the reclaim scheduling flag
+    SchedFlagReclaim,
+    /// SchedFlagDLOverrun represents the deadline overrun scheduling flag
+    SchedFlagDLOverrun,
+    /// SchedFlagKeepPolicy represents the keep policy scheduling flag
+    SchedFlagKeepPolicy,
+    /// SchedFlagKeepParams represents the keep parameters scheduling flag
+    SchedFlagKeepParams,
+    /// SchedFlagUtilClampMin represents the utilization clamp minimum scheduling flag
+    SchedFlagUtilClampMin,
+    /// SchedFlagUtilClampMin represents the utilization clamp maximum scheduling flag
+    SchedFlagUtilClampMax,
+}
+
+/// Default LinuxSchedulerFlag is SchedResetOnFork
+impl Default for LinuxSchedulerFlag {
+    fn default() -> Self {
+        LinuxSchedulerFlag::SchedResetOnFork
     }
 }

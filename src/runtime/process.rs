@@ -87,6 +87,11 @@ pub struct Process {
     /// SelinuxLabel specifies the selinux context that the container
     /// process is run as.
     selinux_label: Option<String>,
+
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[getset(get = "pub", set = "pub")]
+    /// IOPriority contains the I/O priority settings for the cgroup.
+    io_priority: Option<LinuxIOPriority>,
 }
 
 // Default impl for processes in the container
@@ -127,6 +132,8 @@ impl Default for Process {
             .into(),
             oom_score_adj: None,
             command_line: None,
+            // Empty IOPriority, no default iopriority
+            io_priority: Default::default(),
         }
     }
 }
@@ -343,5 +350,58 @@ impl Default for LinuxCapabilities {
             permitted: default_vec.clone().into(),
             ambient: default_vec.into(),
         }
+    }
+}
+
+#[derive(
+    Builder, Clone, Copy, CopyGetters, Debug, Default, Deserialize, Eq, PartialEq, Serialize,
+)]
+#[builder(
+    default,
+    pattern = "owned",
+    setter(into, strip_option),
+    build_fn(error = "OciSpecError")
+)]
+#[getset(get_copy = "pub", set = "pub")]
+/// RLimit types and restrictions.
+pub struct LinuxIOPriority {
+    #[serde(default)]
+    /// Class represents an I/O scheduling class.
+    class: IOPriorityClass,
+
+    #[serde(default)]
+    /// Priority for the io operation
+    priority: i64,
+}
+
+#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+/// IOPriorityClass represents an I/O scheduling class.
+pub enum IOPriorityClass {
+    /// This is the realtime io class. This scheduling class is given
+    /// higher priority than any other in the system, processes from this class are
+    /// given first access to the disk every time. Thus it needs to be used with some
+    /// care, one io RT process can starve the entire system. Within the RT class,
+    /// there are 8 levels of class data that determine exactly how much time this
+    /// process needs the disk for on each service. In the future this might change
+    /// to be more directly mappable to performance, by passing in a wanted data
+    /// rate instead
+    IoprioClassRt,
+    /// This is the best-effort scheduling class, which is the default
+    /// for any process that hasn't set a specific io priority. The class data
+    /// determines how much io bandwidth the process will get, it's directly mappable
+    /// to the cpu nice levels just more coarsely implemented. 0 is the highest
+    /// BE prio level, 7 is the lowest. The mapping between cpu nice level and io
+    /// nice level is determined as: io_nice = (cpu_nice + 20) / 5.
+    IoprioClassBe,
+    /// This is the idle scheduling class, processes running at this
+    /// level only get io time when no one else needs the disk. The idle class has no
+    /// class data, since it doesn't really apply here.
+    IoprioClassIdle,
+}
+
+impl Default for IOPriorityClass {
+    fn default() -> Self {
+        Self::IoprioClassBe
     }
 }

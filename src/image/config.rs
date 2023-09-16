@@ -224,10 +224,15 @@ impl ImageConfiguration {
         to_string(&self, true)
     }
 
+    /// Extract the labels of the configuration, if present.
+    pub fn labels_of_config(&self) -> Option<&HashMap<String, String>> {
+        self.config().as_ref().and_then(|c| c.labels().as_ref())
+    }
+
     /// Retrieve the version number associated with this configuration.  This will try
     /// to use several well-known label keys.
     pub fn version(&self) -> Option<&str> {
-        let labels = self.config().as_ref().and_then(|c| c.labels().as_ref());
+        let labels = self.labels_of_config();
         if let Some(labels) = labels {
             for k in [super::ANNOTATION_VERSION, LABEL_VERSION] {
                 if let Some(v) = labels.get(k) {
@@ -236,6 +241,12 @@ impl ImageConfiguration {
             }
         }
         None
+    }
+
+    /// Extract the value of a given annotation on the configuration, if present.
+    pub fn get_config_annotation(&self, key: &str) -> Option<&str> {
+        self.labels_of_config()
+            .and_then(|v| v.get(key).map(|s| s.as_str()))
     }
 }
 
@@ -479,35 +490,37 @@ mod tests {
     use std::{fs, path::PathBuf};
 
     use super::*;
-    use crate::image::Os;
+    use crate::image::{Os, ANNOTATION_CREATED, ANNOTATION_VERSION};
 
-    fn create_config() -> ImageConfiguration {
+    fn create_base_config() -> ConfigBuilder {
+        ConfigBuilder::default()
+            .user("alice".to_owned())
+            .exposed_ports(vec!["8080/tcp".to_owned()])
+            .env(vec![
+                "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin".to_owned(),
+                "FOO=oci_is_a".to_owned(),
+                "BAR=well_written_spec".to_owned(),
+            ])
+            .entrypoint(vec!["/bin/my-app-binary".to_owned()])
+            .cmd(vec![
+                "--foreground".to_owned(),
+                "--config".to_owned(),
+                "/etc/my-app.d/default.cfg".to_owned(),
+            ])
+            .volumes(vec![
+                "/var/job-result-data".to_owned(),
+                "/var/log/my-app-logs".to_owned(),
+            ])
+            .working_dir("/home/alice".to_owned())
+    }
+
+    fn create_base_imgconfig(conf: Config) -> ImageConfigurationBuilder {
         ImageConfigurationBuilder::default()
             .created("2015-10-31T22:22:56.015925234Z".to_owned())
             .author("Alyssa P. Hacker <alyspdev@example.com>".to_owned())
             .architecture(Arch::Amd64)
             .os(Os::Linux)
-            .config(
-                ConfigBuilder::default()
-                    .user("alice".to_owned())
-                    .exposed_ports(vec!["8080/tcp".to_owned()])
-                    .env(vec![
-                        "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin".to_owned(),
-                        "FOO=oci_is_a".to_owned(),
-                        "BAR=well_written_spec".to_owned(),
-                    ])
-                    .entrypoint(vec!["/bin/my-app-binary".to_owned()])
-                    .cmd(vec![
-                        "--foreground".to_owned(),
-                        "--config".to_owned(),
-                        "/etc/my-app.d/default.cfg".to_owned(),
-                    ])
-                    .volumes(vec![
-                        "/var/job-result-data".to_owned(),
-                        "/var/log/my-app-logs".to_owned(),
-                    ])
-                    .working_dir("/home/alice".to_owned())
-                    .build().expect("build config"),
+            .config(conf
             )
             .rootfs(RootFsBuilder::default()
             .diff_ids(vec![
@@ -529,8 +542,27 @@ mod tests {
                 .build()
                 .expect("build history"),
             ])
+    }
+
+    fn create_config() -> ImageConfiguration {
+        create_base_imgconfig(create_base_config().build().expect("config"))
             .build()
             .expect("build configuration")
+    }
+
+    /// A config with some additions (labels)
+    fn create_imgconfig_v1() -> ImageConfiguration {
+        let labels = [
+            (ANNOTATION_CREATED, "2023-09-16T19:22:18.014Z"),
+            (ANNOTATION_VERSION, "42.27"),
+        ]
+        .into_iter()
+        .map(|(k, v)| (k.to_owned(), v.to_owned()));
+        let config = create_base_config()
+            .labels(labels.collect::<HashMap<_, _>>())
+            .build()
+            .unwrap();
+        create_base_imgconfig(config).build().unwrap()
     }
 
     fn get_config_path() -> PathBuf {
@@ -548,6 +580,16 @@ mod tests {
 
         // assert
         assert_eq!(actual, expected);
+    }
+
+    #[test]
+    fn test_helpers() {
+        let config = create_imgconfig_v1();
+        assert_eq!(config.labels_of_config().unwrap().len(), 2);
+        assert_eq!(
+            config.get_config_annotation(ANNOTATION_CREATED).unwrap(),
+            "2023-09-16T19:22:18.014Z"
+        );
     }
 
     #[test]
@@ -593,9 +635,10 @@ mod tests {
 
         // act
         config.to_writer_pretty(&mut actual).expect("to writer");
+        let actual = String::from_utf8(actual).unwrap();
 
         // assert
-        let expected = fs::read(get_config_path()).expect("read expected");
+        let expected = fs::read_to_string(get_config_path()).expect("read expected");
         assert_eq!(actual, expected);
     }
 

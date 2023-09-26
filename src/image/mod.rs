@@ -60,6 +60,11 @@ pub enum MediaType {
     /// MediaType ArtifactManifest specifies the media type used for content addressable
     /// artifacts to store them along side container images in a registry.
     ArtifactManifest,
+    /// MediaType EmptyJSON specifies a descriptor that has no content for the implementation. The
+    /// blob payload is the most minimal content that is still a valid JSON object: {} (size of 2).
+    /// The blob digest of {} is
+    /// sha256:44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a.
+    EmptyJSON,
     /// MediaType not specified by OCI image format.
     Other(String),
 }
@@ -87,6 +92,7 @@ impl Display for MediaType {
             ),
             Self::ImageConfig => write!(f, "application/vnd.oci.image.config.v1+json"),
             Self::ArtifactManifest => write!(f, "application/vnd.oci.artifact.manifest.v1+json"),
+            Self::EmptyJSON => write!(f, "application/vnd.oci.empty.v1+json"),
             Self::Other(media_type) => write!(f, "{media_type}"),
         }
     }
@@ -113,6 +119,7 @@ impl From<&str> for MediaType {
             }
             "application/vnd.oci.image.config.v1+json" => MediaType::ImageConfig,
             "application/vnd.oci.artifact.manifest.v1+json" => MediaType::ArtifactManifest,
+            "application/vnd.oci.empty.v1+json" => MediaType::EmptyJSON,
             media => MediaType::Other(media.to_owned()),
         }
     }

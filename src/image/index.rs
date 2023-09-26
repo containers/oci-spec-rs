@@ -43,11 +43,24 @@ pub struct ImageIndex {
     #[getset(get = "pub", set = "pub")]
     #[builder(default)]
     media_type: Option<MediaType>,
+    /// This OPTIONAL property contains the type of an artifact when the manifest is used for an
+    /// artifact. If defined, the value MUST comply with RFC 6838, including the naming
+    /// requirements in its section 4.2, and MAY be registered with IANA.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[getset(get = "pub", set = "pub")]
+    #[builder(default)]
+    artifact_type: Option<MediaType>,
     /// This REQUIRED property contains a list of manifests for specific
     /// platforms. While this property MUST be present, the size of
     /// the array MAY be zero.
     #[getset(get = "pub", set = "pub")]
     manifests: Vec<Descriptor>,
+    /// This OPTIONAL property specifies a descriptor of another manifest. This value, used by the
+    /// referrers API, indicates a relationship to the specified manifest.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[getset(get = "pub", set = "pub")]
+    #[builder(default)]
+    subject: Option<Descriptor>,
     /// This OPTIONAL property contains arbitrary metadata for the image
     /// index. This OPTIONAL property MUST use the annotation rules.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -191,6 +204,8 @@ impl Default for ImageIndex {
             media_type: Default::default(),
             manifests: Default::default(),
             annotations: Default::default(),
+            artifact_type: Default::default(),
+            subject: Default::default(),
         }
     }
 }

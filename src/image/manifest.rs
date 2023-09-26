@@ -50,6 +50,15 @@ pub struct ImageManifest {
     #[getset(get = "pub", set = "pub")]
     #[builder(default)]
     media_type: Option<MediaType>,
+    /// This OPTIONAL property contains the type of an artifact when the manifest is used for an
+    /// artifact. This MUST be set when config.mediaType is set to the empty value. If defined, the
+    /// value MUST comply with RFC 6838, including the naming requirements in its section 4.2, and
+    /// MAY be registered with IANA. Implementations storing or copying image manifests MUST NOT
+    /// error on encountering an artifactType that is unknown to the implementation.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[getset(get = "pub", set = "pub")]
+    #[builder(default)]
+    artifact_type: Option<MediaType>,
     /// This REQUIRED property references a configuration object for a
     /// container, by digest. Beyond the descriptor requirements,
     /// the value has the following additional restrictions:
@@ -69,6 +78,12 @@ pub struct ImageManifest {
     /// attributes of the initial empty directory are unspecified.
     #[getset(get_mut = "pub", get = "pub", set = "pub")]
     layers: Vec<Descriptor>,
+    /// This OPTIONAL property specifies a descriptor of another manifest. This value, used by the
+    /// referrers API, indicates a relationship to the specified manifest.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[getset(get = "pub", set = "pub")]
+    #[builder(default)]
+    subject: Option<Descriptor>,
     /// This OPTIONAL property contains arbitrary metadata for the image
     /// manifest. This OPTIONAL property MUST use the annotation
     /// rules.

@@ -60,6 +60,22 @@ pub struct Descriptor {
     #[getset(get = "pub", set = "pub")]
     #[builder(default)]
     platform: Option<Platform>,
+    /// This OPTIONAL property contains the type of an artifact when the descriptor points to an
+    /// artifact. This is the value of the config descriptor mediaType when the descriptor
+    /// references an image manifest. If defined, the value MUST comply with RFC 6838, including
+    /// the naming requirements in its section 4.2, and MAY be registered with IANA.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[getset(get = "pub", set = "pub")]
+    #[builder(default)]
+    artifact_type: Option<MediaType>,
+    /// This OPTIONAL property contains an embedded representation of the referenced content.
+    /// Values MUST conform to the Base 64 encoding, as defined in RFC 4648. The decoded data MUST
+    /// be identical to the referenced content and SHOULD be verified against the digest and size
+    /// fields by content consumers. See Embedded Content for when this is appropriate.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[getset(get = "pub", set = "pub")]
+    #[builder(default)]
+    data: Option<String>,
 }
 
 #[derive(
@@ -109,6 +125,10 @@ pub struct Platform {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default)]
     variant: Option<String>,
+    /// This property is RESERVED for future versions of the specification.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default)]
+    features: Option<Vec<String>>,
 }
 
 impl Descriptor {
@@ -121,6 +141,8 @@ impl Descriptor {
             urls: Default::default(),
             annotations: Default::default(),
             platform: Default::default(),
+            artifact_type: Default::default(),
+            data: Default::default(),
         }
     }
 }

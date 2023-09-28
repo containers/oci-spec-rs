@@ -125,6 +125,33 @@ impl From<&str> for MediaType {
     }
 }
 
+impl From<MediaType> for String {
+    fn from(media_type: MediaType) -> Self {
+        match media_type {
+            MediaType::Descriptor => "application/vnd.oci.descriptor".to_string(),
+            MediaType::LayoutHeader => "application/vnd.oci.layout.header.v1+json".to_string(),
+            MediaType::ImageManifest => "application/vnd.oci.image.manifest.v1+json".to_string(),
+            MediaType::ImageIndex => "application/vnd.oci.image.index.v1+json".to_string(),
+            MediaType::ImageLayer => "application/vnd.oci.image.layer.v1.tar".to_string(),
+            MediaType::ImageLayerGzip => "application/vnd.oci.image.layer.v1.tar+gzip".to_string(),
+            MediaType::ImageLayerZstd => "application/vnd.oci.image.layer.v1.tar+zstd".to_string(),
+            MediaType::ImageLayerNonDistributable => {
+                "application/vnd.oci.image.layer.nondistributable.v1.tar".to_string()
+            }
+            MediaType::ImageLayerNonDistributableGzip => {
+                "application/vnd.oci.image.layer.nondistributable.v1.tar+gzip".to_string()
+            }
+            MediaType::ImageLayerNonDistributableZstd => {
+                "application/vnd.oci.image.layer.nondistributable.v1.tar+zstd".to_string()
+            }
+            MediaType::ImageConfig => "application/vnd.oci.image.config.v1+json".to_string(),
+            MediaType::ArtifactManifest => "application/vnd.oci.artifact.manifest.v1+json".to_string(),
+            MediaType::EmptyJSON => "application/vnd.oci.empty.v1+json".to_string(),
+            MediaType::Other(media) => media.to_string(),
+        }
+    }
+}
+
 /// Trait to get the Docker Image Manifest V2 Schema 2 media type for an OCI media type
 ///
 /// This may be necessary for compatibility with tools that do not recognize the OCI media types.

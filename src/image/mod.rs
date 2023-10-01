@@ -145,7 +145,9 @@ impl From<MediaType> for String {
                 "application/vnd.oci.image.layer.nondistributable.v1.tar+zstd".to_string()
             }
             MediaType::ImageConfig => "application/vnd.oci.image.config.v1+json".to_string(),
-            MediaType::ArtifactManifest => "application/vnd.oci.artifact.manifest.v1+json".to_string(),
+            MediaType::ArtifactManifest => {
+                "application/vnd.oci.artifact.manifest.v1+json".to_string()
+            }
             MediaType::EmptyJSON => "application/vnd.oci.empty.v1+json".to_string(),
             MediaType::Other(media) => media.to_string(),
         }

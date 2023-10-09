@@ -1,6 +1,6 @@
 [package]
 name = "oci-spec"
-version = "6.3.0"
+version = "0.6.3"
 edition = "2021"
 authors = [
     "Furisto",

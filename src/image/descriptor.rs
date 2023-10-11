@@ -8,6 +8,7 @@ use std::collections::HashMap;
 #[derive(
     Builder, Clone, CopyGetters, Debug, Deserialize, Eq, Getters, Setters, PartialEq, Serialize,
 )]
+#[serde(rename_all = "camelCase")]
 #[builder(
     pattern = "owned",
     setter(into, strip_option),
@@ -22,7 +23,6 @@ pub struct Descriptor {
     /// This REQUIRED property contains the media type of the referenced
     /// content. Values MUST comply with RFC 6838, including the naming
     /// requirements in its section 4.2.
-    #[serde(rename = "mediaType")]
     #[getset(get = "pub", set = "pub")]
     media_type: MediaType,
     /// This REQUIRED property is the digest of the targeted content,
@@ -144,5 +144,39 @@ impl Descriptor {
             artifact_type: Default::default(),
             data: Default::default(),
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::image::Descriptor;
+
+    #[test]
+    fn test_deserialize() {
+        let descriptor_str = r#"{
+            "mediaType": "application/vnd.oci.image.manifest.v1+json",
+            "digest":"sha256:c2b8beca588702777e5f35dafdbeae9ec16c2bab802331f81cacd2a92f1d5356",
+            "size":769,
+            "annotations":{"org.opencontainers.image.created": "2023-10-11T22:37:26Z"},
+            "artifactType":"application/spdx+json"}"#;
+        let descriptor: Descriptor = serde_json::from_str(descriptor_str).unwrap();
+        assert_eq!(descriptor.media_type, MediaType::ImageManifest);
+        assert_eq!(
+            descriptor.digest,
+            "sha256:c2b8beca588702777e5f35dafdbeae9ec16c2bab802331f81cacd2a92f1d5356"
+        );
+        assert_eq!(descriptor.size, 769);
+        assert_eq!(
+            descriptor
+                .annotations
+                .unwrap()
+                .get("org.opencontainers.image.created"),
+            Some(&"2023-10-11T22:37:26Z".to_string())
+        );
+        assert_eq!(
+            descriptor.artifact_type.unwrap(),
+            MediaType::Other("application/spdx+json".to_string())
+        );
     }
 }

@@ -8,7 +8,7 @@ pub const VERSION_MINOR: u32 = 0;
 pub const VERSION_PATCH: u32 = 1;
 
 /// Indicates development branch. Releases will be empty string.
-pub const VERSION_DEV: &str = "";
+pub const VERSION_DEV: &str = "-dev";
 
 /// Retrieve the version as string representation.
 pub fn version() -> String {

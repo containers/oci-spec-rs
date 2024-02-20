@@ -20,12 +20,14 @@ VERSION_DEV_FILES=(
 
 for FILE in "${VERSION_DEV_FILES[@]}"; do
     sed -Ei "s/^(pub const VERSION_DEV: &str = ).*/\1\"\";/g" "$FILE"
+    sed -Ei 's/(assert_eq!\(version\(\), "[0-9]+\.[0-9]+\.[0-9]+).*("\.to_string\(\)\))/\1\2/g' "$FILE"
 done
 git add .
 git commit -sm "Bump to $VERSION"
 
 for FILE in "${VERSION_DEV_FILES[@]}"; do
     sed -Ei "s/^(pub const VERSION_DEV: &str = ).*/\1\"-dev\";/g" "$FILE"
+    sed -Ei 's/(assert_eq!\(version\(\), "[0-9]+\.[0-9]+\.[0-9]+).*("\.to_string\(\)\))/\1-dev\2/g' "$FILE"
 done
 git add .
 git commit -sm "Back to dev"

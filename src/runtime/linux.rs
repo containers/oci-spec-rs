@@ -3,7 +3,7 @@ use crate::error::{oci_error, OciSpecError};
 use derive_builder::Builder;
 use getset::{CopyGetters, Getters, Setters};
 use serde::{Deserialize, Serialize};
-use std::{collections::HashMap, convert::TryFrom, path::PathBuf, vec};
+use std::{collections::HashMap, path::PathBuf, vec};
 
 #[derive(Builder, Clone, Debug, Deserialize, Eq, Getters, Setters, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]

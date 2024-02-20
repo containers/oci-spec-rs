@@ -237,7 +237,7 @@ mod tests {
     use std::{fs, path::PathBuf};
 
     use super::*;
-    use crate::image::{Descriptor, DescriptorBuilder};
+    use crate::image::DescriptorBuilder;
 
     fn create_manifest() -> ImageManifest {
         use crate::image::SCHEMA_VERSION;

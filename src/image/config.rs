@@ -490,7 +490,7 @@ mod tests {
     use std::{fs, path::PathBuf};
 
     use super::*;
-    use crate::image::{Os, ANNOTATION_CREATED, ANNOTATION_VERSION};
+    use crate::image::{ANNOTATION_CREATED, ANNOTATION_VERSION};
 
     fn create_base_config() -> ConfigBuilder {
         ConfigBuilder::default()

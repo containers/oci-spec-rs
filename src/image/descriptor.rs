@@ -150,7 +150,6 @@ impl Descriptor {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::image::Descriptor;
 
     #[test]
     fn test_deserialize() {

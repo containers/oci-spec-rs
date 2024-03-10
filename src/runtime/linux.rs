@@ -586,6 +586,7 @@ pub struct LinuxBlockIo {
     build_fn(error = "OciSpecError")
 )]
 /// LinuxHugepageLimit structure corresponds to limiting kernel hugepages.
+/// Default to reservation limits if supported. Otherwise fallback to page fault limits.
 pub struct LinuxHugepageLimit {
     #[serde(default)]
     #[getset(get = "pub", set = "pub")]
@@ -595,7 +596,7 @@ pub struct LinuxHugepageLimit {
 
     #[serde(default)]
     #[getset(get_copy = "pub", set = "pub")]
-    /// Limit is the limit of "hugepagesize" hugetlb usage.
+    /// Limit is the limit of "hugepagesize" hugetlb reservations (if supported) or usage.
     limit: i64,
 }
 

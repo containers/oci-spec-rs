@@ -314,39 +314,48 @@ impl ToString for LinuxDeviceCgroup {
 /// LinuxMemory for Linux cgroup 'memory' resource management.
 pub struct LinuxMemory {
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[getset(get_copy = "pub", set = "pub")]
     /// Memory limit (in bytes).
     limit: Option<i64>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[getset(get_copy = "pub", set = "pub")]
     /// Memory reservation or soft_limit (in bytes).
     reservation: Option<i64>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[getset(get_copy = "pub", set = "pub")]
     /// Total memory limit (memory + swap).
     swap: Option<i64>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[getset(get_copy = "pub", set = "pub")]
     /// Kernel memory limit (in bytes).
     kernel: Option<i64>,
 
     #[serde(skip_serializing_if = "Option::is_none", rename = "kernelTCP")]
+    #[getset(get_copy = "pub", set = "pub")]
     /// Kernel memory limit for tcp (in bytes).
     kernel_tcp: Option<i64>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[getset(get_copy = "pub", set = "pub")]
     /// How aggressive the kernel will swap memory pages.
     swappiness: Option<u64>,
 
     #[serde(skip_serializing_if = "Option::is_none", rename = "disableOOMKiller")]
+    #[getset(get_copy = "pub", set = "pub")]
     /// DisableOOMKiller disables the OOM killer for out of memory
     /// conditions.
     disable_oom_killer: Option<bool>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[getset(get_copy = "pub", set = "pub")]
     /// Enables hierarchical memory accounting
     use_hierarchy: Option<bool>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[getset(get_copy = "pub", set = "pub")]
     /// Enables checking if a new memory limit is lower
     check_before_update: Option<bool>,
 }

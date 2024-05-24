@@ -3,12 +3,22 @@ use crate::{
     runtime::{Capabilities, Capability},
 };
 use derive_builder::Builder;
-use getset::{CopyGetters, Getters, Setters};
+use getset::{CopyGetters, Getters, MutGetters, Setters};
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 
 #[derive(
-    Builder, Clone, CopyGetters, Debug, Deserialize, Getters, Setters, Eq, PartialEq, Serialize,
+    Builder,
+    Clone,
+    CopyGetters,
+    Debug,
+    Deserialize,
+    Getters,
+    MutGetters,
+    Setters,
+    Eq,
+    PartialEq,
+    Serialize,
 )]
 #[serde(rename_all = "camelCase")]
 #[builder(
@@ -30,7 +40,7 @@ pub struct Process {
     /// ConsoleSize specifies the size of the console.
     console_size: Option<Box>,
 
-    #[getset(get = "pub", set = "pub")]
+    #[getset(get_mut = "pub", get = "pub", set = "pub")]
     /// User specifies user information for the process.
     user: User,
 
@@ -41,13 +51,13 @@ pub struct Process {
     args: Option<Vec<String>>,
 
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    #[getset(get = "pub", set = "pub")]
+    #[getset(get_mut = "pub", get = "pub", set = "pub")]
     /// CommandLine specifies the full command line for the application to
     /// execute on Windows.
     command_line: Option<String>,
 
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    #[getset(get = "pub", set = "pub")]
+    #[getset(get_mut = "pub", get = "pub", set = "pub")]
     /// Env populates the process environment for the process.
     env: Option<Vec<String>>,
 
@@ -265,6 +275,7 @@ pub struct LinuxRlimit {
     Default,
     Deserialize,
     Getters,
+    MutGetters,
     Setters,
     Eq,
     PartialEq,
@@ -280,28 +291,28 @@ pub struct LinuxRlimit {
 /// User id (uid) and group id (gid) tracks file permssions.
 pub struct User {
     #[serde(default)]
-    #[getset(get_copy = "pub", set = "pub")]
+    #[getset(get_mut = "pub", get_copy = "pub", set = "pub")]
     /// UID is the user id.
     uid: u32,
 
     #[serde(default)]
-    #[getset(get_copy = "pub", set = "pub")]
+    #[getset(get_mut = "pub", get_copy = "pub", set = "pub")]
     /// GID is the group id.
     gid: u32,
 
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    #[getset(get_copy = "pub", set = "pub")]
+    #[getset(get_mut = "pub", get_copy = "pub", set = "pub")]
     /// Specifies the umask of the user.
     umask: Option<u32>,
 
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    #[getset(get = "pub", set = "pub")]
+    #[getset(get_mut = "pub", get = "pub", set = "pub")]
     /// AdditionalGids are additional group ids set for the container's
     /// process.
     additional_gids: Option<Vec<u32>>,
 
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    #[getset(get = "pub", set = "pub")]
+    #[getset(get_mut = "pub", get = "pub", set = "pub")]
     /// Username is the user name.
     username: Option<String>,
 }

@@ -3,7 +3,7 @@ use crate::error::{oci_error, OciSpecError};
 use derive_builder::Builder;
 use getset::{CopyGetters, Getters, MutGetters, Setters};
 use serde::{Deserialize, Serialize};
-use std::{collections::HashMap, path::PathBuf, vec};
+use std::{collections::HashMap, fmt::Display, path::PathBuf, vec};
 
 #[derive(
     Builder, Clone, Debug, Deserialize, Eq, Getters, MutGetters, Setters, PartialEq, Serialize,
@@ -282,8 +282,11 @@ pub struct LinuxDeviceCgroup {
     access: Option<String>,
 }
 
-impl ToString for LinuxDeviceCgroup {
-    fn to_string(&self) -> String {
+/// This ToString trait is automatically implemented for any type which implements the Display trait.
+/// As such, ToString shouldn’t be implemented directly: Display should be implemented instead,
+/// and you get the ToString implementation for free.
+impl Display for LinuxDeviceCgroup {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let major = self
             .major
             .map(|mj| mj.to_string())
@@ -293,7 +296,8 @@ impl ToString for LinuxDeviceCgroup {
             .map(|mi| mi.to_string())
             .unwrap_or_else(|| "*".to_string());
         let access = self.access.as_deref().unwrap_or("");
-        format!(
+        write!(
+            f,
             "{} {}:{} {}",
             &self.typ.unwrap_or_default().as_str(),
             &major,
@@ -644,9 +648,14 @@ pub struct LinuxInterfacePriority {
     priority: u32,
 }
 
-impl ToString for LinuxInterfacePriority {
-    fn to_string(&self) -> String {
-        format!("{} {}\n", self.name, self.priority)
+/// This ToString trait is automatically implemented for any type which implements the Display trait.
+/// As such, ToString shouldn’t be implemented directly: Display should be implemented instead,
+/// and you get the ToString implementation for free.
+impl Display for LinuxInterfacePriority {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        // Serde seralization never fails since this is
+        // a combination of String and enums.
+        writeln!(f, "{} {}", self.name, self.priority)
     }
 }
 

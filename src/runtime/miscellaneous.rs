@@ -1,6 +1,6 @@
 use crate::error::OciSpecError;
 use derive_builder::Builder;
-use getset::{CopyGetters, Getters, Setters};
+use getset::{CopyGetters, Getters, MutGetters, Setters};
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 
@@ -40,7 +40,17 @@ impl Default for Root {
 }
 
 #[derive(
-    Builder, Clone, Debug, Default, Deserialize, Eq, Getters, Setters, PartialEq, Serialize,
+    Builder,
+    Clone,
+    Debug,
+    Default,
+    Deserialize,
+    Eq,
+    Getters,
+    MutGetters,
+    Setters,
+    PartialEq,
+    Serialize,
 )]
 #[builder(
     default,
@@ -48,7 +58,7 @@ impl Default for Root {
     setter(into, strip_option),
     build_fn(error = "OciSpecError")
 )]
-#[getset(get = "pub", set = "pub")]
+#[getset(get_mut = "pub", get = "pub", set = "pub")]
 /// Mount specifies a mount for a container.
 pub struct Mount {
     /// Destination is the absolute path where the mount will be placed in

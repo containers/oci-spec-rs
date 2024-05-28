@@ -1,11 +1,13 @@
 use crate::error::{oci_error, OciSpecError};
 
 use derive_builder::Builder;
-use getset::{CopyGetters, Getters, Setters};
+use getset::{CopyGetters, Getters, MutGetters, Setters};
 use serde::{Deserialize, Serialize};
-use std::{collections::HashMap, path::PathBuf, vec};
+use std::{collections::HashMap, fmt::Display, path::PathBuf, vec};
 
-#[derive(Builder, Clone, Debug, Deserialize, Eq, Getters, Setters, PartialEq, Serialize)]
+#[derive(
+    Builder, Clone, Debug, Deserialize, Eq, Getters, MutGetters, Setters, PartialEq, Serialize,
+)]
 #[serde(rename_all = "camelCase")]
 #[builder(
     default,
@@ -13,7 +15,7 @@ use std::{collections::HashMap, path::PathBuf, vec};
     setter(into, strip_option),
     build_fn(error = "OciSpecError")
 )]
-#[getset(get = "pub", set = "pub")]
+#[getset(get_mut = "pub", get = "pub", set = "pub")]
 /// Linux contains platform-specific configuration for Linux based
 /// containers.
 pub struct Linux {
@@ -240,6 +242,7 @@ impl LinuxDeviceType {
     Deserialize,
     Eq,
     Getters,
+    MutGetters,
     Setters,
     PartialEq,
     Serialize,
@@ -254,33 +257,36 @@ impl LinuxDeviceType {
 /// controller
 pub struct LinuxDeviceCgroup {
     #[serde(default)]
-    #[getset(get_copy = "pub", set = "pub")]
+    #[getset(get_mut = "pub", get_copy = "pub", set = "pub")]
     /// Allow or deny
     allow: bool,
 
     #[serde(default, rename = "type", skip_serializing_if = "Option::is_none")]
-    #[getset(get_copy = "pub", set = "pub")]
+    #[getset(get_mut = "pub", get_copy = "pub", set = "pub")]
     /// Device type, block, char, etc.
     typ: Option<LinuxDeviceType>,
 
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    #[getset(get_copy = "pub", set = "pub")]
+    #[getset(get_mut = "pub", get_copy = "pub", set = "pub")]
     /// Device's major number
     major: Option<i64>,
 
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    #[getset(get_copy = "pub", set = "pub")]
+    #[getset(get_mut = "pub", get_copy = "pub", set = "pub")]
     /// Device's minor number
     minor: Option<i64>,
 
     /// Cgroup access premissions format, rwm.
     #[serde(default)]
-    #[getset(get = "pub", set = "pub")]
+    #[getset(get_mut = "pub", get = "pub", set = "pub")]
     access: Option<String>,
 }
 
-impl ToString for LinuxDeviceCgroup {
-    fn to_string(&self) -> String {
+/// This ToString trait is automatically implemented for any type which implements the Display trait.
+/// As such, ToString shouldn’t be implemented directly: Display should be implemented instead,
+/// and you get the ToString implementation for free.
+impl Display for LinuxDeviceCgroup {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let major = self
             .major
             .map(|mj| mj.to_string())
@@ -290,7 +296,8 @@ impl ToString for LinuxDeviceCgroup {
             .map(|mi| mi.to_string())
             .unwrap_or_else(|| "*".to_string());
         let access = self.access.as_deref().unwrap_or("");
-        format!(
+        write!(
+            f,
             "{} {}:{} {}",
             &self.typ.unwrap_or_default().as_str(),
             &major,
@@ -641,9 +648,14 @@ pub struct LinuxInterfacePriority {
     priority: u32,
 }
 
-impl ToString for LinuxInterfacePriority {
-    fn to_string(&self) -> String {
-        format!("{} {}\n", self.name, self.priority)
+/// This ToString trait is automatically implemented for any type which implements the Display trait.
+/// As such, ToString shouldn’t be implemented directly: Display should be implemented instead,
+/// and you get the ToString implementation for free.
+impl Display for LinuxInterfacePriority {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        // Serde seralization never fails since this is
+        // a combination of String and enums.
+        writeln!(f, "{} {}", self.name, self.priority)
     }
 }
 
@@ -688,6 +700,7 @@ pub struct LinuxNetwork {
     Deserialize,
     Eq,
     Getters,
+    MutGetters,
     Setters,
     PartialEq,
     Serialize,
@@ -702,55 +715,65 @@ pub struct LinuxNetwork {
 /// Resource constraints for container
 pub struct LinuxResources {
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    #[getset(get = "pub", set = "pub")]
+    #[getset(get_mut = "pub", get = "pub", set = "pub")]
     /// Devices configures the device allowlist.
     devices: Option<Vec<LinuxDeviceCgroup>>,
 
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    #[getset(get = "pub", set = "pub")]
+    #[getset(get_mut = "pub", get = "pub", set = "pub")]
     /// Memory restriction configuration.
     memory: Option<LinuxMemory>,
 
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    #[getset(get = "pub", set = "pub")]
+    #[getset(get_mut = "pub", get = "pub", set = "pub")]
     /// CPU resource restriction configuration.
     cpu: Option<LinuxCpu>,
 
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    #[getset(get = "pub", set = "pub")]
+    #[getset(get_mut = "pub", get = "pub", set = "pub")]
     /// Task resource restrictions
     pids: Option<LinuxPids>,
 
     #[serde(default, skip_serializing_if = "Option::is_none", rename = "blockIO")]
-    #[getset(get = "pub", set = "pub")]
+    #[getset(get_mut = "pub", get = "pub", set = "pub")]
     /// BlockIO restriction configuration.
     block_io: Option<LinuxBlockIo>,
 
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    #[getset(get = "pub", set = "pub")]
+    #[getset(get_mut = "pub", get = "pub", set = "pub")]
     /// Hugetlb limit (in bytes).
     hugepage_limits: Option<Vec<LinuxHugepageLimit>>,
 
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    #[getset(get = "pub", set = "pub")]
+    #[getset(get_mut = "pub", get = "pub", set = "pub")]
     /// Network restriction configuration.
     network: Option<LinuxNetwork>,
 
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    #[getset(get = "pub", set = "pub")]
+    #[getset(get_mut = "pub", get = "pub", set = "pub")]
     /// Rdma resource restriction configuration. Limits are a set of key
     /// value pairs that define RDMA resource limits, where the key
     /// is device name and value is resource limits.
     rdma: Option<HashMap<String, LinuxRdma>>,
 
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    #[getset(get = "pub", set = "pub")]
+    #[getset(get_mut = "pub", get = "pub", set = "pub")]
     /// Unified resources.
     unified: Option<HashMap<String, String>>,
 }
 
 #[derive(
-    Builder, Clone, Copy, CopyGetters, Debug, Default, Deserialize, Eq, PartialEq, Serialize,
+    Builder,
+    Clone,
+    Copy,
+    CopyGetters,
+    Debug,
+    Default,
+    Deserialize,
+    Eq,
+    MutGetters,
+    PartialEq,
+    Serialize,
 )]
 #[serde(rename_all = "camelCase")]
 #[builder(
@@ -759,7 +782,7 @@ pub struct LinuxResources {
     setter(into, strip_option),
     build_fn(error = "OciSpecError")
 )]
-#[getset(get_copy = "pub", set = "pub")]
+#[getset(get_mut = "pub", get_copy = "pub", set = "pub")]
 /// LinuxRdma for Linux cgroup 'rdma' resource management (Linux 4.11).
 pub struct LinuxRdma {
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -900,6 +923,7 @@ pub fn get_default_namespaces() -> Vec<LinuxNamespace> {
     Deserialize,
     Eq,
     Getters,
+    MutGetters,
     Setters,
     PartialEq,
     Serialize,
@@ -915,37 +939,37 @@ pub fn get_default_namespaces() -> Vec<LinuxNamespace> {
 /// file.
 pub struct LinuxDevice {
     #[serde(default)]
-    #[getset(get = "pub", set = "pub")]
+    #[getset(get_mut = "pub", get = "pub", set = "pub")]
     /// Path to the device.
     path: PathBuf,
 
     #[serde(rename = "type")]
-    #[getset(get_copy = "pub", set = "pub")]
+    #[getset(get_mut = "pub", get_copy = "pub", set = "pub")]
     /// Device type, block, char, etc..
     typ: LinuxDeviceType,
 
     #[serde(default)]
-    #[getset(get_copy = "pub", set = "pub")]
+    #[getset(get_mut = "pub", get_copy = "pub", set = "pub")]
     /// Major is the device's major number.
     major: i64,
 
     #[serde(default)]
-    #[getset(get_copy = "pub", set = "pub")]
+    #[getset(get_mut = "pub", get_copy = "pub", set = "pub")]
     /// Minor is the device's minor number.
     minor: i64,
 
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    #[getset(get_copy = "pub", set = "pub")]
+    #[getset(get_mut = "pub", get_copy = "pub", set = "pub")]
     /// FileMode permission bits for the device.
     file_mode: Option<u32>,
 
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    #[getset(get_copy = "pub", set = "pub")]
+    #[getset(get_mut = "pub", get_copy = "pub", set = "pub")]
     /// UID of the device.
     uid: Option<u32>,
 
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    #[getset(get_copy = "pub", set = "pub")]
+    #[getset(get_mut = "pub", get_copy = "pub", set = "pub")]
     /// Gid of the device.
     gid: Option<u32>,
 }
@@ -1271,7 +1295,17 @@ pub fn get_default_readonly_paths() -> Vec<String> {
 }
 
 #[derive(
-    Builder, Clone, Debug, Default, Deserialize, Eq, Getters, Setters, PartialEq, Serialize,
+    Builder,
+    Clone,
+    Debug,
+    Default,
+    Deserialize,
+    Eq,
+    Getters,
+    MutGetters,
+    Setters,
+    PartialEq,
+    Serialize,
 )]
 #[serde(rename_all = "camelCase")]
 #[builder(
@@ -1280,7 +1314,7 @@ pub fn get_default_readonly_paths() -> Vec<String> {
     setter(into, strip_option),
     build_fn(error = "OciSpecError")
 )]
-#[getset(get = "pub", set = "pub")]
+#[getset(get_mut = "pub", get = "pub", set = "pub")]
 /// LinuxIntelRdt has container runtime resource constraints for Intel RDT CAT and MBA
 /// features and flags enabling Intel RDT CMT and MBM features.
 /// Intel RDT features are available in Linux 4.14 and newer kernel versions.

@@ -8,6 +8,7 @@ use getset::{CopyGetters, Getters, MutGetters, Setters};
 use serde::{Deserialize, Serialize};
 use std::{
     collections::HashMap,
+    fmt::Display,
     io::{Read, Write},
     path::Path,
 };
@@ -221,14 +222,19 @@ impl ImageManifest {
     }
 }
 
-/// Implement `ToString` directly since we cannot avoid twice memory allocation
-/// when using auto-implementaion through `Display`.
-impl ToString for ImageManifest {
-    fn to_string(&self) -> String {
+/// This ToString trait is automatically implemented for any type which implements the Display trait.
+/// As such, ToString shouldn’t be implemented directly: Display should be implemented instead,
+/// and you get the ToString implementation for free.
+impl Display for ImageManifest {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         // Serde seralization never fails since this is
         // a combination of String and enums.
-        self.to_string_pretty()
-            .expect("ImageManifest to JSON convertion failed")
+        write!(
+            f,
+            "{}",
+            self.to_string_pretty()
+                .expect("ImageManifest to JSON convertion failed")
+        )
     }
 }
 

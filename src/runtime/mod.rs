@@ -18,6 +18,7 @@ mod linux;
 mod miscellaneous;
 mod process;
 mod solaris;
+mod state;
 mod test;
 mod version;
 mod vm;

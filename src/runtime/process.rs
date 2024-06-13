@@ -74,7 +74,7 @@ pub struct Process {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     #[getset(get = "pub", set = "pub")]
     /// Rlimits specifies rlimit options to apply to the process.
-    rlimits: Option<Vec<LinuxRlimit>>,
+    rlimits: Option<Vec<PosixRlimit>>,
 
     #[serde(default, skip_serializing_if = "Option::is_none")]
     #[getset(get_copy = "pub", set = "pub")]
@@ -141,8 +141,8 @@ impl Default for Process {
             capabilities: Some(Default::default()),
             // Sets the default maximum of 1024 files the process can open
             // This is the same as the linux kernel default
-            rlimits: vec![LinuxRlimit {
-                typ: LinuxRlimitType::RlimitNofile,
+            rlimits: vec![PosixRlimit {
+                typ: PosixRlimitType::RlimitNofile,
                 hard: 1024,
                 soft: 1024,
             }]
@@ -180,63 +180,79 @@ pub struct Box {
 #[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 /// Available rlimit types (see <https://man7.org/linux/man-pages/man2/getrlimit.2.html>)
-pub enum LinuxRlimitType {
+pub enum PosixRlimitType {
     /// Limit in seconds of the amount of CPU time that the process can consume.
+    #[cfg(any(target_os = "linux", target_os = "solaris"))]
     RlimitCpu,
 
     /// Maximum size in bytes of the files that the process creates.
+    #[cfg(any(target_os = "linux", target_os = "solaris"))]
     RlimitFsize,
 
     /// Maximum size of the process's data segment (init data, uninit data and
     /// heap) in bytes.
+    #[cfg(any(target_os = "linux", target_os = "solaris"))]
     RlimitData,
 
     /// Maximum size of the proces stack in bytes.
+    #[cfg(any(target_os = "linux", target_os = "solaris"))]
     RlimitStack,
 
     /// Maximum size of a core dump file in bytes.
+    #[cfg(any(target_os = "linux", target_os = "solaris"))]
     RlimitCore,
 
     /// Limit on the process's resident set (the number of virtual pages
     /// resident in RAM).
+    #[cfg(target_os = "linux")]
     RlimitRss,
 
     /// Limit on number of threads for the real uid calling processes.
+    #[cfg(target_os = "linux")]
     RlimitNproc,
 
     /// One greator than the maximum number of file descritors that one process
     /// may open.
+    #[cfg(any(target_os = "linux", target_os = "solaris"))]
     RlimitNofile,
 
     /// Maximum number of bytes of memory that may be locked into RAM.
+    #[cfg(target_os = "linux")]
     RlimitMemlock,
 
     /// Maximum size of the process's virtual memory(address space) in bytes.
+    #[cfg(any(target_os = "linux", target_os = "solaris"))]
     RlimitAs,
 
     /// Limit on the number of locks and leases for the process.
+    #[cfg(target_os = "linux")]
     RlimitLocks,
 
     /// Limit on number of signals that may be queued for the process.
+    #[cfg(target_os = "linux")]
     RlimitSigpending,
 
     /// Limit on the number of bytes that can be allocated for POSIX message
     /// queue.
+    #[cfg(target_os = "linux")]
     RlimitMsgqueue,
 
     /// Specifies a ceiling to which the process's nice value can be raised.
+    #[cfg(target_os = "linux")]
     RlimitNice,
 
     /// Specifies a ceiling on the real-time priority.
+    #[cfg(target_os = "linux")]
     RlimitRtprio,
 
     /// This is a limit (in microseconds) on the amount of CPU time that a
     /// process scheduled under a real-time scheduling policy may consume
     /// without making a blocking system call.
+    #[cfg(target_os = "linux")]
     RlimitRttime,
 }
 
-impl Default for LinuxRlimitType {
+impl Default for PosixRlimitType {
     fn default() -> Self {
         Self::RlimitCpu
     }
@@ -253,10 +269,10 @@ impl Default for LinuxRlimitType {
 )]
 #[getset(get_copy = "pub", set = "pub")]
 /// RLimit types and restrictions.
-pub struct LinuxRlimit {
+pub struct PosixRlimit {
     #[serde(rename = "type")]
     /// Type of Rlimit to set
-    typ: LinuxRlimitType,
+    typ: PosixRlimitType,
 
     #[serde(default)]
     /// Hard limit for specified type

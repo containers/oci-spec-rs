@@ -297,7 +297,7 @@ mod tests {
                 .expect("failed to canonicalize rootfs");
 
             assert_eq!(
-                &rootfs_absolute_path,
+                &rootfs_absolute_path.canonicalize().unwrap(),
                 spec.root.expect("no root in spec").path()
             );
         }
@@ -312,7 +312,7 @@ mod tests {
                 .expect("failed to canonicalize rootfs");
 
             assert_eq!(
-                &rootfs_absolute_path,
+                &rootfs_absolute_path.canonicalize().unwrap(),
                 spec.root.expect("no root in spec").path()
             );
         }

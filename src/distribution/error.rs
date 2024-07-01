@@ -5,13 +5,15 @@ use derive_builder::Builder;
 use getset::Getters;
 use serde::{Deserialize, Serialize};
 use std::fmt::{self, Display, Formatter};
+use strum_macros::{Display as StrumDisplay, EnumString};
 use thiserror::Error;
 
 /// The string returned by and ErrorResponse error.
 pub const ERR_REGISTRY: &str = "distribution: registry returned error";
 
 /// Unique identifier representing error code.
-#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize, StrumDisplay, EnumString)]
+#[strum(serialize_all = "SCREAMING_SNAKE_CASE")]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum ErrorCode {
     /// Blob unknown to registry.

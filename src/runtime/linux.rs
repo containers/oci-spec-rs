@@ -4,6 +4,7 @@ use derive_builder::Builder;
 use getset::{CopyGetters, Getters, MutGetters, Setters};
 use serde::{Deserialize, Serialize};
 use std::{collections::HashMap, fmt::Display, path::PathBuf, vec};
+use strum_macros::{Display as StrumDisplay, EnumString};
 
 #[derive(
     Builder, Clone, Debug, Deserialize, Eq, Getters, MutGetters, Setters, PartialEq, Serialize,
@@ -193,7 +194,8 @@ pub struct LinuxIdMapping {
     size: u32,
 }
 
-#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize, EnumString)]
+#[strum(serialize_all = "lowercase")]
 #[serde(rename_all = "lowercase")]
 /// Device types
 pub enum LinuxDeviceType {
@@ -796,10 +798,12 @@ pub struct LinuxRdma {
     hca_objects: Option<u32>,
 }
 
-#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize, Hash)]
+#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize, Hash, StrumDisplay)]
+#[strum(serialize_all = "lowercase")]
 #[serde(rename_all = "snake_case")]
 /// Available Linux namespaces.
 pub enum LinuxNamespaceType {
+    #[strum(to_string = "mnt")]
     /// Mount Namespace for isolating mount points
     Mount = 0x00020000,
 
@@ -818,6 +822,7 @@ pub enum LinuxNamespaceType {
     /// PID Namespace for isolating process ids
     Pid = 0x20000000,
 
+    #[strum(to_string = "net")]
     /// Network Namespace for isolating network devices, ports, stacks etc.
     Network = 0x40000000,
 
@@ -1043,7 +1048,8 @@ pub struct LinuxSeccomp {
     syscalls: Option<Vec<LinuxSyscall>>,
 }
 
-#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize, StrumDisplay, EnumString)]
+#[strum(serialize_all = "SCREAMING_SNAKE_CASE")]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 #[repr(u32)]
 /// Available seccomp actions.
@@ -1080,7 +1086,8 @@ impl Default for LinuxSeccompAction {
 }
 
 #[allow(clippy::enum_clike_unportable_variant)]
-#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize, StrumDisplay, EnumString)]
+#[strum(serialize_all = "SCREAMING_SNAKE_CASE")]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 /// Available seccomp architectures.
 pub enum Arch {
@@ -1139,7 +1146,8 @@ pub enum Arch {
     ScmpArchS390x = 0x80000016,
 }
 
-#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize, StrumDisplay, EnumString)]
+#[strum(serialize_all = "SCREAMING_SNAKE_CASE")]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 /// Available seccomp filter flags.
 pub enum LinuxSeccompFilterFlag {
@@ -1163,7 +1171,8 @@ pub enum LinuxSeccompFilterFlag {
     SeccompFilterFlagSpecAllow,
 }
 
-#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize, StrumDisplay, EnumString)]
+#[strum(serialize_all = "SCREAMING_SNAKE_CASE")]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 #[repr(u32)]
 /// The seccomp operator to be used for args.
@@ -1378,14 +1387,16 @@ pub struct LinuxPersonality {
     flags: Option<Vec<String>>,
 }
 
-#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize, StrumDisplay, EnumString)]
 /// Define domain and flags for LinuxPersonality.
 pub enum LinuxPersonalityDomain {
     #[serde(rename = "LINUX")]
+    #[strum(serialize = "LINUX")]
     /// PerLinux is the standard Linux personality.
     PerLinux,
 
     #[serde(rename = "LINUX32")]
+    #[strum(serialize = "LINUX32")]
     /// PerLinux32 sets personality to 32 bit.
     PerLinux32,
 }
@@ -1463,5 +1474,211 @@ impl Arbitrary for LinuxHugepageLimit {
             page_size,
             limit: i64::arbitrary(g),
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    // LinuxDeviceType test cases
+    #[test]
+    fn device_type_enum_to_str() {
+        let type_a = LinuxDeviceType::A;
+        assert_eq!(type_a.as_str(), "a");
+
+        let type_b = LinuxDeviceType::B;
+        assert_eq!(type_b.as_str(), "b");
+
+        let type_c = LinuxDeviceType::C;
+        assert_eq!(type_c.as_str(), "c");
+    }
+
+    #[test]
+    fn device_type_string_to_enum() {
+        let devtype_str = "a";
+        let devtype_enum: LinuxDeviceType = devtype_str.parse().unwrap();
+        assert_eq!(devtype_enum, LinuxDeviceType::A);
+
+        let devtype_str = "b";
+        let devtype_enum: LinuxDeviceType = devtype_str.parse().unwrap();
+        assert_eq!(devtype_enum, LinuxDeviceType::B);
+
+        let devtype_str = "c";
+        let devtype_enum: LinuxDeviceType = devtype_str.parse().unwrap();
+        assert_eq!(devtype_enum, LinuxDeviceType::C);
+
+        let invalid_devtype_str = "x";
+        let unknown_devtype = invalid_devtype_str.parse::<LinuxDeviceType>();
+        assert!(unknown_devtype.is_err());
+    }
+
+    // LinuxNamespaceType test cases
+    #[test]
+    fn ns_type_enum_to_string() {
+        let type_a = LinuxNamespaceType::Network;
+        assert_eq!(type_a.to_string(), "net");
+
+        let type_b = LinuxNamespaceType::Mount;
+        assert_eq!(type_b.to_string(), "mnt");
+
+        let type_c = LinuxNamespaceType::Ipc;
+        assert_eq!(type_c.to_string(), "ipc");
+    }
+
+    #[test]
+    fn ns_type_string_to_enum() {
+        let nstype_str = "net";
+        let nstype_enum = LinuxNamespaceType::try_from(nstype_str).unwrap();
+        assert_eq!(nstype_enum, LinuxNamespaceType::Network);
+
+        let nstype_str = "ipc";
+        let nstype_enum = LinuxNamespaceType::try_from(nstype_str).unwrap();
+        assert_eq!(nstype_enum, LinuxNamespaceType::Ipc);
+
+        let nstype_str = "cgroup";
+        let nstype_enum = LinuxNamespaceType::try_from(nstype_str).unwrap();
+        assert_eq!(nstype_enum, LinuxNamespaceType::Cgroup);
+
+        let invalid_nstype_str = "mount";
+        let unknown_nstype = LinuxNamespaceType::try_from(invalid_nstype_str);
+        assert!(unknown_nstype.is_err());
+    }
+
+    // LinuxSeccompAction test cases
+    #[test]
+    fn seccomp_action_enum_to_string() {
+        let type_a = LinuxSeccompAction::ScmpActKill;
+        assert_eq!(type_a.to_string(), "SCMP_ACT_KILL");
+
+        let type_b = LinuxSeccompAction::ScmpActAllow;
+        assert_eq!(type_b.to_string(), "SCMP_ACT_ALLOW");
+
+        let type_c = LinuxSeccompAction::ScmpActNotify;
+        assert_eq!(type_c.to_string(), "SCMP_ACT_NOTIFY");
+    }
+
+    #[test]
+    fn seccomp_action_string_to_enum() {
+        let action_str = "SCMP_ACT_KILL";
+        let action_enum: LinuxSeccompAction = action_str.parse().unwrap();
+        assert_eq!(action_enum, LinuxSeccompAction::ScmpActKill);
+
+        let action_str = "SCMP_ACT_ALLOW";
+        let action_enum: LinuxSeccompAction = action_str.parse().unwrap();
+        assert_eq!(action_enum, LinuxSeccompAction::ScmpActAllow);
+
+        let action_str = "SCMP_ACT_NOTIFY";
+        let action_enum: LinuxSeccompAction = action_str.parse().unwrap();
+        assert_eq!(action_enum, LinuxSeccompAction::ScmpActNotify);
+
+        let invalid_action_str = "x";
+        let unknown_action = invalid_action_str.parse::<LinuxSeccompAction>();
+        assert!(unknown_action.is_err());
+    }
+
+    // LinuxSeccomp Arch test cases
+    #[test]
+    fn seccomp_arch_enum_to_string() {
+        let type_a = Arch::ScmpArchX86_64;
+        assert_eq!(type_a.to_string(), "SCMP_ARCH_X86_64");
+
+        let type_b = Arch::ScmpArchAarch64;
+        assert_eq!(type_b.to_string(), "SCMP_ARCH_AARCH64");
+
+        let type_c = Arch::ScmpArchPpc64le;
+        assert_eq!(type_c.to_string(), "SCMP_ARCH_PPC64LE");
+    }
+
+    #[test]
+    fn seccomp_arch_string_to_enum() {
+        let arch_type_str = "SCMP_ARCH_X86_64";
+        let arch_type_enum: Arch = arch_type_str.parse().unwrap();
+        assert_eq!(arch_type_enum, Arch::ScmpArchX86_64);
+
+        let arch_type_str = "SCMP_ARCH_AARCH64";
+        let arch_type_enum: Arch = arch_type_str.parse().unwrap();
+        assert_eq!(arch_type_enum, Arch::ScmpArchAarch64);
+
+        let arch_type_str = "SCMP_ARCH_PPC64LE";
+        let arch_type_enum: Arch = arch_type_str.parse().unwrap();
+        assert_eq!(arch_type_enum, Arch::ScmpArchPpc64le);
+
+        let invalid_arch_str = "x";
+        let unknown_arch = invalid_arch_str.parse::<Arch>();
+        assert!(unknown_arch.is_err());
+    }
+
+    // LinuxSeccompFilterFlag test cases
+    #[test]
+    fn seccomp_filter_flag_enum_to_string() {
+        let type_a = LinuxSeccompFilterFlag::SeccompFilterFlagLog;
+        assert_eq!(type_a.to_string(), "SECCOMP_FILTER_FLAG_LOG");
+
+        let type_b = LinuxSeccompFilterFlag::SeccompFilterFlagTsync;
+        assert_eq!(type_b.to_string(), "SECCOMP_FILTER_FLAG_TSYNC");
+
+        let type_c = LinuxSeccompFilterFlag::SeccompFilterFlagSpecAllow;
+        assert_eq!(type_c.to_string(), "SECCOMP_FILTER_FLAG_SPEC_ALLOW");
+    }
+
+    #[test]
+    fn seccomp_filter_flag_string_to_enum() {
+        let filter_flag_type_str = "SECCOMP_FILTER_FLAG_LOG";
+        let filter_flag_type_enum: LinuxSeccompFilterFlag = filter_flag_type_str.parse().unwrap();
+        assert_eq!(
+            filter_flag_type_enum,
+            LinuxSeccompFilterFlag::SeccompFilterFlagLog
+        );
+
+        let filter_flag_type_str = "SECCOMP_FILTER_FLAG_TSYNC";
+        let filter_flag_type_enum: LinuxSeccompFilterFlag = filter_flag_type_str.parse().unwrap();
+        assert_eq!(
+            filter_flag_type_enum,
+            LinuxSeccompFilterFlag::SeccompFilterFlagTsync
+        );
+
+        let filter_flag_type_str = "SECCOMP_FILTER_FLAG_SPEC_ALLOW";
+        let filter_flag_type_enum: LinuxSeccompFilterFlag = filter_flag_type_str.parse().unwrap();
+        assert_eq!(
+            filter_flag_type_enum,
+            LinuxSeccompFilterFlag::SeccompFilterFlagSpecAllow
+        );
+
+        let invalid_filter_flag_str = "x";
+        let unknown_arch = invalid_filter_flag_str.parse::<LinuxSeccompFilterFlag>();
+        assert!(unknown_arch.is_err());
+    }
+
+    // LinuxSeccompOperator test cases
+    #[test]
+    fn seccomp_operator_enum_to_string() {
+        let type_a = LinuxSeccompOperator::ScmpCmpNe;
+        assert_eq!(type_a.to_string(), "SCMP_CMP_NE");
+
+        let type_b = LinuxSeccompOperator::ScmpCmpMaskedEq;
+        assert_eq!(type_b.to_string(), "SCMP_CMP_MASKED_EQ");
+
+        let type_c = LinuxSeccompOperator::ScmpCmpGt;
+        assert_eq!(type_c.to_string(), "SCMP_CMP_GT");
+    }
+
+    #[test]
+    fn seccomp_operator_string_to_enum() {
+        let seccomp_operator_str = "SCMP_CMP_GT";
+        let seccomp_operator_enum: LinuxSeccompOperator = seccomp_operator_str.parse().unwrap();
+        assert_eq!(seccomp_operator_enum, LinuxSeccompOperator::ScmpCmpGt);
+
+        let seccomp_operator_str = "SCMP_CMP_NE";
+        let seccomp_operator_enum: LinuxSeccompOperator = seccomp_operator_str.parse().unwrap();
+        assert_eq!(seccomp_operator_enum, LinuxSeccompOperator::ScmpCmpNe);
+
+        let seccomp_operator_str = "SCMP_CMP_MASKED_EQ";
+        let seccomp_operator_enum: LinuxSeccompOperator = seccomp_operator_str.parse().unwrap();
+        assert_eq!(seccomp_operator_enum, LinuxSeccompOperator::ScmpCmpMaskedEq);
+
+        let invalid_seccomp_operator_str = "x";
+        let unknown_operator = invalid_seccomp_operator_str.parse::<LinuxSeccompOperator>();
+        assert!(unknown_operator.is_err());
     }
 }

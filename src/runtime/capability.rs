@@ -4,10 +4,12 @@ use serde::{
 };
 use std::collections::HashSet;
 
+use strum_macros::{Display, EnumString};
+
 /// Capabilities is a unique set of Capability values.
 pub type Capabilities = HashSet<Capability>;
 
-#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Serialize)]
+#[derive(Clone, Copy, Debug, EnumString, Eq, Display, Hash, PartialEq, Serialize)]
 /// All available capabilities.
 ///
 /// For the purpose of performing permission checks, traditional UNIX
@@ -21,6 +23,7 @@ pub type Capabilities = HashSet<Capability>;
 /// Starting with kernel 2.2, Linux divides the privileges traditionally
 /// associated with superuser into distinct units, known as capabilities, which
 /// can be independently enabled and disabled. Capabilities are a per-thread attribute.
+#[strum(serialize_all = "SCREAMING_SNAKE_CASE")]
 pub enum Capability {
     #[serde(rename = "CAP_AUDIT_CONTROL")]
     /// Enable and disable kernel auditing; change auditing filter rules;
@@ -608,5 +611,61 @@ mod tests {
         assert!(res.contains(&Capability::Syslog));
         assert!(res.contains(&Capability::Chown));
         Ok(())
+    }
+
+    #[test]
+    fn invalid_string2enum() {
+        let invalid_cap_str = "INVALID_CAP";
+        let unknown_cap = invalid_cap_str.parse::<Capability>();
+        assert!(unknown_cap.is_err());
+    }
+
+    #[test]
+    fn cap_enum_to_string() {
+        let cap = Capability::AuditControl;
+        assert_eq!(cap.to_string(), "AUDIT_CONTROL");
+
+        let cap = Capability::AuditRead;
+        assert_eq!(cap.to_string(), "AUDIT_READ");
+
+        let cap = Capability::SysAdmin;
+        assert_eq!(cap.to_string(), "SYS_ADMIN");
+    }
+
+    #[test]
+    fn cap_string_to_enum() {
+        let cap_str = "AUDIT_CONTROL";
+        let cap_enum: Capability = cap_str.parse().unwrap();
+        assert_eq!(cap_enum, Capability::AuditControl);
+
+        let cap_str = "AUDIT_READ";
+        let cap_enum: Capability = cap_str.parse().unwrap();
+        assert_eq!(cap_enum, Capability::AuditRead);
+
+        let cap_str = "SYS_ADMIN";
+        let cap_enum: Capability = cap_str.parse().unwrap();
+        assert_eq!(cap_enum, Capability::SysAdmin);
+    }
+
+    #[test]
+    fn test_serde_serialization() {
+        let cap = Capability::AuditControl;
+        let serialized = serde_json::to_string(&cap).unwrap();
+        assert_eq!(serialized, "\"CAP_AUDIT_CONTROL\"");
+
+        let cap = Capability::SysAdmin;
+        let serialized = serde_json::to_string(&cap).unwrap();
+        assert_eq!(serialized, "\"CAP_SYS_ADMIN\"");
+    }
+
+    #[test]
+    fn test_serde_deserialization() {
+        let serialized = "\"CAP_AUDIT_CONTROL\"";
+        let cap: Capability = serde_json::from_str(serialized).unwrap();
+        assert_eq!(cap, Capability::AuditControl);
+
+        let serialized = "\"CAP_SYS_ADMIN\"";
+        let cap: Capability = serde_json::from_str(serialized).unwrap();
+        assert_eq!(cap, Capability::SysAdmin);
     }
 }

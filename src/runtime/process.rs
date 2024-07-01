@@ -6,6 +6,7 @@ use derive_builder::Builder;
 use getset::{CopyGetters, Getters, MutGetters, Setters};
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
+use strum_macros::{Display as StrumDisplay, EnumString};
 
 #[derive(
     Builder,
@@ -177,7 +178,8 @@ pub struct Box {
     width: u64,
 }
 
-#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize, StrumDisplay, EnumString)]
+#[strum(serialize_all = "SCREAMING_SNAKE_CASE")]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 /// Available rlimit types (see <https://man7.org/linux/man-pages/man2/getrlimit.2.html>)
 pub enum PosixRlimitType {
@@ -408,7 +410,8 @@ pub struct LinuxIOPriority {
     priority: i64,
 }
 
-#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize, StrumDisplay, EnumString)]
+#[strum(serialize_all = "SCREAMING_SNAKE_CASE")]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 /// IOPriorityClass represents an I/O scheduling class.
 pub enum IOPriorityClass {
@@ -496,7 +499,8 @@ impl Default for Scheduler {
     }
 }
 
-#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize, StrumDisplay, EnumString)]
+#[strum(serialize_all = "SCREAMING_SNAKE_CASE")]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 ///  LinuxSchedulerPolicy represents different scheduling policies used with the Linux Scheduler
 pub enum LinuxSchedulerPolicy {
@@ -523,7 +527,8 @@ impl Default for LinuxSchedulerPolicy {
     }
 }
 
-#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize, StrumDisplay, EnumString)]
+#[strum(serialize_all = "SCREAMING_SNAKE_CASE")]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 ///  LinuxSchedulerFlag represents the flags used by the Linux Scheduler.
 pub enum LinuxSchedulerFlag {
@@ -547,5 +552,42 @@ pub enum LinuxSchedulerFlag {
 impl Default for LinuxSchedulerFlag {
     fn default() -> Self {
         LinuxSchedulerFlag::SchedResetOnFork
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    // PosixRlimitType test cases
+    #[test]
+    fn posix_rlimit_type_enum_to_string() {
+        let type_a = PosixRlimitType::RlimitCpu;
+        assert_eq!(type_a.to_string(), "RLIMIT_CPU");
+
+        let type_b = PosixRlimitType::RlimitData;
+        assert_eq!(type_b.to_string(), "RLIMIT_DATA");
+
+        let type_c = PosixRlimitType::RlimitNofile;
+        assert_eq!(type_c.to_string(), "RLIMIT_NOFILE");
+    }
+
+    #[test]
+    fn posix_rlimit_type_string_to_enum() {
+        let posix_rlimit_type_str = "RLIMIT_CPU";
+        let posix_rlimit_type_enum: PosixRlimitType = posix_rlimit_type_str.parse().unwrap();
+        assert_eq!(posix_rlimit_type_enum, PosixRlimitType::RlimitCpu);
+
+        let posix_rlimit_type_str = "RLIMIT_DATA";
+        let posix_rlimit_type_enum: PosixRlimitType = posix_rlimit_type_str.parse().unwrap();
+        assert_eq!(posix_rlimit_type_enum, PosixRlimitType::RlimitData);
+
+        let posix_rlimit_type_str = "RLIMIT_NOFILE";
+        let posix_rlimit_type_enum: PosixRlimitType = posix_rlimit_type_str.parse().unwrap();
+        assert_eq!(posix_rlimit_type_enum, PosixRlimitType::RlimitNofile);
+
+        let invalid_posix_rlimit_type_str = "x";
+        let unknown_rlimit = invalid_posix_rlimit_type_str.parse::<PosixRlimitType>();
+        assert!(unknown_rlimit.is_err());
     }
 }

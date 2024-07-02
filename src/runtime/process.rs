@@ -108,6 +108,11 @@ pub struct Process {
     #[getset(get = "pub", set = "pub")]
     /// Scheduler specifies the scheduling attributes for a process
     scheduler: Option<Scheduler>,
+
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[getset(get = "pub", set = "pub")]
+    /// ExecCPUAffinity specifies the cpu affinity for a process
+    exec_cpu_affinity: Option<ExecCPUAffinity>,
 }
 
 // Default impl for processes in the container
@@ -152,6 +157,7 @@ impl Default for Process {
             command_line: None,
             // Empty IOPriority, no default iopriority
             io_priority: Default::default(),
+            exec_cpu_affinity: Default::default(),
         }
     }
 }
@@ -553,6 +559,33 @@ impl Default for LinuxSchedulerFlag {
     fn default() -> Self {
         LinuxSchedulerFlag::SchedResetOnFork
     }
+}
+
+#[derive(
+    Builder, Clone, Debug, Default, Deserialize, Getters, Setters, Eq, PartialEq, Serialize,
+)]
+#[builder(
+    default,
+    pattern = "owned",
+    setter(into, strip_option),
+    build_fn(error = "OciSpecError")
+)]
+#[getset(get = "pub", set = "pub")]
+/// ExecCPUAffinity specifies CPU affinity used to execute the process.
+/// This setting is not applicable to the container's init process.
+pub struct ExecCPUAffinity {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    /// cpu_affinity_initial is a list of CPUs a runtime parent process to be run on
+    /// initially, before the transition to container's cgroup.
+    /// This is a a comma-separated list, with dashes to represent ranges.
+    /// For example, `0-3,7` represents CPUs 0,1,2,3, and 7.
+    cpu_affinity_initial: Option<String>,
+
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    /// cpu_affinity_final is a list of CPUs the process will be run on after the transition
+    /// to container's cgroup. The format is the same as for `initial`. If omitted or empty,
+    /// the container's default CPU affinity, as defined by cpu.cpus property, is used.
+    cpu_affinity_final: Option<String>,
 }
 
 #[cfg(test)]

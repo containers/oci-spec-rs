@@ -5,8 +5,7 @@ use crate::{
 use derive_builder::Builder;
 use getset::{CopyGetters, Getters, MutGetters, Setters};
 use regex::Regex;
-use serde::de;
-use serde::{Deserialize, Deserializer, Serialize};
+use serde::{de, Deserialize, Deserializer, Serialize};
 use std::path::PathBuf;
 use strum_macros::{Display as StrumDisplay, EnumString};
 

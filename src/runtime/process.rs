@@ -74,6 +74,7 @@ pub struct Process {
 
     #[serde(default, skip_serializing_if = "Option::is_none")]
     #[getset(get = "pub", set = "pub")]
+    #[cfg(any(target_os = "linux", target_os = "solaris"))]
     /// Rlimits specifies rlimit options to apply to the process.
     rlimits: Option<Vec<PosixRlimit>>,
 
@@ -147,6 +148,7 @@ impl Default for Process {
             capabilities: Some(Default::default()),
             // Sets the default maximum of 1024 files the process can open
             // This is the same as the linux kernel default
+            #[cfg(any(target_os = "linux", target_os = "solaris"))]
             rlimits: vec![PosixRlimit {
                 typ: PosixRlimitType::RlimitNofile,
                 hard: 1024,
@@ -187,27 +189,23 @@ pub struct Box {
 #[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize, StrumDisplay, EnumString)]
 #[strum(serialize_all = "SCREAMING_SNAKE_CASE")]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+#[cfg(any(target_os = "linux", target_os = "solaris"))]
 /// Available rlimit types (see <https://man7.org/linux/man-pages/man2/getrlimit.2.html>)
 pub enum PosixRlimitType {
     /// Limit in seconds of the amount of CPU time that the process can consume.
-    #[cfg(any(target_os = "linux", target_os = "solaris"))]
     RlimitCpu,
 
     /// Maximum size in bytes of the files that the process creates.
-    #[cfg(any(target_os = "linux", target_os = "solaris"))]
     RlimitFsize,
 
     /// Maximum size of the process's data segment (init data, uninit data and
     /// heap) in bytes.
-    #[cfg(any(target_os = "linux", target_os = "solaris"))]
     RlimitData,
 
     /// Maximum size of the proces stack in bytes.
-    #[cfg(any(target_os = "linux", target_os = "solaris"))]
     RlimitStack,
 
     /// Maximum size of a core dump file in bytes.
-    #[cfg(any(target_os = "linux", target_os = "solaris"))]
     RlimitCore,
 
     /// Limit on the process's resident set (the number of virtual pages
@@ -221,7 +219,6 @@ pub enum PosixRlimitType {
 
     /// One greator than the maximum number of file descritors that one process
     /// may open.
-    #[cfg(any(target_os = "linux", target_os = "solaris"))]
     RlimitNofile,
 
     /// Maximum number of bytes of memory that may be locked into RAM.
@@ -229,7 +226,6 @@ pub enum PosixRlimitType {
     RlimitMemlock,
 
     /// Maximum size of the process's virtual memory(address space) in bytes.
-    #[cfg(any(target_os = "linux", target_os = "solaris"))]
     RlimitAs,
 
     /// Limit on the number of locks and leases for the process.
@@ -260,6 +256,7 @@ pub enum PosixRlimitType {
     RlimitRttime,
 }
 
+#[cfg(any(target_os = "linux", target_os = "solaris"))]
 impl Default for PosixRlimitType {
     fn default() -> Self {
         Self::RlimitCpu
@@ -276,6 +273,7 @@ impl Default for PosixRlimitType {
     build_fn(error = "OciSpecError")
 )]
 #[getset(get_copy = "pub", set = "pub")]
+#[cfg(any(target_os = "linux", target_os = "solaris"))]
 /// RLimit types and restrictions.
 pub struct PosixRlimit {
     #[serde(rename = "type")]

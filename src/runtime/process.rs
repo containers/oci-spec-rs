@@ -623,13 +623,13 @@ where
     Ok(value)
 }
 
-static CPU_AFFINITY_REGEX: Lazy<Regex> = Lazy::new(|| {
+static EXEC_CPU_AFFINITY_REGEX: Lazy<Regex> = Lazy::new(|| {
     Regex::new(r"^(\d+(-\d+)?)(,\d+(-\d+)?)*$").expect("Failed to create regex for execCPUAffinity")
 });
 
 fn validate_cpu_affinity(s: &str) -> Result<(), String> {
-    if !CPU_AFFINITY_REGEX.is_match(s) {
-        return Err(format!("Invalid CPU affinity format: {}", s));
+    if !EXEC_CPU_AFFINITY_REGEX.is_match(s) {
+        return Err(format!("Invalid execCPUAffinity format: {}", s));
     }
 
     Ok(())
@@ -749,7 +749,7 @@ mod tests {
             .cpu_affinity_final("4-6,8".to_string())
             .build();
         let err = affinity.unwrap_err();
-        assert_eq!(err.to_string(), "Invalid CPU affinity format: 0-3,i");
+        assert_eq!(err.to_string(), "Invalid execCPUAffinity format: 0-3,i");
     }
 
     #[test]
@@ -759,7 +759,7 @@ mod tests {
             .cpu_affinity_final("0-l1".to_string())
             .build();
         let err = affinity.unwrap_err();
-        assert_eq!(err.to_string(), "Invalid CPU affinity format: 0-l1");
+        assert_eq!(err.to_string(), "Invalid execCPUAffinity format: 0-l1");
     }
 
     #[test]

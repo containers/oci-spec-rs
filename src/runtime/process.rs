@@ -4,7 +4,9 @@ use crate::{
 };
 use derive_builder::Builder;
 use getset::{CopyGetters, Getters, MutGetters, Setters};
-use serde::{Deserialize, Serialize};
+use regex::Regex;
+use serde::de;
+use serde::{Deserialize, Deserializer, Serialize};
 use std::path::PathBuf;
 use strum_macros::{Display as StrumDisplay, EnumString};
 
@@ -566,29 +568,75 @@ impl Default for LinuxSchedulerFlag {
     default,
     pattern = "owned",
     setter(into, strip_option),
-    build_fn(error = "OciSpecError")
+    build_fn(validate = "Self::validate", error = "OciSpecError")
 )]
 #[getset(get = "pub", set = "pub")]
 /// ExecCPUAffinity specifies CPU affinity used to execute the process.
 /// This setting is not applicable to the container's init process.
 pub struct ExecCPUAffinity {
-    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        deserialize_with = "deserialize"
+    )]
     /// cpu_affinity_initial is a list of CPUs a runtime parent process to be run on
     /// initially, before the transition to container's cgroup.
     /// This is a a comma-separated list, with dashes to represent ranges.
     /// For example, `0-3,7` represents CPUs 0,1,2,3, and 7.
     cpu_affinity_initial: Option<String>,
 
-    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        deserialize_with = "deserialize"
+    )]
     /// cpu_affinity_final is a list of CPUs the process will be run on after the transition
     /// to container's cgroup. The format is the same as for `initial`. If omitted or empty,
     /// the container's default CPU affinity, as defined by cpu.cpus property, is used.
     cpu_affinity_final: Option<String>,
 }
 
+impl ExecCPUAffinityBuilder {
+    fn validate(&self) -> Result<(), OciSpecError> {
+        if let Some(Some(ref s)) = self.cpu_affinity_initial {
+            validate_cpu_affinity(s).map_err(|e| OciSpecError::Other(e.to_string()))?;
+        }
+
+        if let Some(Some(ref s)) = self.cpu_affinity_final {
+            validate_cpu_affinity(s).map_err(|e| OciSpecError::Other(e.to_string()))?;
+        }
+
+        Ok(())
+    }
+}
+
+fn deserialize<'de, D>(deserializer: D) -> Result<Option<String>, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    let value: Option<String> = Option::deserialize(deserializer)?;
+
+    if let Some(ref s) = value {
+        validate_cpu_affinity(s).map_err(de::Error::custom)?;
+    }
+
+    Ok(value)
+}
+
+fn validate_cpu_affinity(s: &str) -> Result<(), String> {
+    let re = Regex::new(r"^(\d+(-\d+)?)(,\d+(-\d+)?)*$").map_err(|e| e.to_string())?;
+
+    if !re.is_match(s) {
+        return Err(format!("Invalid CPU affinity format: {}", s));
+    }
+
+    Ok(())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+    use serde_json::json;
 
     // PosixRlimitType test cases
     #[test]
@@ -620,5 +668,103 @@ mod tests {
         let invalid_posix_rlimit_type_str = "x";
         let unknown_rlimit = invalid_posix_rlimit_type_str.parse::<PosixRlimitType>();
         assert!(unknown_rlimit.is_err());
+    }
+
+    #[test]
+    fn exec_cpu_affinity_valid_initial_final() {
+        let json = json!({"cpu_affinity_initial": "0-3,7", "cpu_affinity_final": "4-6,8"});
+        let result: Result<ExecCPUAffinity, _> = serde_json::from_value(json);
+        assert!(result.is_ok());
+
+        let json = json!({"cpu_affinity_initial": "0-3", "cpu_affinity_final": "4-6"});
+        let result: Result<ExecCPUAffinity, _> = serde_json::from_value(json);
+        assert!(result.is_ok());
+
+        let json = json!({"cpu_affinity_initial": "0", "cpu_affinity_final": "4"});
+        let result: Result<ExecCPUAffinity, _> = serde_json::from_value(json);
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn exec_cpu_affinity_invalid_initial() {
+        let json = json!({"cpu_affinity_initial": "0-3,,7", "cpu_affinity_final": "4-6,8"});
+        let result: Result<ExecCPUAffinity, _> = serde_json::from_value(json);
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn exec_cpu_affinity_invalid_final() {
+        let json = json!({"cpu_affinity_initial": "0-3,7", "cpu_affinity_final": "4-6.,8"});
+        let result: Result<ExecCPUAffinity, _> = serde_json::from_value(json);
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn exec_cpu_affinity_valid_final() {
+        let json = json!({"cpu_affinity_final": "0,1,2,3"});
+        let result: Result<ExecCPUAffinity, _> = serde_json::from_value(json);
+        assert!(result.is_ok());
+        assert!(result.unwrap().cpu_affinity_initial.is_none());
+    }
+
+    #[test]
+    fn exec_cpu_affinity_valid_initial() {
+        let json = json!({"cpu_affinity_initial": "0-1,2-5"});
+        let result: Result<ExecCPUAffinity, _> = serde_json::from_value(json);
+        assert!(result.is_ok());
+        assert!(result.unwrap().cpu_affinity_final.is_none());
+    }
+
+    #[test]
+    fn exec_cpu_affinity_empty() {
+        let json = json!({});
+        let result: Result<ExecCPUAffinity, _> = serde_json::from_value(json);
+        assert!(result.is_ok());
+        let affinity = result.unwrap();
+        assert!(affinity.cpu_affinity_initial.is_none());
+        assert!(affinity.cpu_affinity_final.is_none());
+    }
+
+    #[test]
+    fn test_build_valid_input() {
+        let affinity = ExecCPUAffinityBuilder::default()
+            .cpu_affinity_initial("0-3,7,8,9,10".to_string())
+            .cpu_affinity_final("4-6,8".to_string())
+            .build();
+        assert!(affinity.is_ok());
+        let affinity = affinity.unwrap();
+        assert_eq!(
+            affinity.cpu_affinity_initial,
+            Some("0-3,7,8,9,10".to_string())
+        );
+        assert_eq!(affinity.cpu_affinity_final, Some("4-6,8".to_string()));
+    }
+
+    #[test]
+    fn test_build_invalid_initial() {
+        let affinity = ExecCPUAffinityBuilder::default()
+            .cpu_affinity_initial("0-3,i".to_string())
+            .cpu_affinity_final("4-6,8".to_string())
+            .build();
+        let err = affinity.unwrap_err();
+        assert_eq!(err.to_string(), "Invalid CPU affinity format: 0-3,i");
+    }
+
+    #[test]
+    fn test_build_invalid_final() {
+        let affinity = ExecCPUAffinityBuilder::default()
+            .cpu_affinity_initial("0-3,7".to_string())
+            .cpu_affinity_final("0-l1".to_string())
+            .build();
+        let err = affinity.unwrap_err();
+        assert_eq!(err.to_string(), "Invalid CPU affinity format: 0-l1");
+    }
+
+    #[test]
+    fn test_build_empty() {
+        let affinity = ExecCPUAffinityBuilder::default().build();
+        let affinity = affinity.unwrap();
+        assert!(affinity.cpu_affinity_initial.is_none());
+        assert!(affinity.cpu_affinity_final.is_none());
     }
 }

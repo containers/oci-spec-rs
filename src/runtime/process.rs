@@ -8,6 +8,7 @@ use regex::Regex;
 use serde::{de, Deserialize, Deserializer, Serialize};
 use std::path::PathBuf;
 use strum_macros::{Display as StrumDisplay, EnumString};
+use once_cell::sync::Lazy;
 
 #[derive(
     Builder,
@@ -622,10 +623,12 @@ where
     Ok(value)
 }
 
-fn validate_cpu_affinity(s: &str) -> Result<(), String> {
-    let re = Regex::new(r"^(\d+(-\d+)?)(,\d+(-\d+)?)*$").map_err(|e| e.to_string())?;
+static CPU_AFFINITY_REGEX: Lazy<Regex> = Lazy::new(|| {
+    Regex::new(r"^(\d+(-\d+)?)(,\d+(-\d+)?)*$").expect("Failed to create regex for execCPUAffinity")
+});
 
-    if !re.is_match(s) {
+fn validate_cpu_affinity(s: &str) -> Result<(), String> {
+    if !CPU_AFFINITY_REGEX.is_match(s) {
         return Err(format!("Invalid CPU affinity format: {}", s));
     }
 

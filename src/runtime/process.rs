@@ -4,11 +4,11 @@ use crate::{
 };
 use derive_builder::Builder;
 use getset::{CopyGetters, Getters, MutGetters, Setters};
+use once_cell::sync::Lazy;
 use regex::Regex;
 use serde::{de, Deserialize, Deserializer, Serialize};
 use std::path::PathBuf;
 use strum_macros::{Display as StrumDisplay, EnumString};
-use once_cell::sync::Lazy;
 
 #[derive(
     Builder,

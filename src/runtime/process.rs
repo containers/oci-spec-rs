@@ -766,6 +766,13 @@ mod tests {
             .build();
         let err = affinity.unwrap_err();
         assert_eq!(err.to_string(), "Invalid execCPUAffinity format: 0-3,i");
+
+        let affinity = ExecCPUAffinityBuilder::default()
+            .cpu_affinity_initial("-".to_string())
+            .cpu_affinity_final("4-6,8".to_string())
+            .build();
+        let err = affinity.unwrap_err();
+        assert_eq!(err.to_string(), "Invalid execCPUAffinity format: -");
     }
 
     #[test]
@@ -776,6 +783,13 @@ mod tests {
             .build();
         let err = affinity.unwrap_err();
         assert_eq!(err.to_string(), "Invalid execCPUAffinity format: 0-l1");
+
+        let affinity = ExecCPUAffinityBuilder::default()
+            .cpu_affinity_initial("0-3,7".to_string())
+            .cpu_affinity_final(",1,2".to_string())
+            .build();
+        let err = affinity.unwrap_err();
+        assert_eq!(err.to_string(), "Invalid execCPUAffinity format: ,1,2");
     }
 
     #[test]

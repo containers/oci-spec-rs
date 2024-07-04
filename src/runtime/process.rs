@@ -4,6 +4,8 @@ use crate::{
 };
 use derive_builder::Builder;
 use getset::{CopyGetters, Getters, MutGetters, Setters};
+use once_cell::sync::Lazy;
+use regex::Regex;
 use serde::{de, Deserialize, Deserializer, Serialize};
 use std::path::PathBuf;
 use strum_macros::{Display as StrumDisplay, EnumString};
@@ -621,31 +623,13 @@ where
     Ok(value)
 }
 
+static EXEC_CPU_AFFINITY_REGEX: Lazy<Regex> = Lazy::new(|| {
+    Regex::new(r"^(\d+(-\d+)?)(,\d+(-\d+)?)*$").expect("Failed to create regex for execCPUAffinity")
+});
+
 fn validate_cpu_affinity(s: &str) -> Result<(), String> {
-    let iter = s.split(',');
-
-    for part in iter {
-        let mut range_iter = part.split('-');
-        let start = range_iter
-            .next()
-            .ok_or_else(|| format!("Invalid execCPUAffinity format: {}", s))?;
-
-        // Check if the start is a valid number
-        if start.parse::<usize>().is_err() {
-            return Err(format!("Invalid execCPUAffinity format: {}", s));
-        }
-
-        // Check if there's a range and if the end is a valid number
-        if let Some(end) = range_iter.next() {
-            if end.parse::<usize>().is_err() {
-                return Err(format!("Invalid execCPUAffinity format: {}", s));
-            }
-        }
-
-        // Ensure there's no extra data after the end of a range
-        if range_iter.next().is_some() {
-            return Err(format!("Invalid execCPUAffinity format: {}", s));
-        }
+    if !EXEC_CPU_AFFINITY_REGEX.is_match(s) {
+        return Err(format!("Invalid execCPUAffinity format: {}", s));
     }
 
     Ok(())

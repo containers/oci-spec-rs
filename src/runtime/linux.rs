@@ -104,14 +104,7 @@ impl Default for Linux {
             // Empty sysctl Hashmap
             sysctl: Default::default(),
             resources: Some(LinuxResources {
-                devices: vec![LinuxDeviceCgroup {
-                    access: "rwm".to_string().into(),
-                    allow: false,
-                    typ: Default::default(),
-                    major: Default::default(),
-                    minor: Default::default(),
-                }]
-                .into(),
+                devices: vec![].into(),
                 memory: Default::default(),
                 cpu: Default::default(),
                 pids: Default::default(),

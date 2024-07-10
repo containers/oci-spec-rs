@@ -828,13 +828,13 @@ impl TryFrom<&str> for LinuxNamespaceType {
 
     fn try_from(namespace: &str) -> Result<Self, Self::Error> {
         match namespace {
-            "mnt" => Ok(LinuxNamespaceType::Mount),
+            "mnt" | "mount" => Ok(LinuxNamespaceType::Mount),
             "cgroup" => Ok(LinuxNamespaceType::Cgroup),
             "uts" => Ok(LinuxNamespaceType::Uts),
             "ipc" => Ok(LinuxNamespaceType::Ipc),
             "user" => Ok(LinuxNamespaceType::User),
             "pid" => Ok(LinuxNamespaceType::Pid),
-            "net" => Ok(LinuxNamespaceType::Network),
+            "net" | "network" => Ok(LinuxNamespaceType::Network),
             "time" => Ok(LinuxNamespaceType::Time),
             _ => Err(oci_error(format!(
                 "unknown namespace {namespace}, could not convert"
@@ -1525,6 +1525,10 @@ mod tests {
         let nstype_enum = LinuxNamespaceType::try_from(nstype_str).unwrap();
         assert_eq!(nstype_enum, LinuxNamespaceType::Network);
 
+        let nstype_str = "network";
+        let nstype_enum = LinuxNamespaceType::try_from(nstype_str).unwrap();
+        assert_eq!(nstype_enum, LinuxNamespaceType::Network);
+
         let nstype_str = "ipc";
         let nstype_enum = LinuxNamespaceType::try_from(nstype_str).unwrap();
         assert_eq!(nstype_enum, LinuxNamespaceType::Ipc);
@@ -1533,7 +1537,11 @@ mod tests {
         let nstype_enum = LinuxNamespaceType::try_from(nstype_str).unwrap();
         assert_eq!(nstype_enum, LinuxNamespaceType::Cgroup);
 
-        let invalid_nstype_str = "mount";
+        let nstype_str = "mount";
+        let nstype_enum = LinuxNamespaceType::try_from(nstype_str).unwrap();
+        assert_eq!(nstype_enum, LinuxNamespaceType::Mount);
+
+        let invalid_nstype_str = "xxx";
         let unknown_nstype = LinuxNamespaceType::try_from(invalid_nstype_str);
         assert!(unknown_nstype.is_err());
     }

@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"constant":["ERR_REGISTRY","VERSION_DEV","VERSION_MAJOR","VERSION_MINOR","VERSION_PATCH"],"enum":["ErrorCode"],"fn":["version"],"struct":["ErrorInfo","ErrorInfoBuilder","ErrorResponse","ErrorResponseBuilder","RepositoryList","RepositoryListBuilder","TagList","TagListBuilder"]};

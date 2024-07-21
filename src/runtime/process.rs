@@ -592,7 +592,8 @@ pub struct ExecCPUAffinity {
     )]
     /// cpu_affinity_final is a list of CPUs the process will be run on after the transition
     /// to container's cgroup. The format is the same as for `initial`. If omitted or empty,
-    /// the container's default CPU affinity, as defined by cpu.cpus property, is used.
+    /// runtime SHOULD NOT change process' CPU affinity after the process is moved to
+    /// container's cgroup, and the final affinity is determined by the Linux kernel.
     cpu_affinity_final: Option<String>,
 }
 

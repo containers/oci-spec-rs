@@ -75,6 +75,7 @@ impl Error for ParseError {}
 #[derive(Clone, Hash, PartialEq, Eq, Debug)]
 pub struct Reference {
     registry: String,
+    mirror_registry: Option<String>,
     repository: String,
     tag: Option<String>,
     digest: Option<String>,
@@ -85,6 +86,7 @@ impl Reference {
     pub fn with_tag(registry: String, repository: String, tag: String) -> Self {
         Self {
             registry,
+            mirror_registry: None,
             repository,
             tag: Some(tag),
             digest: None,
@@ -95,45 +97,78 @@ impl Reference {
     pub fn with_digest(registry: String, repository: String, digest: String) -> Self {
         Self {
             registry,
+            mirror_registry: None,
             repository,
             tag: None,
             digest: Some(digest),
         }
     }
 
+    /// Set a pull mirror registry for this reference.
+    ///
+    /// The mirror registry will be used to resolve the image, the original registry
+    /// is available via the [`Reference::namespace`] function.
+    ///
+    /// The original registry will be sent with the `ns` query parameter to the mirror registry.
+    /// The `ns` query parameter is currently not part of the stable OCI Distribution Spec yet,
+    /// but is being discussed to be added and is already used by some other implementations
+    /// (for example containerd). So be aware that this feature might not work with all registries.
+    ///
+    /// Since this is not part of the stable OCI Distribution Spec yet, this feature is exempt from
+    /// semver backwards compatibility guarantees and might change in the future.
+    #[doc(hidden)]
+    pub fn set_mirror_registry(&mut self, registry: String) {
+        self.mirror_registry = Some(registry);
+    }
+
     /// Resolve the registry address of a given `Reference`.
     ///
     /// Some registries, such as docker.io, uses a different address for the actual
     /// registry. This function implements such redirection.
+    ///
+    /// If a mirror registry is set, it will be used instead of the original registry.
     pub fn resolve_registry(&self) -> &str {
-        let registry = self.registry();
-        match registry {
-            "docker.io" => "index.docker.io",
-            _ => registry,
+        match (self.registry(), self.mirror_registry.as_deref()) {
+            (_, Some(mirror_registry)) => mirror_registry,
+            ("docker.io", None) => "index.docker.io",
+            (registry, None) => registry,
         }
     }
 
-    /// registry returns the name of the registry.
+    /// Returns the name of the registry.
     pub fn registry(&self) -> &str {
         &self.registry
     }
 
-    /// repository returns the name of the repository.
+    /// Returns the name of the repository.
     pub fn repository(&self) -> &str {
         &self.repository
     }
 
-    /// tag returns the object's tag, if present.
+    /// Returns the object's tag, if present.
     pub fn tag(&self) -> Option<&str> {
         self.tag.as_deref()
     }
 
-    /// digest returns the object's digest, if present.
+    /// Returns the object's digest, if present.
     pub fn digest(&self) -> Option<&str> {
         self.digest.as_deref()
     }
 
-    /// full_name returns the full repository name and path.
+    /// Returns the original registry when pulled via a mirror.
+    ///
+    /// Since this is not part of the stable OCI Distribution Spec yet, this feature is exempt from
+    /// semver backwards compatibility guarantees and might change in the future.
+    #[doc(hidden)]
+    pub fn namespace(&self) -> Option<&str> {
+        if self.mirror_registry.is_some() {
+            Some(self.registry())
+        } else {
+            None
+        }
+    }
+
+    /// Returns the full repository name and path.
     fn full_name(&self) -> String {
         if self.registry() == "" {
             self.repository().to_string()
@@ -142,7 +177,7 @@ impl Reference {
         }
     }
 
-    /// whole returns the whole reference.
+    /// Returns the whole reference.
     pub fn whole(&self) -> String {
         let mut s = self.full_name();
         if let Some(t) = self.tag() {
@@ -200,6 +235,7 @@ impl TryFrom<String> for Reference {
         let (registry, repository) = split_domain(name);
         let reference = Reference {
             registry,
+            mirror_registry: None,
             repository,
             tag,
             digest,
@@ -355,6 +391,46 @@ mod test {
         )]
         fn parse_bad_reference(input: &str, err: ParseError) {
             assert_eq!(Reference::try_from(input).unwrap_err(), err)
+        }
+
+        #[rstest(
+            input,
+            registry,
+            resolved_registry,
+            whole,
+            case(
+                "busybox",
+                "docker.io",
+                "index.docker.io",
+                "docker.io/library/busybox:latest"
+            ),
+            case("test.com/repo:tag", "test.com", "test.com", "test.com/repo:tag"),
+            case("test:5000/repo", "test:5000", "test:5000", "test:5000/repo:latest"),
+            case(
+                "sub-dom1.foo.com/bar/baz/quux",
+                "sub-dom1.foo.com",
+                "sub-dom1.foo.com",
+                "sub-dom1.foo.com/bar/baz/quux:latest"
+            ),
+            case(
+                "b.gcr.io/test.example.com/my-app:test.example.com",
+                "b.gcr.io",
+                "b.gcr.io",
+                "b.gcr.io/test.example.com/my-app:test.example.com"
+            )
+        )]
+        fn test_mirror_registry(input: &str, registry: &str, resolved_registry: &str, whole: &str) {
+            let mut reference = Reference::try_from(input).expect("could not parse reference");
+            assert_eq!(resolved_registry, reference.resolve_registry());
+            assert_eq!(registry, reference.registry());
+            assert_eq!(None, reference.namespace());
+            assert_eq!(whole, reference.whole());
+
+            reference.set_mirror_registry("docker.mirror.io".to_owned());
+            assert_eq!("docker.mirror.io", reference.resolve_registry());
+            assert_eq!(registry, reference.registry());
+            assert_eq!(Some(registry), reference.namespace());
+            assert_eq!(whole, reference.whole());
         }
     }
 }

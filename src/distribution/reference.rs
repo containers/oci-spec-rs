@@ -256,33 +256,25 @@ impl TryFrom<String> for Reference {
         }
         // Digests much always be hex-encoded, ensuring that their hex portion will always be
         // size*2
-        if reference.digest().is_some() {
-            let d = reference.digest().unwrap();
-            // FIXME: we should actually separate the algorithm from the digest
-            // using regular expressions. This won't hold up if we support an
-            // algorithm more or less than 6 characters like sha1024.
-            if d.len() < 8 {
-                return Err(ParseError::DigestInvalidFormat);
-            }
-            let algo = &d[0..6];
-            let digest = &d[7..];
-            match algo {
-                "sha256" => {
+        if let Some(digest) = reference.digest() {
+            match digest.split_once(':') {
+                None => return Err(ParseError::DigestInvalidFormat),
+                Some(("sha256", digest)) => {
                     if digest.len() != 64 {
                         return Err(ParseError::DigestInvalidLength);
                     }
                 }
-                "sha384" => {
+                Some(("sha384", digest)) => {
                     if digest.len() != 96 {
                         return Err(ParseError::DigestInvalidLength);
                     }
                 }
-                "sha512" => {
+                Some(("sha512", digest)) => {
                     if digest.len() != 128 {
                         return Err(ParseError::DigestInvalidLength);
                     }
                 }
-                _ => return Err(ParseError::DigestUnsupported),
+                Some((_, _)) => return Err(ParseError::DigestUnsupported),
             }
         }
         Ok(reference)

@@ -104,6 +104,17 @@ impl Reference {
         }
     }
 
+    /// Clone the Reference for the same image with a new digest.
+    pub fn clone_with_digest(&self, digest: String) -> Self {
+        Self {
+            registry: self.registry.clone(),
+            mirror_registry: self.mirror_registry.clone(),
+            repository: self.repository.clone(),
+            tag: None,
+            digest: Some(digest),
+        }
+    }
+
     /// Set a pull mirror registry for this reference.
     ///
     /// The mirror registry will be used to resolve the image, the original registry

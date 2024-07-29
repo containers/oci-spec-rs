@@ -62,7 +62,7 @@ impl Error for ParseError {}
 /// Parsing a tagged image reference:
 ///
 /// ```
-/// use oci_distribution::Reference;
+/// use oci_client::Reference;
 ///
 /// let reference: Reference = "docker.io/library/hello-world:latest".parse().unwrap();
 ///

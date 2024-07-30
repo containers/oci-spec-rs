@@ -1,24 +1,18 @@
 {
 	"name": "oci-spec-rs",
+	"image": "mcr.microsoft.com/devcontainers/rust:1-bullseye",
 	"customizations": {
 		"vscode": {
 			"settings": {
-				"lldb.executable": "/usr/bin/lldb",
 				"files.watcherExclude": {
 					"**/target/**": true
 				},
 				"rust-analyzer.checkOnSave.command": "clippy"
 			},
 			"extensions": [
-				"vadimcn.vscode-lldb",
-				"mutantdino.resourcemonitor",
 				"rust-lang.rust-analyzer",
-				"tamasfe.even-better-toml",
-				"serayuzgur.crates"
+				"tamasfe.even-better-toml"
 			]
 		}
-	},
-	"build": {
-		"dockerfile": "Dockerfile"
 	}
 }

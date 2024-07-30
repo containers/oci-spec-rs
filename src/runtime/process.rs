@@ -4,10 +4,10 @@ use crate::{
 };
 use derive_builder::Builder;
 use getset::{CopyGetters, Getters, MutGetters, Setters};
-use once_cell::sync::Lazy;
 use regex::Regex;
 use serde::{de, Deserialize, Deserializer, Serialize};
 use std::path::PathBuf;
+use std::sync::LazyLock;
 use strum_macros::{Display as StrumDisplay, EnumString};
 
 #[derive(
@@ -623,7 +623,7 @@ where
     Ok(value)
 }
 
-static EXEC_CPU_AFFINITY_REGEX: Lazy<Regex> = Lazy::new(|| {
+static EXEC_CPU_AFFINITY_REGEX: LazyLock<Regex> = LazyLock::new(|| {
     Regex::new(r"^(\d+(-\d+)?)(,\d+(-\d+)?)*$").expect("Failed to create regex for execCPUAffinity")
 });
 

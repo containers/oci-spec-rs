@@ -1,6 +1,9 @@
 use std::collections::HashMap;
 
-use crate::error::OciSpecError;
+use crate::{
+    error::OciSpecError,
+    runtime::{Arch, LinuxNamespaceType, LinuxSeccompAction},
+};
 use derive_builder::Builder;
 use getset::{Getters, MutGetters, Setters};
 use serde::{Deserialize, Serialize};
@@ -59,7 +62,7 @@ pub struct Features {
 pub struct LinuxFeature {
     /// The list of the recognized namespaces, e.g., "mount".
     /// "None" means "unknown", not "no support for any namespace".
-    namespaces: Option<Vec<String>>,
+    namespaces: Option<Vec<LinuxNamespaceType>>,
     /// The list of the recognized capabilities , e.g., "CAP_SYS_ADMIN".
     /// "None" means "unknown", not "no support for any capability".
     capabilities: Option<Vec<String>>,
@@ -88,9 +91,9 @@ pub struct Cgroup {
 #[serde(rename_all = "camelCase")]
 pub struct Seccomp {
     enabled: Option<bool>,
-    actions: Option<Vec<String>>,
+    actions: Option<Vec<LinuxSeccompAction>>,
     operators: Option<Vec<String>>,
-    archs: Option<Vec<String>>,
+    archs: Option<Vec<Arch>>,
     known_flags: Option<Vec<String>>,
     supported_flags: Option<Vec<String>>,
 }
@@ -123,6 +126,7 @@ pub struct MountExtensions {
     idmap: Option<IDMap>,
 }
 
+/// IDMap represents the "idmap" field.
 #[derive(Clone, Eq, PartialEq, Serialize, Deserialize, Debug, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct IDMap {
@@ -431,7 +435,15 @@ mod tests {
 
         assert_eq!(
             linux.namespaces.as_ref().unwrap(),
-            &["cgroup", "ipc", "mount", "network", "pid", "user", "uts"]
+            &[
+                LinuxNamespaceType::Cgroup,
+                LinuxNamespaceType::Ipc,
+                LinuxNamespaceType::Mount,
+                LinuxNamespaceType::Network,
+                LinuxNamespaceType::Pid,
+                LinuxNamespaceType::User,
+                LinuxNamespaceType::Uts,
+            ]
         );
 
         assert_eq!(
@@ -497,15 +509,15 @@ mod tests {
             &Seccomp {
                 enabled: Some(true),
                 actions: Some(vec![
-                    "SCMP_ACT_ALLOW".to_string(),
-                    "SCMP_ACT_ERRNO".to_string(),
-                    "SCMP_ACT_KILL".to_string(),
-                    "SCMP_ACT_KILL_PROCESS".to_string(),
-                    "SCMP_ACT_KILL_THREAD".to_string(),
-                    "SCMP_ACT_LOG".to_string(),
-                    "SCMP_ACT_NOTIFY".to_string(),
-                    "SCMP_ACT_TRACE".to_string(),
-                    "SCMP_ACT_TRAP".to_string()
+                    LinuxSeccompAction::ScmpActAllow,
+                    LinuxSeccompAction::ScmpActErrno,
+                    LinuxSeccompAction::ScmpActKill,
+                    LinuxSeccompAction::ScmpActKillProcess,
+                    LinuxSeccompAction::ScmpActKillThread,
+                    LinuxSeccompAction::ScmpActLog,
+                    LinuxSeccompAction::ScmpActNotify,
+                    LinuxSeccompAction::ScmpActTrace,
+                    LinuxSeccompAction::ScmpActTrap
                 ]),
                 operators: Some(vec![
                     "SCMP_CMP_EQ".to_string(),
@@ -517,23 +529,23 @@ mod tests {
                     "SCMP_CMP_NE".to_string()
                 ]),
                 archs: Some(vec![
-                    "SCMP_ARCH_AARCH64".to_string(),
-                    "SCMP_ARCH_ARM".to_string(),
-                    "SCMP_ARCH_MIPS".to_string(),
-                    "SCMP_ARCH_MIPS64".to_string(),
-                    "SCMP_ARCH_MIPS64N32".to_string(),
-                    "SCMP_ARCH_MIPSEL".to_string(),
-                    "SCMP_ARCH_MIPSEL64".to_string(),
-                    "SCMP_ARCH_MIPSEL64N32".to_string(),
-                    "SCMP_ARCH_PPC".to_string(),
-                    "SCMP_ARCH_PPC64".to_string(),
-                    "SCMP_ARCH_PPC64LE".to_string(),
-                    "SCMP_ARCH_RISCV64".to_string(),
-                    "SCMP_ARCH_S390".to_string(),
-                    "SCMP_ARCH_S390X".to_string(),
-                    "SCMP_ARCH_X32".to_string(),
-                    "SCMP_ARCH_X86".to_string(),
-                    "SCMP_ARCH_X86_64".to_string()
+                    Arch::ScmpArchAarch64,
+                    Arch::ScmpArchArm,
+                    Arch::ScmpArchMips,
+                    Arch::ScmpArchMips64,
+                    Arch::ScmpArchMips64n32,
+                    Arch::ScmpArchMipsel,
+                    Arch::ScmpArchMipsel64,
+                    Arch::ScmpArchMipsel64n32,
+                    Arch::ScmpArchPpc,
+                    Arch::ScmpArchPpc64,
+                    Arch::ScmpArchPpc64le,
+                    Arch::ScmpArchRiscv64,
+                    Arch::ScmpArchS390,
+                    Arch::ScmpArchS390x,
+                    Arch::ScmpArchX32,
+                    Arch::ScmpArchX86,
+                    Arch::ScmpArchX86_64,
                 ]),
                 known_flags: Some(vec![
                     "SECCOMP_FILTER_FLAG_TSYNC".to_string(),

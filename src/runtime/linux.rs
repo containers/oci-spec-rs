@@ -1044,32 +1044,50 @@ pub struct LinuxSeccomp {
 #[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize, StrumDisplay, EnumString)]
 #[strum(serialize_all = "SCREAMING_SNAKE_CASE")]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
-#[repr(u32)]
 /// Available seccomp actions.
 pub enum LinuxSeccompAction {
     /// Kill the thread, defined for backward compatibility.
-    ScmpActKill = 0x00000000,
+    ScmpActKill,
+
+    /// Kill the thread
+    ScmpActKillThread,
 
     /// Kill the process.
-    ScmpActKillProcess = 0x80000000,
+    ScmpActKillProcess,
 
     /// Throw a SIGSYS signal.
-    ScmpActTrap = 0x00030000,
+    ScmpActTrap,
 
     /// Return the specified error code.
-    ScmpActErrno = 0x00050001,
+    ScmpActErrno,
 
     /// Notifies userspace.
-    ScmpActNotify = 0x7fc00000,
+    ScmpActNotify,
 
     /// Notify a tracing process with the specified value.
-    ScmpActTrace = 0x7ff00001,
+    ScmpActTrace,
 
     /// Allow the syscall to be executed after the action has been logged.
-    ScmpActLog = 0x7ffc0000,
+    ScmpActLog,
 
     /// Allow the syscall to be executed.
-    ScmpActAllow = 0x7fff0000,
+    ScmpActAllow,
+}
+
+impl From<LinuxSeccompAction> for u32 {
+    fn from(action: LinuxSeccompAction) -> Self {
+        match action {
+            LinuxSeccompAction::ScmpActKill => 0x00000000,
+            LinuxSeccompAction::ScmpActKillThread => 0x00000000,
+            LinuxSeccompAction::ScmpActKillProcess => 0x80000000,
+            LinuxSeccompAction::ScmpActTrap => 0x00030000,
+            LinuxSeccompAction::ScmpActErrno => 0x00050001,
+            LinuxSeccompAction::ScmpActNotify => 0x7fc00000,
+            LinuxSeccompAction::ScmpActTrace => 0x7ff00001,
+            LinuxSeccompAction::ScmpActLog => 0x7ffc0000,
+            LinuxSeccompAction::ScmpActAllow => 0x7fff0000,
+        }
+    }
 }
 
 impl Default for LinuxSeccompAction {

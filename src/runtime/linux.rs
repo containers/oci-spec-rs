@@ -1155,6 +1155,9 @@ pub enum Arch {
 
     /// The S390x architecture.
     ScmpArchS390x = 0x80000016,
+
+    /// The RISCV64 architecture.
+    ScmpArchRiscv64 = 0xc00000f3,
 }
 
 #[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize, StrumDisplay, EnumString)]

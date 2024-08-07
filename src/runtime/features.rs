@@ -43,7 +43,7 @@ pub struct Features {
     /// This list does not contain filesystem-specific options passed to mount(2) syscall as (const void *).
     mount_options: Option<Vec<String>>,
     /// Information specific to Linux
-    linux: Option<Linux>,
+    linux: Option<LinuxFeature>,
     /// Implementation-specific annotation strings,
     /// such as the implementation version, and third-party extensions.
     annotations: Option<HashMap<String, String>>,
@@ -56,7 +56,7 @@ pub struct Features {
 /// Linux specific features.
 #[derive(Clone, Eq, PartialEq, Serialize, Deserialize, Debug, Default)]
 #[serde(rename_all = "camelCase")]
-pub struct Linux {
+pub struct LinuxFeature {
     /// The list of the recognized namespaces, e.g., "mount".
     /// "None" means "unknown", not "no support for any namespace".
     namespaces: Option<Vec<String>>,

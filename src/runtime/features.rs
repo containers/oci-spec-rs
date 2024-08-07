@@ -5,7 +5,7 @@ use derive_builder::Builder;
 use getset::{Getters, MutGetters, Setters};
 use serde::{Deserialize, Serialize};
 
-/// Features Structure that represents supported features of the runtime.
+/// Features represents supported features of the runtime.
 ///
 /// This structure is used to report the supported features of the runtime to runtime callers.
 ///

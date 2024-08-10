@@ -67,6 +67,7 @@ pub struct ImageManifest {
     /// config. Implementations MUST support at least the following
     /// media types:
     /// - application/vnd.oci.image.config.v1+json
+    ///
     /// Manifests concerned with portability SHOULD use one of the above
     /// media types.
     #[getset(get = "pub", set = "pub")]

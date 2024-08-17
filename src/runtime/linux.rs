@@ -909,6 +909,14 @@ pub fn get_default_namespaces() -> Vec<LinuxNamespace> {
             typ: LinuxNamespaceType::Cgroup,
             path: Default::default(),
         },
+        LinuxNamespace {
+            typ: LinuxNamespaceType::User,
+            path: Default::default(),
+        },
+        LinuxNamespace {
+            typ: LinuxNamespaceType::Time,
+            path: Default::default(),
+        },
     ]
 }
 

@@ -57,8 +57,27 @@ pub struct Features {
 }
 
 /// Linux specific features.
-#[derive(Clone, Eq, PartialEq, Serialize, Deserialize, Debug, Default)]
+#[derive(
+    Builder,
+    Clone,
+    Debug,
+    Default,
+    Deserialize,
+    Eq,
+    MutGetters,
+    Getters,
+    Setters,
+    PartialEq,
+    Serialize,
+)]
 #[serde(rename_all = "camelCase")]
+#[builder(
+    default,
+    pattern = "owned",
+    setter(into, strip_option),
+    build_fn(error = "OciSpecError")
+)]
+#[getset(get_mut = "pub", get = "pub", set = "pub")]
 pub struct LinuxFeature {
     /// The list of the recognized namespaces, e.g., "mount".
     /// "None" means "unknown", not "no support for any namespace".
@@ -66,69 +85,245 @@ pub struct LinuxFeature {
     /// The list of the recognized capabilities , e.g., "CAP_SYS_ADMIN".
     /// "None" means "unknown", not "no support for any capability".
     capabilities: Option<Vec<String>>,
-
+    /// The available features related to cgroup.
     cgroup: Option<Cgroup>,
+    /// The available features related to seccomp.
     seccomp: Option<Seccomp>,
+    /// The available features related to apparmor.
     apparmor: Option<Apparmor>,
+    /// The available features related to selinux.
     selinux: Option<Selinux>,
+    /// The available features related to Intel RDT.
     intel_rdt: Option<IntelRdt>,
+    /// The available features related to mount extensions.
     mount_extensions: Option<MountExtensions>,
 }
 
 /// Cgroup represents the "cgroup" field.
-#[derive(Clone, Eq, PartialEq, Serialize, Deserialize, Debug, Default)]
+#[derive(
+    Builder,
+    Clone,
+    Debug,
+    Default,
+    Deserialize,
+    Eq,
+    MutGetters,
+    Getters,
+    Setters,
+    PartialEq,
+    Serialize,
+)]
 #[serde(rename_all = "camelCase")]
+#[builder(
+    default,
+    pattern = "owned",
+    setter(into, strip_option),
+    build_fn(error = "OciSpecError")
+)]
+#[getset(get_mut = "pub", get = "pub", set = "pub")]
 pub struct Cgroup {
+    /// "v1" field represents whether Cgroup v1 support is compiled in.
+    /// Unrelated to whether the host uses cgroup v1 or not.
+    /// "None" means "unknown", not "false".
     v1: Option<bool>,
+    /// "v2" field represents whether Cgroup v2 support is compiled in.
+    /// Unrelated to whether the host uses cgroup v2 or not.
+    /// "None" means "unknown", not "false".
     v2: Option<bool>,
+    /// "systemd" field represents whether systemd-cgroup support is compiled in.
+    /// Unrelated to whether the host uses systemd or not.
+    /// "None" means "unknown", not "false".
     systemd: Option<bool>,
+    /// "systemdUser" field represents whether user-scoped systemd-cgroup support is compiled in.
+    /// Unrelated to whether the host uses systemd or not.
+    /// "None" means "unknown", not "false".
     systemd_user: Option<bool>,
+    /// "rdma" field represents whether RDMA cgroup support is compiled in.
+    /// Unrelated to whether the host supports it or not.
+    /// "None" means "unknown", not "false".
     rdma: Option<bool>,
 }
 
 /// Seccomp represents the "seccomp" field.
-#[derive(Clone, Eq, PartialEq, Serialize, Deserialize, Debug, Default)]
+#[derive(
+    Builder,
+    Clone,
+    Debug,
+    Default,
+    Deserialize,
+    Eq,
+    MutGetters,
+    Getters,
+    Setters,
+    PartialEq,
+    Serialize,
+)]
 #[serde(rename_all = "camelCase")]
+#[builder(
+    default,
+    pattern = "owned",
+    setter(into, strip_option),
+    build_fn(error = "OciSpecError")
+)]
+#[getset(get_mut = "pub", get = "pub", set = "pub")]
 pub struct Seccomp {
+    /// "enabled" field represents whether seccomp support is compiled in.
+    /// "None" means "unknown", not "false".
     enabled: Option<bool>,
+    /// "actions" field represents the list of the recognized actions.
+    /// "None" means "unknown", not "no support for any action".
     actions: Option<Vec<LinuxSeccompAction>>,
+    /// "operators" field represents the list of the recognized operators.
+    /// "None" means "unknown", not "no support for any operator".
     operators: Option<Vec<String>>,
+    /// "archs" field represents the list of the recognized architectures.
+    /// "None" means "unknown", not "no support for any architecture".
     archs: Option<Vec<Arch>>,
+    /// "knownFlags" field represents the list of the recognized filter flags.
+    /// "None" means "unknown", not "no flags are recognized".
     known_flags: Option<Vec<String>>,
+    /// "supportedFlags" field represents the list of the supported filter flags.
+    /// This list may be a subset of the "knownFlags" due to some of unsupported flags
+    /// by the current kernel and/or libseccomp.
+    /// "None" means "unknown", not "no flags are supported".
     supported_flags: Option<Vec<String>>,
 }
 
 /// Apparmor represents the "apparmor" field.
-#[derive(Clone, Eq, PartialEq, Serialize, Deserialize, Debug, Default)]
+#[derive(
+    Builder,
+    Clone,
+    Debug,
+    Default,
+    Deserialize,
+    Eq,
+    MutGetters,
+    Getters,
+    Setters,
+    PartialEq,
+    Serialize,
+)]
 #[serde(rename_all = "camelCase")]
+#[builder(
+    default,
+    pattern = "owned",
+    setter(into, strip_option),
+    build_fn(error = "OciSpecError")
+)]
+#[getset(get_mut = "pub", get = "pub", set = "pub")]
 pub struct Apparmor {
+    /// "enabled" field represents whether AppArmor support is compiled in.
+    /// Unrelated to whether the host supports AppArmor or not.
+    /// "None" means "unknown", not "false".
     enabled: Option<bool>,
 }
 
 /// Selinux represents the "selinux" field.
-#[derive(Clone, Eq, PartialEq, Serialize, Deserialize, Debug, Default)]
+#[derive(
+    Builder,
+    Clone,
+    Debug,
+    Default,
+    Deserialize,
+    Eq,
+    MutGetters,
+    Getters,
+    Setters,
+    PartialEq,
+    Serialize,
+)]
 #[serde(rename_all = "camelCase")]
+#[builder(
+    default,
+    pattern = "owned",
+    setter(into, strip_option),
+    build_fn(error = "OciSpecError")
+)]
+#[getset(get_mut = "pub", get = "pub", set = "pub")]
 pub struct Selinux {
+    /// "enabled" field represents whether SELinux support is compiled in.
+    /// Unrelated to whether the host supports SELinux or not.
+    /// "None" means "unknown", not "false".
     enabled: Option<bool>,
 }
 
 /// IntelRdt represents the "intelRdt" field.
-#[derive(Clone, Eq, PartialEq, Serialize, Deserialize, Debug, Default)]
+#[derive(
+    Builder,
+    Clone,
+    Debug,
+    Default,
+    Deserialize,
+    Eq,
+    MutGetters,
+    Getters,
+    Setters,
+    PartialEq,
+    Serialize,
+)]
 #[serde(rename_all = "camelCase")]
+#[builder(
+    default,
+    pattern = "owned",
+    setter(into, strip_option),
+    build_fn(error = "OciSpecError")
+)]
+#[getset(get_mut = "pub", get = "pub", set = "pub")]
 pub struct IntelRdt {
+    /// "enabled" field represents whether Intel RDT support is compiled in.
+    /// Unrelated to whether the host supports Intel RDT or not.
     enabled: Option<bool>,
 }
 
 /// MountExtensions represents the "mountExtensions" field.
-#[derive(Clone, Eq, PartialEq, Serialize, Deserialize, Debug, Default)]
+#[derive(
+    Builder,
+    Clone,
+    Debug,
+    Default,
+    Deserialize,
+    Eq,
+    MutGetters,
+    Getters,
+    Setters,
+    PartialEq,
+    Serialize,
+)]
 #[serde(rename_all = "camelCase")]
+#[builder(
+    default,
+    pattern = "owned",
+    setter(into, strip_option),
+    build_fn(error = "OciSpecError")
+)]
+#[getset(get_mut = "pub", get = "pub", set = "pub")]
 pub struct MountExtensions {
+    /// "idMap" field represents the ID mapping support.
     idmap: Option<IDMap>,
 }
 
 /// IDMap represents the "idmap" field.
-#[derive(Clone, Eq, PartialEq, Serialize, Deserialize, Debug, Default)]
+#[derive(
+    Builder,
+    Clone,
+    Debug,
+    Default,
+    Deserialize,
+    Eq,
+    MutGetters,
+    Getters,
+    Setters,
+    PartialEq,
+    Serialize,
+)]
 #[serde(rename_all = "camelCase")]
+#[builder(
+    default,
+    pattern = "owned",
+    setter(into, strip_option),
+    build_fn(error = "OciSpecError")
+)]
+#[getset(get_mut = "pub", get = "pub", set = "pub")]
 pub struct IDMap {
     /// "enabled" field represents whether idmap mounts supports is compiled in.
     /// Unrelated to whether the host supports it or not.

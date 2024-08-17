@@ -4,12 +4,12 @@ use serde::{
 };
 use std::collections::HashSet;
 
-use strum_macros::{Display, EnumString};
+use strum_macros::{Display, EnumIter, EnumString};
 
 /// Capabilities is a unique set of Capability values.
 pub type Capabilities = HashSet<Capability>;
 
-#[derive(Clone, Copy, Debug, EnumString, Eq, Display, Hash, PartialEq, Serialize)]
+#[derive(Clone, Copy, Debug, EnumString, Eq, Display, Hash, PartialEq, Serialize, EnumIter)]
 /// All available capabilities.
 ///
 /// For the purpose of performing permission checks, traditional UNIX

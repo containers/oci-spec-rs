@@ -20,11 +20,12 @@ pub use descriptor::*;
 pub use index::*;
 pub use manifest::*;
 pub use oci_layout::*;
+use strum_macros::EnumIter;
 pub use version::*;
 
 /// Media types used by OCI image format spec. Values MUST comply with RFC 6838,
 /// including the naming requirements in its section 4.2.
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, EnumIter)]
 pub enum MediaType {
     /// MediaType Descriptor specifies the media type for a content descriptor.
     Descriptor,
@@ -201,7 +202,7 @@ impl<'de> Deserialize<'de> for MediaType {
 
 /// Name of the target operating system.
 #[allow(missing_docs)]
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, EnumIter)]
 pub enum Os {
     AIX,
     Android,
@@ -304,7 +305,7 @@ impl Default for Os {
 }
 
 /// Name of the CPU target architecture.
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, EnumIter)]
 pub enum Arch {
     /// 32 bit x86, little-endian
     #[allow(non_camel_case_types)]

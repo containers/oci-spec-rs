@@ -8,7 +8,7 @@ use once_cell::sync::Lazy;
 use regex::Regex;
 use serde::{de, Deserialize, Deserializer, Serialize};
 use std::path::PathBuf;
-use strum_macros::{Display as StrumDisplay, EnumString};
+use strum_macros::{Display as StrumDisplay, EnumIter, EnumString};
 
 #[derive(
     Builder,
@@ -188,7 +188,9 @@ pub struct Box {
     width: u64,
 }
 
-#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize, StrumDisplay, EnumString)]
+#[derive(
+    Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize, StrumDisplay, EnumString, EnumIter,
+)]
 #[strum(serialize_all = "SCREAMING_SNAKE_CASE")]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 #[cfg(any(target_os = "linux", target_os = "solaris"))]
@@ -416,7 +418,9 @@ pub struct LinuxIOPriority {
     priority: i64,
 }
 
-#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize, StrumDisplay, EnumString)]
+#[derive(
+    Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize, StrumDisplay, EnumString, EnumIter,
+)]
 #[strum(serialize_all = "SCREAMING_SNAKE_CASE")]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 /// IOPriorityClass represents an I/O scheduling class.
@@ -505,7 +509,9 @@ impl Default for Scheduler {
     }
 }
 
-#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize, StrumDisplay, EnumString)]
+#[derive(
+    Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize, StrumDisplay, EnumString, EnumIter,
+)]
 #[strum(serialize_all = "SCREAMING_SNAKE_CASE")]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 ///  LinuxSchedulerPolicy represents different scheduling policies used with the Linux Scheduler
@@ -533,7 +539,9 @@ impl Default for LinuxSchedulerPolicy {
     }
 }
 
-#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize, StrumDisplay, EnumString)]
+#[derive(
+    Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize, StrumDisplay, EnumString, EnumIter,
+)]
 #[strum(serialize_all = "SCREAMING_SNAKE_CASE")]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 ///  LinuxSchedulerFlag represents the flags used by the Linux Scheduler.

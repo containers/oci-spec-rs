@@ -4,7 +4,7 @@ use derive_builder::Builder;
 use getset::{CopyGetters, Getters, MutGetters, Setters};
 use serde::{Deserialize, Serialize};
 use std::{collections::HashMap, fmt::Display, path::PathBuf, vec};
-use strum_macros::{Display as StrumDisplay, EnumString};
+use strum_macros::{Display as StrumDisplay, EnumIter, EnumString};
 
 #[derive(
     Builder, Clone, Debug, Deserialize, Eq, Getters, MutGetters, Setters, PartialEq, Serialize,
@@ -187,7 +187,7 @@ pub struct LinuxIdMapping {
     size: u32,
 }
 
-#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize, EnumString)]
+#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize, EnumString, EnumIter)]
 #[strum(serialize_all = "lowercase")]
 #[serde(rename_all = "lowercase")]
 /// Device types
@@ -791,7 +791,9 @@ pub struct LinuxRdma {
     hca_objects: Option<u32>,
 }
 
-#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize, Hash, StrumDisplay)]
+#[derive(
+    Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize, Hash, StrumDisplay, EnumIter,
+)]
 #[strum(serialize_all = "lowercase")]
 #[serde(rename_all = "snake_case")]
 /// Available Linux namespaces.
@@ -1041,7 +1043,9 @@ pub struct LinuxSeccomp {
     syscalls: Option<Vec<LinuxSyscall>>,
 }
 
-#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize, StrumDisplay, EnumString)]
+#[derive(
+    Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize, StrumDisplay, EnumString, EnumIter,
+)]
 #[strum(serialize_all = "SCREAMING_SNAKE_CASE")]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 /// Available seccomp actions.
@@ -1097,7 +1101,9 @@ impl Default for LinuxSeccompAction {
 }
 
 #[allow(clippy::enum_clike_unportable_variant)]
-#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize, StrumDisplay, EnumString)]
+#[derive(
+    Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize, StrumDisplay, EnumString, EnumIter,
+)]
 #[strum(serialize_all = "SCREAMING_SNAKE_CASE")]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 /// Available seccomp architectures.
@@ -1160,7 +1166,9 @@ pub enum Arch {
     ScmpArchRiscv64 = 0xc00000f3,
 }
 
-#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize, StrumDisplay, EnumString)]
+#[derive(
+    Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize, StrumDisplay, EnumString, EnumIter,
+)]
 #[strum(serialize_all = "SCREAMING_SNAKE_CASE")]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 /// Available seccomp filter flags.
@@ -1185,7 +1193,9 @@ pub enum LinuxSeccompFilterFlag {
     SeccompFilterFlagSpecAllow,
 }
 
-#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize, StrumDisplay, EnumString)]
+#[derive(
+    Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize, StrumDisplay, EnumString, EnumIter,
+)]
 #[strum(serialize_all = "SCREAMING_SNAKE_CASE")]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 #[repr(u32)]
@@ -1401,7 +1411,9 @@ pub struct LinuxPersonality {
     flags: Option<Vec<String>>,
 }
 
-#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize, StrumDisplay, EnumString)]
+#[derive(
+    Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize, StrumDisplay, EnumString, EnumIter,
+)]
 /// Define domain and flags for LinuxPersonality.
 pub enum LinuxPersonalityDomain {
     #[serde(rename = "LINUX")]

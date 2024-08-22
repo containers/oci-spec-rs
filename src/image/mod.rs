@@ -71,30 +71,7 @@ pub enum MediaType {
 
 impl Display for MediaType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::Descriptor => write!(f, "application/vnd.oci.descriptor"),
-            Self::LayoutHeader => write!(f, "application/vnd.oci.layout.header.v1+json"),
-            Self::ImageManifest => write!(f, "application/vnd.oci.image.manifest.v1+json"),
-            Self::ImageIndex => write!(f, "application/vnd.oci.image.index.v1+json"),
-            Self::ImageLayer => write!(f, "application/vnd.oci.image.layer.v1.tar"),
-            Self::ImageLayerGzip => write!(f, "application/vnd.oci.image.layer.v1.tar+gzip"),
-            Self::ImageLayerZstd => write!(f, "application/vnd.oci.image.layer.v1.tar+zstd"),
-            Self::ImageLayerNonDistributable => {
-                write!(f, "application/vnd.oci.image.layer.nondistributable.v1.tar")
-            }
-            Self::ImageLayerNonDistributableGzip => write!(
-                f,
-                "application/vnd.oci.image.layer.nondistributable.v1.tar+gzip"
-            ),
-            Self::ImageLayerNonDistributableZstd => write!(
-                f,
-                "application/vnd.oci.image.layer.nondistributable.v1.tar+zstd"
-            ),
-            Self::ImageConfig => write!(f, "application/vnd.oci.image.config.v1+json"),
-            Self::ArtifactManifest => write!(f, "application/vnd.oci.artifact.manifest.v1+json"),
-            Self::EmptyJSON => write!(f, "application/vnd.oci.empty.v1+json"),
-            Self::Other(media_type) => write!(f, "{media_type}"),
-        }
+        write!(f, "{}", self.as_ref())
     }
 }
 
@@ -127,29 +104,33 @@ impl From<&str> for MediaType {
 
 impl From<MediaType> for String {
     fn from(media_type: MediaType) -> Self {
-        match media_type {
-            MediaType::Descriptor => "application/vnd.oci.descriptor".to_string(),
-            MediaType::LayoutHeader => "application/vnd.oci.layout.header.v1+json".to_string(),
-            MediaType::ImageManifest => "application/vnd.oci.image.manifest.v1+json".to_string(),
-            MediaType::ImageIndex => "application/vnd.oci.image.index.v1+json".to_string(),
-            MediaType::ImageLayer => "application/vnd.oci.image.layer.v1.tar".to_string(),
-            MediaType::ImageLayerGzip => "application/vnd.oci.image.layer.v1.tar+gzip".to_string(),
-            MediaType::ImageLayerZstd => "application/vnd.oci.image.layer.v1.tar+zstd".to_string(),
-            MediaType::ImageLayerNonDistributable => {
-                "application/vnd.oci.image.layer.nondistributable.v1.tar".to_string()
+        media_type.as_ref().to_owned()
+    }
+}
+
+impl AsRef<str> for MediaType {
+    fn as_ref(&self) -> &str {
+        match self {
+            Self::Descriptor => "application/vnd.oci.descriptor",
+            Self::LayoutHeader => "application/vnd.oci.layout.header.v1+json",
+            Self::ImageManifest => "application/vnd.oci.image.manifest.v1+json",
+            Self::ImageIndex => "application/vnd.oci.image.index.v1+json",
+            Self::ImageLayer => "application/vnd.oci.image.layer.v1.tar",
+            Self::ImageLayerGzip => "application/vnd.oci.image.layer.v1.tar+gzip",
+            Self::ImageLayerZstd => "application/vnd.oci.image.layer.v1.tar+zstd",
+            Self::ImageLayerNonDistributable => {
+                "application/vnd.oci.image.layer.nondistributable.v1.tar"
             }
-            MediaType::ImageLayerNonDistributableGzip => {
-                "application/vnd.oci.image.layer.nondistributable.v1.tar+gzip".to_string()
+            Self::ImageLayerNonDistributableGzip => {
+                "application/vnd.oci.image.layer.nondistributable.v1.tar+gzip"
             }
-            MediaType::ImageLayerNonDistributableZstd => {
-                "application/vnd.oci.image.layer.nondistributable.v1.tar+zstd".to_string()
+            Self::ImageLayerNonDistributableZstd => {
+                "application/vnd.oci.image.layer.nondistributable.v1.tar+zstd"
             }
-            MediaType::ImageConfig => "application/vnd.oci.image.config.v1+json".to_string(),
-            MediaType::ArtifactManifest => {
-                "application/vnd.oci.artifact.manifest.v1+json".to_string()
-            }
-            MediaType::EmptyJSON => "application/vnd.oci.empty.v1+json".to_string(),
-            MediaType::Other(media) => media.to_string(),
+            Self::ImageConfig => "application/vnd.oci.image.config.v1+json",
+            Self::ArtifactManifest => "application/vnd.oci.artifact.manifest.v1+json",
+            Self::EmptyJSON => "application/vnd.oci.empty.v1+json",
+            Self::Other(media_type) => media_type.as_str(),
         }
     }
 }
@@ -475,5 +456,18 @@ mod tests {
         if let Arch::Other(o) = a {
             panic!("Architecture {o} not mapped between Rust and OCI")
         }
+    }
+
+    #[test]
+    fn test_asref() {
+        // This just spot checks a few conversions
+        assert_eq!(
+            MediaType::ImageConfig.as_ref(),
+            "application/vnd.oci.image.config.v1+json"
+        );
+        assert_eq!(
+            String::from(MediaType::ImageConfig).as_str(),
+            "application/vnd.oci.image.config.v1+json"
+        );
     }
 }

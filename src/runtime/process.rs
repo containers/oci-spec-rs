@@ -7,7 +7,7 @@ use getset::{CopyGetters, Getters, MutGetters, Setters};
 use regex::Regex;
 use serde::{de, Deserialize, Deserializer, Serialize};
 use std::path::PathBuf;
-use std::sync::LazyLock;
+use std::sync::OnceLock;
 use strum_macros::{Display as StrumDisplay, EnumString};
 
 #[derive(
@@ -623,12 +623,16 @@ where
     Ok(value)
 }
 
-static EXEC_CPU_AFFINITY_REGEX: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r"^(\d+(-\d+)?)(,\d+(-\d+)?)*$").expect("Failed to create regex for execCPUAffinity")
-});
+fn exec_cpu_affinity_regex() -> &'static Regex {
+    static EXEC_CPU_AFFINITY_REGEX: OnceLock<Regex> = OnceLock::new();
+    EXEC_CPU_AFFINITY_REGEX.get_or_init(|| {
+        Regex::new(r"^(\d+(-\d+)?)(,\d+(-\d+)?)*$")
+            .expect("Failed to create regex for execCPUAffinity")
+    })
+}
 
 fn validate_cpu_affinity(s: &str) -> Result<(), String> {
-    if !EXEC_CPU_AFFINITY_REGEX.is_match(s) {
+    if !exec_cpu_affinity_regex().is_match(s) {
         return Err(format!("Invalid execCPUAffinity format: {}", s));
     }
 

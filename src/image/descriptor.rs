@@ -1,4 +1,4 @@
-use super::{Arch, MediaType, Os};
+use super::{Arch, Digest, MediaType, Os};
 use crate::error::OciSpecError;
 use derive_builder::Builder;
 use getset::{CopyGetters, Getters, Setters};
@@ -30,7 +30,7 @@ pub struct Descriptor {
     /// content SHOULD be verified against this digest when consumed via
     /// untrusted sources.
     #[getset(get = "pub", set = "pub")]
-    digest: String,
+    digest: Digest,
     /// This REQUIRED property specifies the size, in bytes, of the raw
     /// content. This property exists so that a client will have an
     /// expected size for the content before processing. If the
@@ -133,7 +133,7 @@ pub struct Platform {
 
 impl Descriptor {
     /// Construct a new descriptor with the required fields.
-    pub fn new(media_type: MediaType, size: u64, digest: impl Into<String>) -> Self {
+    pub fn new(media_type: MediaType, size: u64, digest: impl Into<Digest>) -> Self {
         Self {
             media_type,
             size,
@@ -145,10 +145,17 @@ impl Descriptor {
             data: Default::default(),
         }
     }
+
+    /// Return a view of [`Self::digest()`] that has been parsed as a valid SHA-256 digest.
+    pub fn digest_sha256(&self) -> crate::Result<super::Sha256Digest> {
+        super::Sha256Digest::try_from(self.digest().clone())
+    }
 }
 
 #[cfg(test)]
 mod tests {
+    use std::str::FromStr;
+
     use super::*;
 
     #[test]
@@ -163,7 +170,10 @@ mod tests {
         assert_eq!(descriptor.media_type, MediaType::ImageManifest);
         assert_eq!(
             descriptor.digest,
-            "sha256:c2b8beca588702777e5f35dafdbeae9ec16c2bab802331f81cacd2a92f1d5356"
+            Digest::from_str(
+                "sha256:c2b8beca588702777e5f35dafdbeae9ec16c2bab802331f81cacd2a92f1d5356"
+            )
+            .unwrap()
         );
         assert_eq!(descriptor.size, 769);
         assert_eq!(
@@ -177,5 +187,16 @@ mod tests {
             descriptor.artifact_type.unwrap(),
             MediaType::Other("application/spdx+json".to_string())
         );
+    }
+
+    #[test]
+    fn test_malformed_digest() {
+        let descriptor_str = r#"{
+            "mediaType": "application/vnd.oci.image.manifest.v1+json",
+            "digest":"../blah:this-is-an-attack",
+            "size":769,
+            "annotations":{"org.opencontainers.image.created": "2023-10-11T22:37:26Z"},
+            "artifactType":"application/spdx+json"}"#;
+        assert!(serde_json::from_str::<Descriptor>(descriptor_str).is_err());
     }
 }

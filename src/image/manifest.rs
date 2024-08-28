@@ -251,14 +251,14 @@ mod tests {
 
         let config = DescriptorBuilder::default()
             .media_type(MediaType::ImageConfig)
-            .size(7023)
+            .size(7023u64)
             .digest("sha256:b5b2b2c507a0944348e0303114d8d93aaaa081732b86451d9bce1f432a537bc7")
             .build()
             .expect("build config descriptor");
 
         let layers: Vec<Descriptor> = [
             (
-                32654,
+                32654u64,
                 "sha256:9834876dcfb05cb167a5c24953eba58c4ac89b1adf57f28f2f9d09af107ee8f0",
             ),
             (

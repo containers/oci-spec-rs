@@ -239,7 +239,7 @@ mod tests {
         let ppc_manifest = DescriptorBuilder::default()
             .media_type(MediaType::ImageManifest)
             .digest("sha256:e692418e4cbaf90ca69d05a66403747baa33ee08806650b51fab815ad7fc331f")
-            .size(7143)
+            .size(7143u64)
             .platform(
                 PlatformBuilder::default()
                     .architecture(Arch::PowerPC64le)
@@ -253,7 +253,7 @@ mod tests {
         let amd64_manifest = DescriptorBuilder::default()
             .media_type(MediaType::ImageManifest)
             .digest("sha256:5b0bcabd1ed22e9fb1310cf6c2dec7cdef19f0ad69efa1f392e94a4333501270")
-            .size(7682)
+            .size(7682u64)
             .platform(
                 PlatformBuilder::default()
                     .architecture(Arch::Amd64)

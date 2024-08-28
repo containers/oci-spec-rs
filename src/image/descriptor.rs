@@ -37,7 +37,7 @@ pub struct Descriptor {
     /// length of the retrieved content does not match the specified
     /// length, the content SHOULD NOT be trusted.
     #[getset(get_copy = "pub", set = "pub")]
-    size: i64,
+    size: u64,
     /// This OPTIONAL property specifies a list of URIs from which this
     /// object MAY be downloaded. Each entry MUST conform to [RFC 3986](https://tools.ietf.org/html/rfc3986).
     /// Entries SHOULD use the http and https schemes, as defined
@@ -133,7 +133,7 @@ pub struct Platform {
 
 impl Descriptor {
     /// Construct a new descriptor with the required fields.
-    pub fn new(media_type: MediaType, size: i64, digest: impl Into<String>) -> Self {
+    pub fn new(media_type: MediaType, size: u64, digest: impl Into<String>) -> Self {
         Self {
             media_type,
             size,

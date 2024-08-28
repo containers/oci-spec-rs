@@ -226,7 +226,7 @@ mod tests {
     fn create_manifest() -> ArtifactManifest {
         let blob = DescriptorBuilder::default()
             .media_type(MediaType::Other("application/gzip".to_string()))
-            .size(123)
+            .size(123u64)
             .digest(
                 "sha256:87923725d74f4bfb94c9e86d64170f7521aad8221a5de834851470ca142da630"
                     .to_string(),
@@ -235,7 +235,7 @@ mod tests {
             .unwrap();
         let subject = DescriptorBuilder::default()
             .media_type(MediaType::ImageManifest)
-            .size(1234)
+            .size(1234u64)
             .digest(
                 "sha256:cc06a2839488b8bd2a2b99dcdc03d5cfd818eed72ad08ef3cc197aac64c0d0a0"
                     .to_string(),

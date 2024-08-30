@@ -1,9 +1,9 @@
-use std::convert::TryFrom;
 use std::error::Error;
 use std::fmt;
 use std::str::FromStr;
+use std::{convert::TryFrom, sync::OnceLock};
 
-use crate::regexp;
+use regex::{Regex, RegexBuilder};
 
 /// NAME_TOTAL_LENGTH_MAX is the maximum total number of characters in a repository name.
 const NAME_TOTAL_LENGTH_MAX: usize = 255;
@@ -12,6 +12,19 @@ const DOCKER_HUB_DOMAIN_LEGACY: &str = "index.docker.io";
 const DOCKER_HUB_DOMAIN: &str = "docker.io";
 const DOCKER_HUB_OFFICIAL_REPO_NAME: &str = "library";
 const DEFAULT_TAG: &str = "latest";
+/// REFERENCE_REGEXP is the full supported format of a reference. The regexp
+/// is anchored and has capturing groups for name, tag, and digest components.
+const REFERENCE_REGEXP: &str = r"^((?:(?:[a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9])(?:(?:\.(?:[a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9]))+)?(?::[0-9]+)?/)?[a-z0-9]+(?:(?:(?:[._]|__|[-]*)[a-z0-9]+)+)?(?:(?:/[a-z0-9]+(?:(?:(?:[._]|__|[-]*)[a-z0-9]+)+)?)+)?)(?::([\w][\w.-]{0,127}))?(?:@([A-Za-z][A-Za-z0-9]*(?:[-_+.][A-Za-z][A-Za-z0-9]*)*[:][[:xdigit:]]{32,}))?$";
+
+fn reference_regexp() -> &'static Regex {
+    static RE: OnceLock<Regex> = OnceLock::new();
+    RE.get_or_init(|| {
+        RegexBuilder::new(REFERENCE_REGEXP)
+            .size_limit(10 * (1 << 21))
+            .build()
+            .unwrap()
+    })
+}
 
 /// Reasons that parsing a string as a Reference can fail.
 #[derive(Debug, PartialEq, Eq)]
@@ -62,7 +75,7 @@ impl Error for ParseError {}
 /// Parsing a tagged image reference:
 ///
 /// ```
-/// use oci_client::Reference;
+/// use oci_spec::distribution::Reference;
 ///
 /// let reference: Reference = "docker.io/library/hello-world:latest".parse().unwrap();
 ///
@@ -228,10 +241,7 @@ impl TryFrom<String> for Reference {
         if s.is_empty() {
             return Err(ParseError::NameEmpty);
         }
-        lazy_static! {
-            static ref RE: regex::Regex = regexp::must_compile(regexp::REFERENCE_REGEXP);
-        };
-        let captures = match RE.captures(&s) {
+        let captures = match reference_regexp().captures(&s) {
             Some(caps) => caps,
             None => {
                 return Err(ParseError::ReferenceInvalidFormat);

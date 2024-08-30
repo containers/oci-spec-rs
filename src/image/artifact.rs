@@ -216,8 +216,8 @@ impl ArtifactManifest {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::image::DescriptorBuilder;
-    use std::path::PathBuf;
+    use crate::image::{DescriptorBuilder, Sha256Digest};
+    use std::{path::PathBuf, str::FromStr};
 
     fn get_manifest_path() -> PathBuf {
         PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("test/data/artifact_manifest.json")
@@ -228,8 +228,10 @@ mod tests {
             .media_type(MediaType::Other("application/gzip".to_string()))
             .size(123u64)
             .digest(
-                "sha256:87923725d74f4bfb94c9e86d64170f7521aad8221a5de834851470ca142da630"
-                    .to_string(),
+                Sha256Digest::from_str(
+                    "87923725d74f4bfb94c9e86d64170f7521aad8221a5de834851470ca142da630",
+                )
+                .unwrap(),
             )
             .build()
             .unwrap();
@@ -237,8 +239,10 @@ mod tests {
             .media_type(MediaType::ImageManifest)
             .size(1234u64)
             .digest(
-                "sha256:cc06a2839488b8bd2a2b99dcdc03d5cfd818eed72ad08ef3cc197aac64c0d0a0"
-                    .to_string(),
+                Sha256Digest::from_str(
+                    "cc06a2839488b8bd2a2b99dcdc03d5cfd818eed72ad08ef3cc197aac64c0d0a0",
+                )
+                .unwrap(),
             )
             .build()
             .unwrap();

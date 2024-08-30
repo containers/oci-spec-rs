@@ -229,16 +229,22 @@ impl Display for ImageIndex {
 
 #[cfg(test)]
 mod tests {
+    use std::str::FromStr;
     use std::{fs, path::PathBuf};
 
     use super::*;
-    use crate::image::{Arch, Os};
+    use crate::image::{Arch, Os, Sha256Digest};
     use crate::image::{DescriptorBuilder, PlatformBuilder};
 
     fn create_index() -> ImageIndex {
         let ppc_manifest = DescriptorBuilder::default()
             .media_type(MediaType::ImageManifest)
-            .digest("sha256:e692418e4cbaf90ca69d05a66403747baa33ee08806650b51fab815ad7fc331f")
+            .digest(
+                Sha256Digest::from_str(
+                    "e692418e4cbaf90ca69d05a66403747baa33ee08806650b51fab815ad7fc331f",
+                )
+                .unwrap(),
+            )
             .size(7143u64)
             .platform(
                 PlatformBuilder::default()
@@ -252,7 +258,12 @@ mod tests {
 
         let amd64_manifest = DescriptorBuilder::default()
             .media_type(MediaType::ImageManifest)
-            .digest("sha256:5b0bcabd1ed22e9fb1310cf6c2dec7cdef19f0ad69efa1f392e94a4333501270")
+            .digest(
+                Sha256Digest::from_str(
+                    "5b0bcabd1ed22e9fb1310cf6c2dec7cdef19f0ad69efa1f392e94a4333501270",
+                )
+                .unwrap(),
+            )
             .size(7682u64)
             .platform(
                 PlatformBuilder::default()

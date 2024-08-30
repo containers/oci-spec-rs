@@ -13,12 +13,12 @@ fn char_is_lowercase_ascii_hex(c: char) -> bool {
 
 /// algorithm-component ::= [a-z0-9]+
 fn char_is_algorithm_component(c: char) -> bool {
-    matches!(c, 'a'..='z' | 'A'..='Z' | '0'..='9')
+    matches!(c, 'a'..='z' | '0'..='9')
 }
 
 /// encoded ::= [a-zA-Z0-9=_-]+
 fn char_is_encoded(c: char) -> bool {
-    char_is_algorithm_component(c) || matches!(c, '=' | '_' | '-')
+    char_is_algorithm_component(c) || matches!(c, 'A'..='Z' | '=' | '_' | '-')
 }
 
 /// A parsed pair of algorithm:digest as defined
@@ -151,8 +151,8 @@ pub struct Sha256Digest {
 impl From<Sha256Digest> for Digest {
     fn from(value: Sha256Digest) -> Self {
         Self {
-            buf: format!("sha256:{}", value.value).into_boxed_str(),
-            split: 6,
+            buf: format!("{ALG_SHA256}:{}", value.value).into_boxed_str(),
+            split: ALG_SHA256.len(),
         }
     }
 }
@@ -211,6 +211,7 @@ mod tests {
             "_digest:somevalue",
             ":blah",
             "blah:",
+            "FooBar:123abc",
             "^:foo",
             "bar^baz:blah",
             "sha256:123456*78",
@@ -244,6 +245,7 @@ mod tests {
         let invalid = [
             "sha256:123456=78",
             "foo:bar",
+            "sha256:6c3c624b58dbbcd3c0dd82b4z53f04194d1247c6eebdaab7c610cf7d66709b3b", // has a z in the middle
             "sha256+blah:6c3c624b58dbbcd3c0dd82b4c53f04194d1247c6eebdaab7c610cf7d66709b3b",
         ];
         for case in invalid {
@@ -257,8 +259,13 @@ mod tests {
 
     #[test]
     fn test_sha256_valid() {
+        let expected_value = VALID_DIGEST_SHA256.split_once(':').unwrap().1;
         let d = Digest::from_str(VALID_DIGEST_SHA256).unwrap();
         let d = d.to_sha256().unwrap();
-        assert_eq!(d.value(), VALID_DIGEST_SHA256.split_once(':').unwrap().1);
+        assert_eq!(d.value(), expected_value);
+        let base_digest = Digest::from(d.clone());
+        assert_eq!(base_digest.value(), expected_value);
+        let d2 = base_digest.to_sha256().unwrap();
+        assert_eq!(d, d2);
     }
 }

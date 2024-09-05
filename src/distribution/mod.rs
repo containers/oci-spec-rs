@@ -12,11 +12,13 @@
 //! Guide](https://github.com/opencontainers/artifacts) (a.k.a. "OCI Artifacts").
 
 mod error;
+mod reference;
 mod repository;
 mod tag;
 mod version;
 
 pub use error::*;
+pub use reference::*;
 pub use repository::*;
 pub use tag::*;
 pub use version::*;

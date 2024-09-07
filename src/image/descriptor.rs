@@ -146,9 +146,12 @@ impl Descriptor {
         }
     }
 
-    /// Return a view of [`Self::digest()`] that has been parsed as a valid SHA-256 digest.
-    pub fn digest_sha256(&self) -> crate::Result<super::Sha256Digest> {
-        super::Sha256Digest::try_from(self.digest().clone())
+    /// Return a view of [`Self::digest()`] that has been parsed as a valid SHA-256.
+    pub fn as_digest_sha256(&self) -> Option<&str> {
+        match self.digest.algorithm() {
+            super::DigestAlgorithm::Sha256 => Some(self.digest.digest()),
+            _ => None,
+        }
     }
 }
 

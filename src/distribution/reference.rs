@@ -1,9 +1,9 @@
-use std::error::Error;
 use std::fmt;
 use std::str::FromStr;
 use std::{convert::TryFrom, sync::OnceLock};
 
 use regex::{Regex, RegexBuilder};
+use thiserror::Error;
 
 /// NAME_TOTAL_LENGTH_MAX is the maximum total number of characters in a repository name.
 const NAME_TOTAL_LENGTH_MAX: usize = 255;
@@ -27,46 +27,33 @@ fn reference_regexp() -> &'static Regex {
 }
 
 /// Reasons that parsing a string as a Reference can fail.
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, Error, PartialEq, Eq)]
 pub enum ParseError {
-    /// Invalid checksum digest format
+    /// Will be returned if digest is ill-formed
+    #[error("invalid checksum digest format")]
     DigestInvalidFormat,
-    /// Invalid checksum digest length
+    /// Will be returned if digest does not have a correct lenght
+    #[error("invalid checksum digest length")]
     DigestInvalidLength,
-    /// Unsupported digest algorithm
+    /// Will be returned for an unknown digest algorithm
+    #[error("unsupported digest algorithm")]
     DigestUnsupported,
-    /// Repository name must be lowercase
+    /// Will be returned for an uppercase character in repository name
+    #[error("repository name must be lowercase")]
     NameContainsUppercase,
-    /// Repository name must have at least one component
+    /// Will be returned if a name is empty
+    #[error("repository name must have at least one component")]
     NameEmpty,
-    /// Repository name must not be more than NAME_TOTAL_LENGTH_MAX characters
+    /// Will be returned if a name is too long
+    #[error("repository name must not be more than {NAME_TOTAL_LENGTH_MAX} characters")]
     NameTooLong,
-    /// Invalid reference format
+    /// Will be returned if a reference is ill-formed
+    #[error("invalid reference format")]
     ReferenceInvalidFormat,
-    /// Invalid tag format
+    /// Will be returned if a tag is ill-formed
+    #[error("invalid tag format")]
     TagInvalidFormat,
 }
-
-impl fmt::Display for ParseError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            ParseError::DigestInvalidFormat => write!(f, "invalid checksum digest format"),
-            ParseError::DigestInvalidLength => write!(f, "invalid checksum digest length"),
-            ParseError::DigestUnsupported => write!(f, "unsupported digest algorithm"),
-            ParseError::NameContainsUppercase => write!(f, "repository name must be lowercase"),
-            ParseError::NameEmpty => write!(f, "repository name must have at least one component"),
-            ParseError::NameTooLong => write!(
-                f,
-                "repository name must not be more than {} characters",
-                NAME_TOTAL_LENGTH_MAX
-            ),
-            ParseError::ReferenceInvalidFormat => write!(f, "invalid reference format"),
-            ParseError::TagInvalidFormat => write!(f, "invalid tag format"),
-        }
-    }
-}
-
-impl Error for ParseError {}
 
 /// Reference provides a general type to represent any way of referencing images within an OCI registry.
 ///

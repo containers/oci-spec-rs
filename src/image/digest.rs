@@ -1,11 +1,68 @@
 //! Functionality corresponding to <https://github.com/opencontainers/image-spec/blob/main/descriptor.md#digests>.
 
+use std::fmt::{Display, Write};
 use std::str::FromStr;
 
-/// The well-known identifier for a SHA-256 digest.
-/// At this point, no one is really using alternative digests like sha512, so we
-/// don't yet try to expose them here in a higher level way.
-const ALG_SHA256: &str = "sha256";
+/// A digest algorithm; at the current time only SHA-256
+/// is widely used and supported in the ecosystem. Other
+/// SHA variants are included as they are noted in the
+/// standards. Other digest algorithms may be added
+/// in the future, so this structure is marked as non-exhaustive.
+#[non_exhaustive]
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum DigestAlgorithm {
+    /// The SHA-256 algorithm.
+    Sha256,
+    /// The SHA-384 algorithm.
+    Sha384,
+    /// The SHA-512 algorithm.
+    Sha512,
+    /// Any other algorithm. Note that it is possible
+    /// that other algorithms will be added as enum members.
+    /// If you want to try to handle those, consider also
+    /// comparing against [`Self::as_ref<str>`].
+    Other(Box<str>),
+}
+
+impl AsRef<str> for DigestAlgorithm {
+    fn as_ref(&self) -> &str {
+        match self {
+            DigestAlgorithm::Sha256 => "sha256",
+            DigestAlgorithm::Sha384 => "sha384",
+            DigestAlgorithm::Sha512 => "sha512",
+            DigestAlgorithm::Other(o) => o,
+        }
+    }
+}
+
+impl Display for DigestAlgorithm {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(self.as_ref())
+    }
+}
+
+impl DigestAlgorithm {
+    /// Return the length of the digest in hexadecimal ASCII characters.
+    pub const fn digest_hexlen(&self) -> Option<u32> {
+        match self {
+            DigestAlgorithm::Sha256 => Some(64),
+            DigestAlgorithm::Sha384 => Some(96),
+            DigestAlgorithm::Sha512 => Some(128),
+            DigestAlgorithm::Other(_) => None,
+        }
+    }
+}
+
+impl From<&str> for DigestAlgorithm {
+    fn from(value: &str) -> Self {
+        match value {
+            "sha256" => Self::Sha256,
+            "sha384" => Self::Sha384,
+            "sha512" => Self::Sha512,
+            o => Self::Other(o.into()),
+        }
+    }
+}
 
 fn char_is_lowercase_ascii_hex(c: char) -> bool {
     matches!(c, '0'..='9' | 'a'..='f')
@@ -27,23 +84,31 @@ fn char_is_encoded(c: char) -> bool {
 /// ```
 /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
 /// use std::str::FromStr;
-/// use oci_spec::image::Digest;
+/// use oci_spec::image::{Digest, DigestAlgorithm};
 /// let d = Digest::from_str("sha256:6c3c624b58dbbcd3c0dd82b4c53f04194d1247c6eebdaab7c610cf7d66709b3b")?;
-/// assert_eq!(d.algorithm(), "sha256");
-/// assert_eq!(d.value(), "6c3c624b58dbbcd3c0dd82b4c53f04194d1247c6eebdaab7c610cf7d66709b3b");
+/// assert_eq!(d.algorithm(), &DigestAlgorithm::Sha256);
+/// assert_eq!(d.digest(), "6c3c624b58dbbcd3c0dd82b4c53f04194d1247c6eebdaab7c610cf7d66709b3b");
 /// let d = Digest::from_str("multihash+base58:QmRZxt2b1FVZPNqd8hsiykDL3TdBDeTSPX9Kv46HmX4Gx8")?;
-/// assert_eq!(d.algorithm(), "multihash+base58");
-/// assert_eq!(d.value(), "QmRZxt2b1FVZPNqd8hsiykDL3TdBDeTSPX9Kv46HmX4Gx8");
+/// assert_eq!(d.algorithm(), &DigestAlgorithm::from("multihash+base58"));
+/// assert_eq!(d.digest(), "QmRZxt2b1FVZPNqd8hsiykDL3TdBDeTSPX9Kv46HmX4Gx8");
 /// # Ok(())
 /// # }
 /// ```
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Digest {
-    /// The underlying buffer
-    buf: Box<str>,
-    /// The byte offset of the `:`
-    split: usize,
+    /// The algorithm
+    algorithm: DigestAlgorithm,
+    /// The digest value
+    digest: Box<str>,
+}
+
+impl Display for Digest {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(self.algorithm.as_ref())?;
+        f.write_char(':')?;
+        f.write_str(&self.digest)
+    }
 }
 
 impl<'de> serde::Deserialize<'de> for Digest {
@@ -61,25 +126,24 @@ impl serde::ser::Serialize for Digest {
     where
         S: serde::Serializer,
     {
-        serializer.serialize_str(&self.buf)
+        let v = self.to_string();
+        serializer.serialize_str(&v)
     }
 }
 
 impl Digest {
     const ALGORITHM_SEPARATOR: &'static [char] = &['+', '.', '_', '-'];
     /// The algorithm name (e.g. sha256, sha512)
-    pub fn algorithm(&self) -> &str {
-        &self.buf[0..self.split]
+    pub fn algorithm(&self) -> &DigestAlgorithm {
+        &self.algorithm
     }
 
-    /// The algorithm component (lowercase hexadecimal)
-    pub fn value(&self) -> &str {
-        &self.buf[self.split + 1..]
-    }
-
-    /// View this digest as a valid SHA-256 digest, or return an error.
-    pub fn to_sha256(&self) -> crate::Result<Sha256Digest> {
-        Sha256Digest::try_from(self.clone())
+    /// The algorithm digest component. When this is one of the
+    /// SHA family (SHA-256, SHA-384, etc.) the digest value
+    /// is guaranteed to be a valid length with only lowercase hexadecimal
+    /// characters. For example with SHA-256, the length is 64.
+    pub fn digest(&self) -> &str {
+        &self.digest
     }
 }
 
@@ -117,60 +181,38 @@ impl FromStr for Digest {
             )));
         }
 
-        Ok(Self {
-            buf: s.into(),
-            split,
-        })
+        let algorithm = DigestAlgorithm::from(algorithm);
+        if let Some(expected) = algorithm.digest_hexlen() {
+            let found = value.len();
+            if expected as usize != found {
+                return Err(crate::OciSpecError::Other(format!(
+                    "Invalid digest length {found} expected {expected}"
+                )));
+            }
+            let is_all_hex = value.chars().all(char_is_lowercase_ascii_hex);
+            if !is_all_hex {
+                return Err(crate::OciSpecError::Other(format!(
+                    "Invalid non-hexadecimal character in digest: {value}"
+                )));
+            }
+        }
+        let digest = value.to_owned().into_boxed_str();
+        Ok(Self { algorithm, digest })
     }
 }
 
-/// A SHA-256 digest; this can only be constructed by first parsing a [`Digest`].
-///
-/// ```
-/// # fn main() -> Result<(), Box<dyn std::error::Error>> {
-/// use std::str::FromStr;
-/// use oci_spec::image::{Digest, Sha256Digest};
-/// let d = Digest::from_str("sha256:6c3c624b58dbbcd3c0dd82b4c53f04194d1247c6eebdaab7c610cf7d66709b3b")?;
-/// assert_eq!(d.algorithm(), "sha256");
-/// assert_eq!(d.value(), "6c3c624b58dbbcd3c0dd82b4c53f04194d1247c6eebdaab7c610cf7d66709b3b");
-/// let d = Sha256Digest::try_from(d)?;
-/// assert_eq!(d.value(), "6c3c624b58dbbcd3c0dd82b4c53f04194d1247c6eebdaab7c610cf7d66709b3b");
-/// // But other digests will fail to be converted
-/// let d = Digest::from_str("multihash+base58:QmRZxt2b1FVZPNqd8hsiykDL3TdBDeTSPX9Kv46HmX4Gx8")?;
-/// assert!(Sha256Digest::try_from(d).is_err());
-/// # Ok(())
-/// # }
-/// ```
-
+/// A SHA-256 digest, guaranteed to be 64 lowercase hexadecimal ASCII characters.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Sha256Digest {
-    /// The underlying SHA-256 digest, guaranteed to be 64 lowercase hexadecimal ASCII characters.
-    value: Box<str>,
+    digest: Box<str>,
 }
 
 impl From<Sha256Digest> for Digest {
     fn from(value: Sha256Digest) -> Self {
         Self {
-            buf: format!("{ALG_SHA256}:{}", value.value).into_boxed_str(),
-            split: ALG_SHA256.len(),
+            algorithm: DigestAlgorithm::Sha256,
+            digest: value.digest,
         }
-    }
-}
-
-impl TryFrom<Digest> for Sha256Digest {
-    type Error = crate::OciSpecError;
-
-    fn try_from(algdigest: Digest) -> Result<Self, Self::Error> {
-        match algdigest.algorithm() {
-            ALG_SHA256 => {}
-            o => {
-                return Err(crate::OciSpecError::Other(format!(
-                    "Expected algorithm {ALG_SHA256} but found {o}"
-                )))
-            }
-        }
-
-        Self::from_str(algdigest.value())
     }
 }
 
@@ -178,22 +220,22 @@ impl FromStr for Sha256Digest {
     type Err = crate::OciSpecError;
 
     fn from_str(digest: &str) -> Result<Self, Self::Err> {
-        let is_all_hex = digest.chars().all(char_is_lowercase_ascii_hex);
-        if !(digest.len() == 64 && is_all_hex) {
-            return Err(crate::OciSpecError::Other(format!(
-                "Invalid SHA-256 digest: {digest}"
-            )));
+        let alg = DigestAlgorithm::Sha256;
+        let v = format!("{alg}:{digest}");
+        let d = Digest::from_str(&v)?;
+        match d.algorithm {
+            DigestAlgorithm::Sha256 => Ok(Self { digest: d.digest }),
+            o => Err(crate::OciSpecError::Other(format!(
+                "Expected algorithm sha256 but found {o}",
+            ))),
         }
-        Ok(Self {
-            value: digest.into(),
-        })
     }
 }
 
 impl Sha256Digest {
-    /// The underlying SHA-256 digest, guaranteed to be 64 lowercase hexadecimal ASCII characters.
-    pub fn value(&self) -> &str {
-        &self.value
+    /// The SHA-256 digest, guaranteed to be 64 lowercase hexadecimal characters.
+    pub fn digest(&self) -> &str {
+        &self.digest
     }
 }
 
@@ -215,6 +257,10 @@ mod tests {
             "^:foo",
             "bar^baz:blah",
             "sha256:123456*78",
+            "sha256:6c3c624b58dbbcd3c0dd82b4z53f04194d1247c6eebdaab7c610cf7d66709b3b", // has a z in the middle
+            "sha384:x",
+            "sha384:6c3c624b58dbbcd3c0dd82b4c53f04194d1247c6eebdaab7c610cf7d66709b3b",
+            "sha512:6c3c624b58dbbcd3c0dd82b4c53f04194d1247c6eebdaab7c610cf7d66709b3b",
         ];
         for case in invalid {
             assert!(
@@ -226,46 +272,58 @@ mod tests {
 
     const VALID_DIGEST_SHA256: &str =
         "sha256:6c3c624b58dbbcd3c0dd82b4c53f04194d1247c6eebdaab7c610cf7d66709b3b";
+    const VALID_DIGEST_SHA384: &str =
+        "sha384:6c3c624b58dbbcd4d1247c6eebdaab7c610cf7d66709b3b3c0dd82b4c53f04194d1247c6eebdaab7c610cf7d66709b3b";
+    const VALID_DIGEST_SHA512: &str =
+        "sha512:6c3c624b58dbbcd3c0dd826c3c624b58dbbcd3c0dd82b4c53f04194d1247c6eebdaab7c610cf7d66709b3bb4c53f04194d1247c6eebdaab7c610cf7d66709b3b";
 
     #[test]
     fn test_digest_valid() {
-        let cases = ["foo:bar", "sha256:blah", "sha512:12345"];
+        let cases = ["foo:bar", "xxhash:42"];
         for case in cases {
             Digest::from_str(case).unwrap();
         }
 
         let d = Digest::from_str("multihash+base58:QmRZxt2b1FVZPNqd8hsiykDL3TdBDeTSPX9Kv46HmX4Gx8")
             .unwrap();
-        assert_eq!(d.algorithm(), "multihash+base58");
-        assert_eq!(d.value(), "QmRZxt2b1FVZPNqd8hsiykDL3TdBDeTSPX9Kv46HmX4Gx8");
-    }
-
-    #[test]
-    fn test_sha256_invalid() {
-        let invalid = [
-            "sha256:123456=78",
-            "foo:bar",
-            "sha256:6c3c624b58dbbcd3c0dd82b4z53f04194d1247c6eebdaab7c610cf7d66709b3b", // has a z in the middle
-            "sha256+blah:6c3c624b58dbbcd3c0dd82b4c53f04194d1247c6eebdaab7c610cf7d66709b3b",
-        ];
-        for case in invalid {
-            let d = Digest::from_str(case).unwrap();
-            assert!(
-                Sha256Digest::try_from(d).is_err(),
-                "Should have failed to parse: {case}"
-            )
-        }
+        assert_eq!(d.algorithm(), &DigestAlgorithm::from("multihash+base58"));
+        assert_eq!(d.digest(), "QmRZxt2b1FVZPNqd8hsiykDL3TdBDeTSPX9Kv46HmX4Gx8");
     }
 
     #[test]
     fn test_sha256_valid() {
         let expected_value = VALID_DIGEST_SHA256.split_once(':').unwrap().1;
         let d = Digest::from_str(VALID_DIGEST_SHA256).unwrap();
-        let d = d.to_sha256().unwrap();
-        assert_eq!(d.value(), expected_value);
+        assert_eq!(d.algorithm(), &DigestAlgorithm::Sha256);
+        assert_eq!(d.digest(), expected_value);
         let base_digest = Digest::from(d.clone());
-        assert_eq!(base_digest.value(), expected_value);
-        let d2 = base_digest.to_sha256().unwrap();
-        assert_eq!(d, d2);
+        assert_eq!(base_digest.digest(), expected_value);
+    }
+
+    #[test]
+    fn test_sha384_valid() {
+        let expected_value = VALID_DIGEST_SHA384.split_once(':').unwrap().1;
+        let d = Digest::from_str(VALID_DIGEST_SHA384).unwrap();
+        assert_eq!(d.algorithm(), &DigestAlgorithm::Sha384);
+        assert_eq!(d.digest(), expected_value);
+        let base_digest = Digest::from(d.clone());
+        assert_eq!(base_digest.digest(), expected_value);
+    }
+
+    #[test]
+    fn test_sha512_valid() {
+        let expected_value = VALID_DIGEST_SHA512.split_once(':').unwrap().1;
+        let d = Digest::from_str(VALID_DIGEST_SHA512).unwrap();
+        assert_eq!(d.algorithm(), &DigestAlgorithm::Sha512);
+        assert_eq!(d.digest(), expected_value);
+        let base_digest = Digest::from(d.clone());
+        assert_eq!(base_digest.digest(), expected_value);
+    }
+
+    #[test]
+    fn test_sha256() {
+        let digest = VALID_DIGEST_SHA256.split_once(':').unwrap().1;
+        let v = Sha256Digest::from_str(digest).unwrap();
+        assert_eq!(v.digest(), digest);
     }
 }

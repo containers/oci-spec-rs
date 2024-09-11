@@ -2,7 +2,7 @@ name: 🏷️ Pull Request Labels
 
 on:
   pull_request:
-    types: [opened, labeled, unlabeled, synchronize]
+    types: [ opened, labeled, unlabeled, synchronize ]
 jobs:
   label:
     runs-on: ubuntu-latest
@@ -10,7 +10,7 @@ jobs:
       issues: write
       pull-requests: write
     steps:
-      - uses: mheap/github-action-required-labels@v5
+      - uses: mheap/github-action-required-labels@d25134c992b943fb6ad00c25ea00eb5988c0a9dd # 5.4.2
         with:
           mode: exactly
           count: 1

@@ -56,6 +56,13 @@ jobs:
             ~/.cargo/git
             target
           key: ${{ runner.os }}-cargo-clippy-${{ hashFiles('**/Cargo.lock') }}
+      - name: Select Toolchain
+        uses: actions-rs/toolchain@16499b5e05bf2e26879000db0c1d13f7e13fa3af # v1.0.7
+        with:
+          toolchain: nightly
+          default: true
+          override: true
+          components: clippy, rustfmt
       - name: Clippy Lint
         run: cargo clippy --all --all-features -- -D warnings
 

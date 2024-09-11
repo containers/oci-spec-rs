@@ -1,5 +1,6 @@
 #![deny(missing_docs, warnings)]
 #![doc = include_str!("../README.md")]
+#![allow(clippy::too_long_first_doc_paragraph)]
 
 #[cfg(feature = "distribution")]
 pub mod distribution;

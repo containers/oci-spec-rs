@@ -161,6 +161,10 @@ pub fn get_default_mounts() -> Vec<Mount> {
 }
 
 /// utility function to generate default rootless config for mounts.
+// TODO(saschagrunert): remove once clippy does not report this false positive any more. We cannot
+// use `inspect` instead of `map` because we need to mutate the mounts.
+// Ref: https://github.com/rust-lang/rust-clippy/issues/13185
+#[allow(clippy::manual_inspect)]
 pub fn get_rootless_mounts() -> Vec<Mount> {
     let mut mounts = get_default_mounts();
     mounts

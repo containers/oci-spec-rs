@@ -8,7 +8,7 @@ pub const VERSION_MINOR: u32 = 0;
 pub const VERSION_PATCH: u32 = 0;
 
 /// Indicates development branch. Releases will be empty string.
-pub const VERSION_DEV: &str = "-dev";
+pub const VERSION_DEV: &str = "";
 
 /// Retrieve the version as string representation.
 pub fn version() -> String {
@@ -21,6 +21,6 @@ mod tests {
 
     #[test]
     fn version_test() {
-        assert_eq!(version(), "1.0.0-dev".to_string())
+        assert_eq!(version(), "1.0.0".to_string())
     }
 }

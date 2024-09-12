@@ -9,7 +9,7 @@ use std::str::FromStr;
 /// standards. Other digest algorithms may be added
 /// in the future, so this structure is marked as non-exhaustive.
 #[non_exhaustive]
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub enum DigestAlgorithm {
     /// The SHA-256 algorithm.
     Sha256,
@@ -95,7 +95,7 @@ fn char_is_encoded(c: char) -> bool {
 /// # }
 /// ```
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, Hash)]
 pub struct Digest {
     /// The algorithm
     algorithm: DigestAlgorithm,

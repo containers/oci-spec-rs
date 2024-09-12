@@ -216,6 +216,18 @@ impl From<Sha256Digest> for Digest {
     }
 }
 
+impl AsRef<str> for Sha256Digest {
+    fn as_ref(&self) -> &str {
+        self.digest()
+    }
+}
+
+impl Display for Sha256Digest {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(self.digest())
+    }
+}
+
 impl FromStr for Sha256Digest {
     type Err = crate::OciSpecError;
 

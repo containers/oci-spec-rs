@@ -54,7 +54,7 @@ pub struct ImageIndex {
     /// This REQUIRED property contains a list of manifests for specific
     /// platforms. While this property MUST be present, the size of
     /// the array MAY be zero.
-    #[getset(get = "pub", set = "pub")]
+    #[getset(get_mut = "pub", get = "pub", set = "pub")]
     manifests: Vec<Descriptor>,
     /// This OPTIONAL property specifies a descriptor of another manifest. This value, used by the
     /// referrers API, indicates a relationship to the specified manifest.
@@ -65,7 +65,7 @@ pub struct ImageIndex {
     /// This OPTIONAL property contains arbitrary metadata for the image
     /// index. This OPTIONAL property MUST use the annotation rules.
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[getset(get = "pub", set = "pub")]
+    #[getset(get_mut = "pub", get = "pub", set = "pub")]
     #[builder(default)]
     annotations: Option<HashMap<String, String>>,
 }

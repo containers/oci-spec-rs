@@ -9,7 +9,7 @@ use std::str::FromStr;
 /// standards. Other digest algorithms may be added
 /// in the future, so this structure is marked as non-exhaustive.
 #[non_exhaustive]
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub enum DigestAlgorithm {
     /// The SHA-256 algorithm.
     Sha256,
@@ -95,7 +95,7 @@ fn char_is_encoded(c: char) -> bool {
 /// # }
 /// ```
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, Hash)]
 pub struct Digest {
     /// The algorithm
     algorithm: DigestAlgorithm,
@@ -202,7 +202,7 @@ impl FromStr for Digest {
 }
 
 /// A SHA-256 digest, guaranteed to be 64 lowercase hexadecimal ASCII characters.
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, Hash)]
 pub struct Sha256Digest {
     digest: Box<str>,
 }
@@ -213,6 +213,18 @@ impl From<Sha256Digest> for Digest {
             algorithm: DigestAlgorithm::Sha256,
             digest: value.digest,
         }
+    }
+}
+
+impl AsRef<str> for Sha256Digest {
+    fn as_ref(&self) -> &str {
+        self.digest()
+    }
+}
+
+impl Display for Sha256Digest {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(self.digest())
     }
 }
 

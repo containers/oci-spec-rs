@@ -151,6 +151,14 @@ impl FromStr for Digest {
     type Err = crate::OciSpecError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
+        Digest::try_from(s)
+    }
+}
+
+impl TryFrom<String> for Digest {
+    type Error = crate::OciSpecError;
+
+    fn try_from(s: String) -> Result<Self, Self::Error> {
         let Some(split) = s.find(':') else {
             return Err(crate::OciSpecError::Other("missing ':' in digest".into()));
         };
@@ -198,6 +206,14 @@ impl FromStr for Digest {
         }
         let digest = value.to_owned().into_boxed_str();
         Ok(Self { algorithm, digest })
+    }
+}
+
+impl TryFrom<&str> for Digest {
+    type Error = crate::OciSpecError;
+
+    fn try_from(string: &str) -> Result<Self, Self::Error> {
+        TryFrom::try_from(string.to_owned())
     }
 }
 
@@ -296,7 +312,7 @@ mod tests {
             Digest::from_str(case).unwrap();
         }
 
-        let d = Digest::from_str("multihash+base58:QmRZxt2b1FVZPNqd8hsiykDL3TdBDeTSPX9Kv46HmX4Gx8")
+        let d = Digest::try_from("multihash+base58:QmRZxt2b1FVZPNqd8hsiykDL3TdBDeTSPX9Kv46HmX4Gx8")
             .unwrap();
         assert_eq!(d.algorithm(), &DigestAlgorithm::from("multihash+base58"));
         assert_eq!(d.digest(), "QmRZxt2b1FVZPNqd8hsiykDL3TdBDeTSPX9Kv46HmX4Gx8");

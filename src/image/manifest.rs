@@ -253,10 +253,9 @@ mod tests {
             .media_type(MediaType::ImageConfig)
             .size(7023u64)
             .digest(
-                Sha256Digest::from_str(
-                    "b5b2b2c507a0944348e0303114d8d93aaaa081732b86451d9bce1f432a537bc7",
-                )
-                .unwrap(),
+                "b5b2b2c507a0944348e0303114d8d93aaaa081732b86451d9bce1f432a537bc7"
+                    .parse::<Sha256Digest>()
+                    .unwrap(),
             )
             .build()
             .expect("build config descriptor");

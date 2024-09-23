@@ -1,6 +1,6 @@
 //! Functionality corresponding to <https://github.com/opencontainers/image-spec/blob/main/descriptor.md#digests>.
 
-use std::fmt::{Display, Write};
+use std::fmt::Display;
 use std::str::FromStr;
 
 /// A digest algorithm; at the current time only SHA-256
@@ -97,17 +97,25 @@ fn char_is_encoded(c: char) -> bool {
 
 #[derive(Clone, Debug, Eq, PartialEq, Hash)]
 pub struct Digest {
-    /// The algorithm
+    /// The algorithm; we need to hold a copy of this
+    /// right now as we ended up returning a reference
+    /// from the accessor. It probably would have been
+    /// better to have both borrowed/owned DigestAlgorithm
+    /// versions and our accessor just returns a borrowed version.
     algorithm: DigestAlgorithm,
-    /// The digest value
-    digest: Box<str>,
+    value: Box<str>,
+    split: usize,
+}
+
+impl AsRef<str> for Digest {
+    fn as_ref(&self) -> &str {
+        &self.value
+    }
 }
 
 impl Display for Digest {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.write_str(self.algorithm.as_ref())?;
-        f.write_char(':')?;
-        f.write_str(&self.digest)
+        f.write_str(self.as_ref())
     }
 }
 
@@ -143,7 +151,7 @@ impl Digest {
     /// is guaranteed to be a valid length with only lowercase hexadecimal
     /// characters. For example with SHA-256, the length is 64.
     pub fn digest(&self) -> &str {
-        &self.digest
+        &self.value[self.split + 1..]
     }
 }
 
@@ -159,6 +167,7 @@ impl TryFrom<String> for Digest {
     type Error = crate::OciSpecError;
 
     fn try_from(s: String) -> Result<Self, Self::Error> {
+        let s = s.into_boxed_str();
         let Some(split) = s.find(':') else {
             return Err(crate::OciSpecError::Other("missing ':' in digest".into()));
         };
@@ -204,8 +213,11 @@ impl TryFrom<String> for Digest {
                 )));
             }
         }
-        let digest = value.to_owned().into_boxed_str();
-        Ok(Self { algorithm, digest })
+        Ok(Self {
+            algorithm,
+            value: s,
+            split,
+        })
     }
 }
 
@@ -227,7 +239,8 @@ impl From<Sha256Digest> for Digest {
     fn from(value: Sha256Digest) -> Self {
         Self {
             algorithm: DigestAlgorithm::Sha256,
-            digest: value.digest,
+            value: format!("sha256:{}", value.digest()).into(),
+            split: 6,
         }
     }
 }
@@ -252,7 +265,9 @@ impl FromStr for Sha256Digest {
         let v = format!("{alg}:{digest}");
         let d = Digest::from_str(&v)?;
         match d.algorithm {
-            DigestAlgorithm::Sha256 => Ok(Self { digest: d.digest }),
+            DigestAlgorithm::Sha256 => Ok(Self {
+                digest: d.digest().into(),
+            }),
             o => Err(crate::OciSpecError::Other(format!(
                 "Expected algorithm sha256 but found {o}",
             ))),
@@ -334,6 +349,8 @@ mod tests {
         let d = Digest::from_str(VALID_DIGEST_SHA384).unwrap();
         assert_eq!(d.algorithm(), &DigestAlgorithm::Sha384);
         assert_eq!(d.digest(), expected_value);
+        // Verify we can cheaply coerce to a string
+        assert_eq!(d.as_ref(), VALID_DIGEST_SHA384);
         let base_digest = Digest::from(d.clone());
         assert_eq!(base_digest.digest(), expected_value);
     }

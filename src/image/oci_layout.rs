@@ -17,7 +17,6 @@ use std::{
     setter(into, strip_option),
     build_fn(error = "OciSpecError")
 )]
-
 /// The oci layout JSON object serves as a marker for the base of an Open Container Image Layout
 /// and to provide the version of the image-layout in use. The imageLayoutVersion value will align
 /// with the OCI Image Specification version at the time changes to the layout are made, and will

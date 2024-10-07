@@ -32,7 +32,7 @@ derive_builder = "0.20.0"
 getset = "0.1.1"
 strum = "0.26.2"
 strum_macros = "0.26.2"
-regex = "~1.10.5"
+regex = "~1.11.0"
 
 [dev-dependencies]
 tempfile = "3.2.0"

@@ -8,7 +8,7 @@ The current Maintainers Group for the oci-spec-rs project consists of:
 | Taylor Thomas   | Cosmonic           | @thomastaylor312 | Approver and Maintainer |
 | Toru Komatsu    | Preferred Networks | @utam0k          | Approver and Maintainer |
 | Eric Fang       | Independent        | @yihuaf          | Maintainer              |
-| Jorge Prendes   | Independent        | @jprendes        | Maintainer              |
+| Jorge Prendes   | Microsoft          | @jprendes        | Maintainer              |
 | Thomas Schubart | Gitpod             | @Furisto         | Maintainer              |
 | Yashodhan       | Independent        | @YJDoc2          | Maintainer              |
 

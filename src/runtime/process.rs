@@ -76,7 +76,6 @@ pub struct Process {
 
     #[serde(default, skip_serializing_if = "Option::is_none")]
     #[getset(get = "pub", set = "pub")]
-    #[cfg(any(target_os = "linux", target_os = "solaris"))]
     /// Rlimits specifies rlimit options to apply to the process.
     rlimits: Option<Vec<PosixRlimit>>,
 
@@ -150,7 +149,6 @@ impl Default for Process {
             capabilities: Some(Default::default()),
             // Sets the default maximum of 1024 files the process can open
             // This is the same as the linux kernel default
-            #[cfg(any(target_os = "linux", target_os = "solaris"))]
             rlimits: vec![PosixRlimit {
                 typ: PosixRlimitType::RlimitNofile,
                 hard: 1024,
@@ -191,7 +189,6 @@ pub struct Box {
 #[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize, StrumDisplay, EnumString)]
 #[strum(serialize_all = "SCREAMING_SNAKE_CASE")]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
-#[cfg(any(target_os = "linux", target_os = "solaris"))]
 /// Available rlimit types (see <https://man7.org/linux/man-pages/man2/getrlimit.2.html>)
 pub enum PosixRlimitType {
     /// Limit in seconds of the amount of CPU time that the process can consume.
@@ -212,11 +209,9 @@ pub enum PosixRlimitType {
 
     /// Limit on the process's resident set (the number of virtual pages
     /// resident in RAM).
-    #[cfg(target_os = "linux")]
     RlimitRss,
 
     /// Limit on number of threads for the real uid calling processes.
-    #[cfg(target_os = "linux")]
     RlimitNproc,
 
     /// One greator than the maximum number of file descritors that one process
@@ -224,41 +219,33 @@ pub enum PosixRlimitType {
     RlimitNofile,
 
     /// Maximum number of bytes of memory that may be locked into RAM.
-    #[cfg(target_os = "linux")]
     RlimitMemlock,
 
     /// Maximum size of the process's virtual memory(address space) in bytes.
     RlimitAs,
 
     /// Limit on the number of locks and leases for the process.
-    #[cfg(target_os = "linux")]
     RlimitLocks,
 
     /// Limit on number of signals that may be queued for the process.
-    #[cfg(target_os = "linux")]
     RlimitSigpending,
 
     /// Limit on the number of bytes that can be allocated for POSIX message
     /// queue.
-    #[cfg(target_os = "linux")]
     RlimitMsgqueue,
 
     /// Specifies a ceiling to which the process's nice value can be raised.
-    #[cfg(target_os = "linux")]
     RlimitNice,
 
     /// Specifies a ceiling on the real-time priority.
-    #[cfg(target_os = "linux")]
     RlimitRtprio,
 
     /// This is a limit (in microseconds) on the amount of CPU time that a
     /// process scheduled under a real-time scheduling policy may consume
     /// without making a blocking system call.
-    #[cfg(target_os = "linux")]
     RlimitRttime,
 }
 
-#[cfg(any(target_os = "linux", target_os = "solaris"))]
 impl Default for PosixRlimitType {
     fn default() -> Self {
         Self::RlimitCpu
@@ -275,7 +262,6 @@ impl Default for PosixRlimitType {
     build_fn(error = "OciSpecError")
 )]
 #[getset(get_copy = "pub", set = "pub")]
-#[cfg(any(target_os = "linux", target_os = "solaris"))]
 /// RLimit types and restrictions.
 pub struct PosixRlimit {
     #[serde(rename = "type")]

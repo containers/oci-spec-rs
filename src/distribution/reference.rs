@@ -3,6 +3,7 @@ use std::str::FromStr;
 use std::{convert::TryFrom, sync::OnceLock};
 
 use regex::{Regex, RegexBuilder};
+use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
 /// NAME_TOTAL_LENGTH_MAX is the maximum total number of characters in a repository name.
@@ -72,12 +73,15 @@ pub enum ParseError {
 /// assert_eq!(Some("latest"), reference.tag());
 /// assert_eq!(None, reference.digest());
 /// ```
-#[derive(Clone, Hash, PartialEq, Eq, Debug)]
+#[derive(Clone, Hash, PartialEq, Eq, Debug, Serialize, Deserialize)]
 pub struct Reference {
     registry: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
     mirror_registry: Option<String>,
     repository: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
     tag: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     digest: Option<String>,
 }
 

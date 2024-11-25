@@ -1096,10 +1096,10 @@ impl Default for LinuxSeccompAction {
     }
 }
 
-#[allow(clippy::enum_clike_unportable_variant)]
 #[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize, StrumDisplay, EnumString)]
 #[strum(serialize_all = "SCREAMING_SNAKE_CASE")]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+#[repr(u32)]
 /// Available seccomp architectures.
 pub enum Arch {
     /// The native architecture.
